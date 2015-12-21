@@ -1,0 +1,95 @@
+//
+//  MomentVotedCell.m
+//  dev01
+//
+//  Created by 杨彬 on 15/4/15.
+//  Copyright (c) 2015年 wowtech. All rights reserved.
+//
+
+#import "MomentVotedCell.h"
+#import "MomentVoteCellModel.h"
+
+@interface MomentVotedCell ()
+@property (retain, nonatomic) IBOutlet UIView *markView;
+@property (retain, nonatomic) IBOutlet UILabel *text_label;
+@property (retain, nonatomic) IBOutlet UIView *scale_bar;
+@property (retain, nonatomic) IBOutlet UILabel *scale_label;
+@property (retain, nonatomic) IBOutlet NSLayoutConstraint *scale_bar_width;
+
+@end
+
+@implementation MomentVotedCell
+
+- (void)dealloc {
+    [_markView release];
+    [_text_label release];
+    [_scale_bar release];
+    [_scale_label release];
+    [_scale_bar_width release];
+    
+    
+    self.momentVoteCellModel = nil;
+    
+    [super dealloc];
+}
+
+
+-(void)setMomentVoteCellModel:(MomentVoteCellModel *)momentVoteCellModel{
+    [_momentVoteCellModel release],_momentVoteCellModel = nil;
+    _momentVoteCellModel = [momentVoteCellModel retain];
+    
+    self.text_label.text = _momentVoteCellModel.option.desc;
+    
+    
+    self.scale_label.text = [NSString stringWithFormat:@"%d/%ld",_momentVoteCellModel.option.vote_count,(long)self.voted_count];
+
+    
+    
+    CGFloat total_width = ([UIScreen mainScreen].bounds.size.width - 87) * 0.7;
+    CGFloat scale = ((CGFloat)_momentVoteCellModel.option.vote_count)/self.voted_count;
+    self.scale_bar_width.constant = total_width * scale + 2;
+    
+    
+//    if (_momentVoteCellModel.option.is_voted){
+//        self.seleced_imageView.image = [UIImage imageNamed:@"icon_checked"];
+//    }else{
+//        self.seleced_imageView.image = [UIImage imageNamed:@"icon_unchecked"];
+//    }
+    
+    
+}
+
+
++ (instancetype)cellWithTableView:(UITableView *)tableView{
+    static  NSString *MomentVotedCellID = @"MomentVotedCellID";
+    MomentVotedCell *cell = [tableView dequeueReusableCellWithIdentifier:MomentVotedCellID];
+    if (!cell){
+        cell = [[[NSBundle mainBundle] loadNibNamed:@"MomentVotedCell" owner:self options:nil] lastObject];
+        cell.selectionStyle = UITableViewCellSelectionStyleNone;
+    }
+    return cell;
+}
+
+
+- (void)awakeFromNib {
+    
+    self.markView.layer.cornerRadius = 5.0/2;
+    self.markView.layer.masksToBounds = YES;
+    
+    
+    self.scale_bar.layer.cornerRadius = 5;
+    self.scale_bar.layer.masksToBounds = YES;
+    
+    
+    
+    
+}
+
+- (void)setSelected:(BOOL)selected animated:(BOOL)animated {
+    [super setSelected:selected animated:animated];
+
+    // Configure the view for the selected state
+}
+
+
+@end

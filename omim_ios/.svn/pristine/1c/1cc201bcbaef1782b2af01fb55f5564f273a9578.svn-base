@@ -1,0 +1,202 @@
+//
+//  OMBaseTextFieldCell.m
+//  dev01
+//
+//  Created by 杨彬 on 15/2/28.
+//  Copyright (c) 2015年 wowtech. All rights reserved.
+//
+
+#import "OMBaseTextFieldCell.h"
+#import "OMBaseCellFrameModel.h"
+#import "OMKeyboardNotification.h"
+
+
+@interface OMBaseTextFieldCell ()<UITextFieldDelegate>{
+    CGFloat _cellPosition;
+}
+
+@property (retain, nonatomic) IBOutlet UIView *bgView;
+
+@property (retain, nonatomic) IBOutlet UILabel *title_label;
+
+@property (retain, nonatomic) IBOutlet UITextField *content_textfield;
+
+@property (retain, nonatomic) UITableView *superTableView;
+
+@property (assign, nonatomic) CGPoint tableViewOffset;
+
+
+
+
+
+@end
+
+@implementation OMBaseTextFieldCell
+
+- (void)dealloc {
+    [_cellFromeModel release],_cellFromeModel = nil;
+    
+    [_superTableView release];
+    
+    [_title_label release],_title_label = nil;
+    [_content_textfield release],_content_textfield.delegate = nil,_content_textfield = nil;
+    [_bgView release];
+    [super dealloc];
+}
+
+
+- (void)awakeFromNib {
+    
+    
+    self.content_textfield.delegate = self;
+
+    self.selectionStyle = UITableViewCellSelectionStyleNone;
+    
+    self.bgView.userInteractionEnabled = YES;
+    [self.bgView addGestureRecognizer:[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(bgViewClick)]];
+}
+
+- (void)bgViewClick{
+    [self.content_textfield resignFirstResponder];
+    
+    if ([self.delegate isKindOfClass:[UIViewController class]]){
+        [((UIViewController *)self.delegate).view endEditing:YES];
+    }
+}
+
+- (void)keyboardWillShow:(NSNotification *)note{
+   CGFloat keyboardHeight = [note.userInfo[UIKeyboardFrameEndUserInfoKey] CGRectValue].origin.y - 64;
+    [self adjustPositionWithKeyboardHeight:keyboardHeight];
+    [[NSNotificationCenter defaultCenter]removeObserver:self name:UIKeyboardWillShowNotification object:nil];
+}
+
+-(void)keyboardWillHide:(NSNotification *)note{
+    [UIView animateWithDuration:0.2 animations:^{
+        _superTableView.contentOffset = _tableViewOffset;
+    }];
+}
+
+
+- (void)adjustPositionWithKeyboardHeight:(CGFloat)keyboardHeight{
+    if (_cellPosition - self.frame.size.height < 0){
+        [UIView animateWithDuration:0.2 animations:^{
+             _superTableView.contentOffset = CGPointMake(_superTableView.contentOffset.x, _superTableView.contentOffset.y - (_cellPosition - self.frame.size.height));
+        }];
+       
+    }
+    if (keyboardHeight - _cellPosition < 0){
+        [UIView animateWithDuration:0.2 animations:^{
+            _superTableView.contentOffset = CGPointMake(_superTableView.contentOffset.x, _superTableView.contentOffset.y - (keyboardHeight - _cellPosition));
+        }];
+    }
+}
+
+
+
+-(void)setCellFromeModel:(OMBaseCellFrameModel *)cellFromeModel{
+    [_cellFromeModel release],_cellFromeModel = nil;// 防止cell重复利用导致内存泄露
+    _cellFromeModel = [cellFromeModel retain];
+    
+    self.title_label.text = [NSString stringWithFormat:@"%@:",self.cellFromeModel.cellModel.title];
+    self.content_textfield.text = self.cellFromeModel.cellModel.content;
+    
+    if (_cellFromeModel.canEdit ){
+        self.content_textfield.userInteractionEnabled = YES;
+        self.content_textfield.textColor = [UIColor blackColor];
+        self.title_label.textColor = [UIColor blackColor];
+        
+    }else{
+        self.content_textfield.userInteractionEnabled = NO;
+        self.content_textfield.textColor = [UIColor lightGrayColor];
+        self.title_label.textColor = [UIColor lightGrayColor];
+    }
+}
+
+
+
++ (OMBaseTextFieldCell *)cellWithTableView:(UITableView *)tableView{
+    static NSString *ID = @"OMBaseTextFieldCellID";
+    OMBaseTextFieldCell *cell = [tableView dequeueReusableCellWithIdentifier:ID];
+    if (!cell){
+        cell = [[[NSBundle mainBundle]loadNibNamed:@"OMBaseTextFieldCell" owner:nil options:nil] lastObject];
+        cell.superTableView = tableView;
+    }
+    cell.needAdjustPosition = YES;
+    return cell;
+}
+
+
+
+
+
+- (void)setSelected:(BOOL)selected animated:(BOOL)animated {
+    [super setSelected:selected animated:animated];
+
+    // Configure the view for the selected state
+}
+
+#pragma mark - UITextFieldDelegate
+-(void)textFieldDidEndEditing:(UITextField *)textField{
+    self.cellFromeModel.cellModel.content = textField.text;
+    
+    
+    [[NSNotificationCenter defaultCenter]removeObserver:self];
+}
+
+
+-(void)textFieldDidBeginEditing:(UITextField *)textField{
+    
+}
+-(BOOL)textFieldShouldBeginEditing:(UITextField *)textField{
+    if (!self.needAdjustPosition)return YES;
+
+    
+     _cellPosition = [self cellHeightInSuperView:self];
+    
+    _tableViewOffset = _superTableView.contentOffset;
+    
+    if ([OMKeyboardNotification defaultCenter].isShow){// 键盘已经弹出了
+        [self adjustPositionWithKeyboardHeight:[OMKeyboardNotification defaultCenter].keyboardHeight];
+        return YES;
+    }
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(keyboardWillShow:)
+                                                 name:UIKeyboardWillShowNotification
+                                               object:nil];
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(keyboardWillHide:)
+                                                 name:UIKeyboardWillHideNotification
+                                               object:nil];
+    return YES;
+}
+
+/**
+ *  计算cell在VC中的位置
+ *
+ *  @param subView
+ *
+ *  @return 高度
+ */
+- (CGFloat)cellHeightInSuperView:(UIView *)subView {
+    CGFloat height = 0;
+    UIView * superView = [subView superview];
+    CGFloat offsetY = 0;
+    if ([subView isKindOfClass:[UIScrollView class]]){
+        offsetY = ((UIScrollView *)subView).contentOffset.y;
+    }
+    if ((superView == self.delegate || (superView == ((UIViewController *)self.delegate).view)) ){
+        CGFloat resutl = height - offsetY;
+        height = 0; offsetY = 0;
+        return resutl ;
+    }else{
+        CGFloat subHeight = [self cellHeightInSuperView:superView];
+        height += subView.frame.origin.y + subView.frame.size.height - offsetY + subHeight;
+    }
+    return height;
+}
+
+
+
+@end

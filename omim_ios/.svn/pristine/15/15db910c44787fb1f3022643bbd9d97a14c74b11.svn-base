@@ -1,0 +1,880 @@
+//
+//  WTNetworkTask.m
+//  omimIOSAPI
+//
+//  Created by coca on 2012/12/11.
+//  Copyright (c) 2012年 coca. All rights reserved.
+//
+
+#import "WTNetworkTask.h"
+#import "WTNetworkTaskManager.h"
+
+#import "ChatMessage.h"
+#import "SBJSON.h"
+#import "WowTalkVoipIF.h"
+#import "ASIHTTPRequest.h"
+
+#import "WTHelper.h"
+#import "WTUserDefaults.h"
+#import "WTError.h"
+#import "WTConstant.h"
+
+#import "Buddy.h"
+
+#import "WTUserDefaults.h"
+
+#import "GlobalSetting.h"
+
+#import "WTUserDefaults.h"
+
+#import "WowTalkWebServerIF.h"
+
+#import "OMNetWork_MyClass_Constant.h"
+
+
+@interface WTNetworkTask ()
+@property (nonatomic) BOOL needPostNotif;
+@end
+
+
+@implementation WTNetworkTask
+
+@synthesize notificationName = _notificationName;
+@synthesize key = _key;
+@synthesize taskdict = _taskdict;
+@synthesize type = _type;
+@synthesize observer = _observer;
+@synthesize request = _request;
+@synthesize notifdict = _notifdict;
+@synthesize timer  = _timer;
+@synthesize needPostNotif = _needPostNotif;
+@synthesize isDataTransferDone = _isDataTransferDone;
+@synthesize selector = _selector;
+
+
+#pragma mark --
+-(id)initWithUniqueKey:(NSString*)key taskInfo:(NSDictionary*)tdict taskType:(NSString*) type notificationName:(NSString*)name notificationObserver:(id)observer userInfo:(NSDictionary*)ndict selector:(SEL)selector
+{
+    self = [super init];
+    if (self)
+    {
+        self.key = key;
+        self.taskdict = tdict;
+        self.notifdict = ndict;
+        self.type = type;
+        self.notificationName = name;
+        self.observer = observer;
+        self.selector = selector;
+    }
+    return self;
+}
+
+-(BOOL)preProcessNetworkTask
+{
+    if (![WowTalkVoipIF fIsConnectedToNetwork]) {
+        if (self.selector!=nil) {
+            self.needPostNotif = TRUE;
+            if (self.observer) {
+                [[NSNotificationCenter defaultCenter] addObserver:self.observer selector:self.selector name:self.notificationName object:nil];
+            }
+        }
+        NSError* error = [NSError errorWithDomain:ERROR_DOMAIN code:NETWORK_IS_NOT_AVAILABLE userInfo:nil];
+        [self networkTaskDidFailWithReturningData:nil error:error];
+        return FALSE;
+    
+    }
+    
+    return TRUE;
+}
+
+-(BOOL)start
+{
+    if (![self preProcessNetworkTask]) {
+        return FALSE;
+    }
+    
+    if (![[WTNetworkTaskManager defaultManager] isNetworkTaskManagerRunning]) {
+        [[WTNetworkTaskManager defaultManager] run];
+    }
+    
+    [WTHelper WTLog:[NSString stringWithFormat:@" Current Key :%@",self.key ]];
+    if ([[WTNetworkTaskManager defaultManager].queue valueForKey:self.key]!=nil) {
+        [WTHelper WTLog:@"a same task is running already, please check the unique key"];
+        return FALSE;
+    }
+    
+    [[WTNetworkTaskManager defaultManager].queue setObject:self forKey:self.key];
+    
+    if (self.selector!=nil) {
+        self.needPostNotif = YES;
+        if (self.observer) {
+            [[NSNotificationCenter defaultCenter] addObserver:self.observer selector:self.selector name:self.notificationName object:nil];
+        }
+    } else {
+        self.needPostNotif = NO;
+    }
+    
+    return TRUE;
+}
+
+-(float)currentProgressForUploadTask
+{
+    return self.request.uploadProgress;
+    
+}
+
+-(float)currentProgressForDownloadTask
+{
+    return self.request.downloadProgress;
+}
+
+-(void)networkTaskDidFailWithReturningData:(NSObject *)data error:(NSError *)error
+{
+    [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:FALSE];
+    
+    NSMutableDictionary* dict = [[[NSMutableDictionary alloc] init] autorelease];
+    if (error) {
+        [dict setObject:error forKey:WT_ERROR];
+        [WTHelper WTLogError:error];   // print out the error;
+    }
+    
+    if (self.notifdict) {
+        [dict setObject:self.notifdict forKey:WT_PASSED_IN_NOTIFDATA];
+    }
+    
+    if ([self.type isEqualToString:WT_UPLOAD_MEDIAMESSAGE_ORIGINAL] || [self.type isEqualToString:WT_UPLOAD_MEDIAMESSAGE_THUMBNAIL]) {
+        ChatMessage* msg = [self.taskdict valueForKey:WT_MESSAGE];
+        [dict setObject:msg forKey:WT_MESSAGE];
+        
+        // special handle
+        if (self.key) {
+            [[WTNetworkTaskManager defaultManager].queue removeObjectForKey:self.key];
+        }
+        
+    }
+    else if ([self.type isEqualToString:WT_GET_OFFLINE_MESSAGE]){
+        [WTUserDefaults setOfflineMsgLastSyncStatus:FALSE];
+    }
+    
+    if (self.needPostNotif) {
+        [[NSNotificationCenter defaultCenter] postNotificationName:self.notificationName object:nil userInfo:dict];
+        if (self.observer) {
+            [[NSNotificationCenter defaultCenter] removeObserver:self.observer name:self.notificationName object:nil];
+        }
+    
+    }
+    [self finish];
+}
+
+
+-(void)postNotification:(NSString*)notification{
+    [[NSNotificationCenter defaultCenter] postNotificationName:notification object:nil userInfo:nil];
+}
+
+-(void)networkTaskDidFinishWithReturningData:(NSObject *)data error:(NSError *)error
+{
+    NSLog(@"did finish with net work task!");
+    [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:FALSE];
+    
+    NSMutableDictionary *dict = [[[NSMutableDictionary alloc] init] autorelease];
+    if (self.notifdict) {
+        [dict setObject:self.notifdict forKey:WT_PASSED_IN_NOTIFDATA];
+    }
+    if (error) {
+        //added 0613
+       /* if(error.code==WT_ERROR_AUTH_ERROR && ![self.type isEqualToString: WT_LOGIN_WITH_USER]){
+            [self performSelectorOnMainThread:@selector(postNotification:) withObject:WT_NOTIFICATION_AUTH_FAILED waitUntilDone:NO];
+            [self finish];       
+     
+            return;
+        }
+        //end*/
+        
+        [dict setObject:error forKey:WT_ERROR];
+        
+    }
+    if([self.type isEqualToString: WT_UPLOAD_MEDIAMESSAGE_ORIGINAL]){
+        if (error.code == NO_ERROR)
+        {
+            [WTHelper WTLog:@"succeed to upload the original of the media file"];
+            
+            //set related flag in the dict for callback of a notification.
+            [dict setObject:[NSNumber numberWithBool:TRUE] forKey:WT_DID_UPLOAD_THE_ORIGINAL_FILE];
+            
+            //get the file name.
+            NSString* filename = (NSString*)data;
+            
+            //store the info in the message content.
+            ChatMessage* msg = [self.taskdict valueForKey:WT_MESSAGE];
+            SBJsonParser* jp = [[[SBJsonParser alloc] init] autorelease];
+            NSDictionary* dic = (NSDictionary*)[jp fragmentWithString: msg.messageContent];
+            [dic setValue:filename forKey:WT_PATH_OF_THE_ORIGINAL_FILE_IN_SERVER];
+            SBJsonWriter* jw = [[[SBJsonWriter alloc] init] autorelease];
+            msg.messageContent = [jw stringWithFragment:dic];
+            
+            //update in the database.
+            [Database updateChatMessage:msg];
+            
+            if ([MessageHelper readyToSendMultimediaMessage:msg]) {
+                //send the group message.
+                if (msg.isGroupChatMessage) {
+                    [dict setObject:[NSNumber numberWithBool:TRUE] forKey:WT_IS_SENDING_GROUP_MESSAGE];
+                    [WowTalkWebServerIF groupChat_SendMessage:msg toGroup:msg.chatUserName withCallback:@selector(didSendChatByWebIF:) withObserver:nil];
+                    
+                }
+                // send the single message.
+                else{
+                    BOOL status =  [WowTalkWebServerIF sendBuddyMessage:msg];  // TODO: the return value may have problem, since offical account uses different way to send message
+                    [dict setObject:[NSNumber numberWithBool: status] forKey:WT_DID_SEND_THE_MESSAGE];
+                }
+            }
+            [dict setObject:msg forKey:WT_MESSAGE];
+        }
+        else{
+            ChatMessage* msg = [self.taskdict valueForKey:WT_MESSAGE];
+            [dict setObject:msg forKey:WT_MESSAGE];
+            [WTHelper WTLogError:error];
+        }
+    }
+    else if ([self.type isEqualToString:WT_UPLOAD_MEDIAMESSAGE_THUMBNAIL]){
+        if (error.code == NO_ERROR) {
+            [WTHelper WTLog:@"succeed to upload the thumbnail of the media file"];
+            //set related flag in the dict for callback of a notification.
+            [dict setObject:[NSNumber numberWithBool:TRUE] forKey:WT_DID_UPLOAD_THE_THUMBNAIL];
+            
+            //get the file name.
+            NSString* filename = (NSString*)data;
+            
+            SBJsonParser* jp = [[[SBJsonParser alloc] init] autorelease];
+            ChatMessage* msg = [self.taskdict valueForKey:WT_MESSAGE];
+            NSDictionary* dic = (NSDictionary*)[jp fragmentWithString: msg.messageContent];
+            [dic setValue:filename forKey:WT_PATH_OF_THE_THUMBNAIL_IN_SERVER];
+            SBJsonWriter* jw = [[[SBJsonWriter alloc] init] autorelease];
+            msg.messageContent = [jw stringWithFragment:dic];
+            
+            [Database updateChatMessage:msg];
+            
+            if ([MessageHelper readyToSendMultimediaMessage:msg]) {
+                //send the group message.
+                if (msg.isGroupChatMessage) {
+                    [dict setObject:[NSNumber numberWithBool:TRUE] forKey:WT_IS_SENDING_GROUP_MESSAGE];
+                    [WowTalkWebServerIF groupChat_SendMessage:msg toGroup:msg.chatUserName withCallback:@selector(didSendChatByWebIF:) withObserver:nil];
+                }
+                // send the single message.
+                else{
+                    BOOL status =  [WowTalkWebServerIF sendBuddyMessage:msg];
+                    [dict setObject:[NSNumber numberWithBool: status] forKey:WT_DID_SEND_THE_MESSAGE];
+                }
+            }
+            [dict setObject:msg forKey:WT_MESSAGE];  // post the message to notif.
+        }
+        else{
+            ChatMessage* msg = [self.taskdict valueForKey:WT_MESSAGE];
+            [dict setObject:msg forKey:WT_MESSAGE];
+            
+            [WTHelper WTLogError:error];
+        }
+    }
+    else if ([self.type isEqualToString:WT_DOWNLOAD_MEDIAMESSAGE_ORIGINAL]){
+        if (error.code == NO_ERROR) {
+            [WTHelper WTLog:@"succeed to download the original of the media file"];
+            
+            ChatMessage* msg = [self.taskdict valueForKey:WT_MESSAGE];
+            // save the original file.
+            NSString* savepath = [MessageHelper localOriginalFilePathForMessage:msg];
+            if (savepath) {
+                [(NSData*)data writeToFile:[NSFileManager absolutePathForFileInDocumentFolder:savepath]  atomically:YES];
+                
+                msg.pathOfMultimedia = savepath;  // relative path. contains the extension
+                [Database updateChatMessage:msg];
+                
+                [dict setObject:[NSNumber numberWithBool:TRUE] forKey:WT_DID_DOWNLOAD_THE_ORIGINAL_FILE];
+                [dict setObject:msg forKey:WT_MESSAGE];  // post the message to notif.
+            }
+            else{
+                error = [NSError errorWithDomain:ERROR_DOMAIN code:LOCAL_SYS_ERROR userInfo:nil];
+                [dict setObject:error forKey:WT_ERROR];
+            }
+            
+        }
+        else
+            [WTHelper WTLogError:error];
+    }
+    else if ([self.type isEqualToString:WT_DOWNLOAD_MEDIAMESSAGE_THUMBNAIL]){
+        if (error.code == NO_ERROR) {
+            [WTHelper WTLog:@"succeed to download the thumbnail of the media file"];
+            
+            ChatMessage* msg = [self.taskdict valueForKey:WT_MESSAGE];
+            
+            NSString* savepath = [MessageHelper localThumbnailPathForMessage:msg];
+            [(NSData*)data writeToFile:[NSFileManager absolutePathForFileInDocumentFolder:savepath]  atomically:YES];
+            
+            msg.pathOfThumbNail = savepath;
+            [Database updateChatMessage:msg];
+            
+            [dict setObject:[NSNumber numberWithBool:TRUE] forKey:WT_DID_DOWNLOAD_THE_THUMBNAIL];
+            [dict setObject:msg forKey:WT_MESSAGE];  // post the message to notif.
+        }
+        else
+            [WTHelper WTLogError:error];
+    }
+    else if ([self.type isEqualToString:WT_DOWNLOAD_MSGFILE]){
+        if (error.code == NO_ERROR) {
+            [WTHelper WTLog:@"succeed to download the of the file of msg"];
+            
+            ChatMessage* msg = [self.taskdict valueForKey:WT_MESSAGE];
+            
+            NSString* savepath = [MessageHelper localRecordFileForMessage:msg];
+            [(NSData*)data writeToFile:[NSFileManager absolutePathForFileInDocumentFolder:savepath]  atomically:YES];
+
+            
+            [dict setObject:[NSNumber numberWithBool:TRUE] forKey:WT_DID_DOWNLOAD_THE_MSG_RECORD_FILE];
+            [dict setObject:msg forKey:WT_MESSAGE];  // post the message to notif.
+        }
+        else
+            [WTHelper WTLogError:error];
+    }
+    else if ([self.type isEqualToString:WT_REPORT_EMPTY_TOKEN_TO_SERVER]){
+        if (error.code == NO_ERROR) {
+            [WTHelper WTLog:@"succeed to report the empty token"];
+            [WTUserDefaults setTokenPushed:NO];
+        }
+        else
+            [WTHelper WTLogError:error];
+    }
+    else if ([self.type isEqualToString:WT_REPORT_PUSH_TOKEN_TO_SERVER]){
+        if (error.code == NO_ERROR) {
+            [WTHelper WTLog:@"succeed to report the token"];
+            [WTUserDefaults setTokenPushed:YES];
+        }
+        else
+            [WTHelper WTLogError:error];
+    }
+    else if ([self.type isEqualToString:WT_VALIDATE_ACCESS_CODE]){
+        if (error.code == NO_ERROR) {
+            [WTUserDefaults setDomain:DEFAULT_DOMAIN];
+            [WTHelper WTLog:@"success to validate"];
+        }
+        else
+            [WTHelper WTLogError:error];
+        
+    }
+    else if ([self.type isEqualToString:WT_REQUIRE_ACCESS_CODE]){
+        if (error.code == NO_ERROR) {
+            //move to next step
+            int applyTimes=[WTUserDefaults getApplyTime];
+            applyTimes++;
+            [WTUserDefaults setApplyTime:applyTimes];
+            [WTHelper WTLog:@"success to get the access code"];
+        }
+        else
+            [WTHelper WTLogError:error];
+    }
+    else if ([self.type isEqualToString:WT_UPDATE_MY_PHOTO_ORIGINAL]){
+        if (error.code == NO_ERROR) {
+            [WTHelper WTLog:@"success to update my photo"];
+            NSString* newpath = [self.taskdict valueForKey:WT_FILE_PATH_LOCAL];  //absolute path;
+            
+            NSString* temp = [NSFileManager absolutePathForFileInDocumentFolder:[NSFileManager relativePathToDocumentFolderForFile:[WTUserDefaults getUid] WithSubFolder:SDK_AVATAR_IMAGE_DIR]];
+            
+            [NSFileManager removeFileAtAbsoulutePath:temp];
+            [NSFileManager moveFileAtPath:newpath ToNewPath:temp];
+        }
+        else
+            [WTHelper WTLogError:error];
+    }
+    else if ([self.type isEqualToString:WT_UPDATE_MT_PHOTO_THUMBNAIL]){
+        if (error.code == NO_ERROR) {
+            [WTHelper WTLog:@"success to update my thumbnail"];
+            NSString* newpath = [self.taskdict valueForKey:WT_FILE_PATH_LOCAL];  //absolute path;
+            
+            NSString* temp = [NSFileManager absolutePathForFileInDocumentFolder:[NSFileManager relativePathToDocumentFolderForFile:[WTUserDefaults getUid] WithSubFolder:SDK_AVATAR_THUMB_DIR]];
+            
+            [NSFileManager removeFileAtAbsoulutePath:temp];
+            [NSFileManager moveFileAtPath:newpath ToNewPath:temp];
+        }
+        else
+            [WTHelper WTLogError:error];
+    }
+    else if ([self.type isEqualToString:WT_GET_BUDDY_PHOTO_ORIGINAL]){
+        if (error.code == NO_ERROR) {
+            [WTHelper WTLog:@"success to get the buddy photo"];
+            
+            NSString* buddyid = [self.taskdict valueForKey:WT_BUDDY_ID];
+            
+            Buddy* buddy = [Database buddyWithUserID:buddyid];
+            
+            buddy.pathOfPhoto = [NSFileManager relativePathToDocumentFolderForFile:buddyid WithSubFolder:SDK_AVATAR_IMAGE_DIR];
+            buddy.needToDownloadPhoto = FALSE;
+            
+            [Database setBuddyPhotoFilePath:buddy.pathOfPhoto forUID:buddy.userID];
+            
+            [AvatarHelper writeAvatarForUser:buddy.userID data:(NSData *)data];
+            
+        }
+        else
+            [WTHelper WTLogError:error];
+    }
+    else if ([self.type isEqualToString:WT_GET_BUDDY_PHOTO_THUMBNAIL]){
+        if (error.code == NO_ERROR) {
+            [WTHelper WTLog:@"success to get the buddy thumbnail"];
+            
+            NSString* buddyid = [self.taskdict valueForKey:WT_BUDDY_ID];
+            Buddy* buddy = [Database buddyWithUserID:buddyid];
+            
+            buddy.pathOfThumbNail = [NSFileManager relativePathToDocumentFolderForFile:buddyid WithSubFolder:SDK_AVATAR_THUMB_DIR];
+            buddy.needToDownloadThumbnail = FALSE;
+            
+            [Database setBuddyThumbnailFilePath:buddy.pathOfThumbNail forUID:buddy.userID];
+            
+            [AvatarHelper writeThumbnailForUser:buddyid data:(NSData *)data];
+            [dict setObject:buddyid forKey:WT_BUDDY_ID];  // post the message to notif.
+        }
+        else
+            [WTHelper WTLogError:error];
+    }
+    //TODO: change here, using key as a file path is not a good way.
+    else if ([self.type isEqualToString:WT_GET_FILE_FROM_SERVER]){
+        if (error.code == NO_ERROR) {
+            [WTHelper WTLog:@"success to get a file"];
+            [AvatarHelper writeImageForFile:self.key data:(NSData *)data];
+        }
+        else
+            [WTHelper WTLogError:error];
+    }
+    
+    else if ([self.type isEqualToString:WT_CREATE_CHAT_GROUP]){
+        if (error.code == NO_ERROR) {
+            [WTHelper WTLog:@"success to create a chat group"];
+            if (data != nil)
+                [dict setObject:data forKey:WT_GROUP_ID];
+        }
+        else
+            [WTHelper WTLogError:error];
+    }
+    
+    else if ([self.type isEqualToString:WT_SEND_GROUP_MESSAGES]){
+        if (error.code == NO_ERROR) {
+            [WTHelper WTLog:@"success to send group messages"];
+            ChatMessage* msg = [self.taskdict valueForKey:WT_MESSAGE];
+            msg.sentStatus = [ChatMessage SENTSTATUS_SENT];
+            [Database updateChatMessage:msg];
+            
+            [dict setObject:msg forKey:WT_MESSAGE];
+            
+        }
+        else{
+            [WTHelper WTLogError:error];
+            ChatMessage* msg = [self.taskdict valueForKey:WT_MESSAGE];
+            msg.sentStatus = [ChatMessage SENTSTATUS_NOTSENT];
+            [Database updateChatMessage:msg];
+            
+            [dict setObject:msg forKey:WT_MESSAGE];
+        }
+    }
+    else if ([self.type isEqualToString:@"search_official_account"]) {
+        if (error.code == NO_ERROR) {
+            if (data != nil) {
+                [dict setObject:data forKey:WT_BUDDY];
+            }
+        }
+    }
+    
+    else if ([self.type isEqualToString:WT_GET_USER_BY_UID]||[self.type isEqualToString:WT_GET_USER_BY_WOWTALKID]|| [self.type isEqualToString:WT_SEARCH_BUDDY]){
+        if (error.code == NO_ERROR)
+        {
+            [WTHelper WTLog:@"success to get user by id / search buddy"];
+            if (data != nil)
+                [dict setObject:data forKey:WT_BUDDY];
+        }
+        else{
+            if([self.taskdict valueForKey:WT_BUDDY_ID ]){
+                [dict setObject:[self.taskdict valueForKey:WT_BUDDY_ID ] forKey:WT_BUDDY_ID ];  // send back the wtfile
+            }
+            [WTHelper WTLogError:error];
+
+        }
+    }
+    
+    else if ([self.type isEqualToString:WT_SEND_MSG_TO_OFFICIAL_USER]){
+        if (error.code == NO_ERROR) {
+            [WTHelper WTLog:@"success to send message to official user"];
+            ChatMessage* msg = [self.taskdict valueForKey:WT_MESSAGE];
+            msg.sentStatus = [ChatMessage SENTSTATUS_SENT];
+            [Database updateChatMessage:msg];
+            
+            [dict setObject:msg forKey:WT_MESSAGE];
+            
+        }
+        else{
+            [WTHelper WTLogError:error];
+            ChatMessage* msg = [self.taskdict valueForKey:WT_MESSAGE];
+            msg.sentStatus = [ChatMessage SENTSTATUS_NOTSENT];
+            [Database updateChatMessage:msg];
+            
+            [dict setObject:msg forKey:WT_MESSAGE];
+        }
+        
+    }
+    else if ([self.type isEqualToString:WT_CREATE_FIXED_GROUP])
+    {
+        if (error.code == NO_ERROR) {
+            [WTHelper WTLog:@"success to create a group"];
+            if (data != nil) {
+                
+                NSString* groupid = [(NSDictionary*)data objectForKey:WT_GROUP_ID];
+                NSString* shortGroupid = [(NSDictionary*) data objectForKey:WT_SHORT_GROUP_ID];
+                [dict setObject:groupid forKey:WT_GROUP_ID];
+                [dict setObject:shortGroupid forKey:WT_SHORT_GROUP_ID];
+                
+            }
+        }
+        else [WTHelper WTLogError:error];
+    }
+    else if ([self.type isEqualToString:WT_SEARCH_GROUP_BY_KEY])
+    {
+        if (error.code == NO_ERROR) {
+            [WTHelper WTLog:@"success to search a group"];
+            if (data != nil) {
+                [WTHelper WTLog:@"passing results to observer"];
+                [dict setObject:data forKey:WT_SEARCH_RESULT];
+            }
+        }
+        else [WTHelper WTLogError:error];
+    }
+    else if ([self.type isEqualToString:WT_GET_GROUP_AVATAR_THUMBNAIL]){
+        if (error.code == NO_ERROR) {
+            if (data != nil) {
+                NSString* groupid = [self.taskdict valueForKey:WT_GROUP_ID];
+                [AvatarHelper writeAvatarThumbnailForGroup:groupid data:(NSData*)data];
+            }
+        }
+        else [WTHelper WTLogError:error];
+    }
+    else if ([self.type isEqualToString:WT_GET_GROUP_AVATAR]){
+        if (error.code == NO_ERROR) {
+            if (data != nil) {
+                NSString* groupid = [self.taskdict valueForKey:WT_GROUP_ID];
+                [AvatarHelper writeAvatarForGroup:groupid data:(NSData*)data];
+                
+                //  [dict setObject:data forKey:WT_SEARCH_RESULT];
+            }
+        }
+        else [WTHelper WTLogError:error];
+    }
+    else if ([self.type isEqualToString:WT_GET_ALL_PENDING_REQUEST]){
+        if (error.code == NO_ERROR) {
+            if (data != nil) {
+                [dict setObject:data forKey:WT_PENDING_REQUEST];
+            }
+        }
+        else [WTHelper WTLogError:error];
+    }
+    else if ([self.type isEqualToString:WT_GET_GROUP_PENDING_MEMBERS]){
+        if (error.code == NO_ERROR) {
+            if (data != nil) {
+                [dict setObject:data forKey:WT_PENDING_REQUEST];
+            }
+        }
+        else [WTHelper WTLogError:error];
+    }
+    
+    else if ([self.type isEqualToString:WT_DOWNLOAD_MOMENT_MULTIMEDIA]){
+        if (error.code == NO_ERROR) {
+            [dict setObject:[self.taskdict objectForKey:@"showingorder"] forKey:@"showingorder"];  // send back the order of the image.
+            [dict setObject:[self.taskdict objectForKey:@"momentid"] forKey:@"momentid"];
+        }
+        else [WTHelper WTLogError:error];
+    }
+    
+    else if ([self.type isEqualToString:WT_ADD_MOMENT]){
+        if (error.code == NO_ERROR) {
+            if (data != nil) {
+                [dict setObject:data forKey:@"moment"];  // send back the order of the image.
+            }
+        }
+        else [WTHelper WTLogError:error];
+    }
+    else if ([self.type isEqualToString:WT_ADD_MOMENT_SURVEY]){
+        if (error.code == NO_ERROR) {
+            if (data != nil) {
+                [dict setObject:data forKey:@"moment"];  // send back the order of the image.
+            }
+        }
+        else [WTHelper WTLogError:error];
+    }
+    else if ([self.type isEqualToString:WT_VOTE_MOMENT_SURVEY]){
+        if (error.code == NO_ERROR) {
+            if (data != nil) {
+                [dict setObject:data forKey:@"moment"];  // send back the order of the image.
+            }
+        }
+        else [WTHelper WTLogError:error];
+    }
+    else if([self.type isEqualToString:WT_UPLOAD_MOMENT_MEDIA_THUMBNAIL] ||[self.type isEqualToString:WT_UPLOAD_MOMENT_MEDIA_ORIGINAL] || [self.type isEqualToString:WT_UPLOAD_MOMENT_MULTIMEDIA]){
+        if (error.code == NO_ERROR) {
+            [dict setObject:[self.taskdict valueForKey:@"file"] forKey:@"file"];  // send back the wtfile
+            
+        }
+        else [WTHelper WTLogError:error];
+    }
+    else if ([self.type isEqualToString:WT_REVIEW_MOMENT])
+    {
+        if (error.code == NO_ERROR) {
+            [dict setObject:[self.taskdict valueForKey:@"moment_id" ] forKey:@"moment_id" ];  // send back the wtfile
+            
+        }
+        else [WTHelper WTLogError:error];
+        
+    }
+    else if ([self.type isEqualToString:WT_GET_GROUP_INFO])
+    {
+        if (error.code == NO_ERROR) {
+            [dict setObject:[self.taskdict valueForKey:@"group_id" ] forKey:@"group_id" ];  // send back the wtfile
+            
+        }
+        else [WTHelper WTLogError:error];
+        
+    }
+    
+    else if ([self.type isEqualToString:@"add_event"]) {
+        if (error.code == NO_ERROR) {
+            if (data) {
+                [dict setObject:data forKey:@"event_id"];
+            }
+        } else {
+            [WTHelper WTLogError:error];
+        }
+    }
+
+    
+    else if ([self.type isEqualToString:WT_DOWNLOAD_EVENT_MEDIA]) {
+        if (error.code == NO_ERROR) {
+            if (data) {
+                NSLog(@"%@", [_taskdict objectForKey:@"fileName"]);
+                [dict setObject:[_taskdict objectForKey:@"fileName"] forKey:@"fileName"];
+            }
+        } else {
+            [WTHelper WTLogError:error];
+        }
+    }
+    
+    else if ([self.type isEqualToString:WT_UPLOAD_EVENT_MEDIA_THUMBNAIL]){
+        if (error.code == NO_ERROR) {
+            [WTHelper WTLog:@"success to upload event media thumbnail"];
+            if (data != nil)
+                [dict setObject:_taskdict forKey:WT_UPLOAD_EVENT_MEDIA_THUMBNAIL];
+                [dict setObject:data forKey:@"fileName"];
+        }
+        else
+            [WTHelper WTLogError:error];
+    }
+    
+    else if ([self.type isEqualToString:WT_UPLOAD_EVENT_MEDIA_ORIGINAL]){
+        if (error.code == NO_ERROR) {
+            [WTHelper WTLog:@"success to upload event media original"];
+            if (data != nil)
+                [dict setObject:_taskdict forKey:WT_UPLOAD_EVENT_MEDIA_ORIGINAL];
+                [dict setObject:data forKey:@"fileName"];
+        }
+        else
+            [WTHelper WTLogError:error];
+    }
+    
+    else if ([self.type isEqualToString:WT_BIND_EMAIL_STATUS]){
+        if (error.code == NO_ERROR) {
+            [WTHelper WTLog:@"success to download bind email stauts"];
+            if (data != nil)
+                [dict setObject:data forKey:@"fileName"];
+//                [dict setObject:_taskdict forKey:WT_BIND_EMAIL_STATUS];
+            
+        }
+        else
+            [WTHelper WTLogError:error];
+    }
+    
+    else if ([self.type isEqualToString:WT_GET_MOMENTS_FOR_ALL_BUDDIES]
+             || [self.type isEqualToString:MY_CLASS_GET_CLASS_BULLETIN]
+             || [self.type isEqualToString:MY_CLASS_ADD_CLASS_BULLETIN]
+             || [self.type isEqualToString:WT_ADD_BUDDY]){
+        if (error.code == NO_ERROR) {
+            [WTHelper WTLog:@"success to download newMoment"];
+            if (data != nil)
+                [dict setObject:data forKey:@"fileName"];
+        }
+        else
+            [WTHelper WTLogError:error];
+    }
+    
+// WT_GET_SCHOOL_LESSON_ROOM
+    else if ([self.type isEqualToString:WT_GET_SCHOOL_LESSON_ROOM]){
+        if (error.code == NO_ERROR) {
+            [WTHelper WTLog:@"success to download this school classRoomList"];
+            if (data != nil)
+                [dict setObject:data forKey:@"fileName"];
+        }
+        else
+            [WTHelper WTLogError:error];
+    }
+    
+    else if ([self.type isEqualToString:WT_GET_LATEST_MOMENT_FOR_BUDDY]){
+        if (error.code == NO_ERROR) {
+            [WTHelper WTLog:@"success to download more momemt"];
+            if (data != nil)
+                [dict setObject:data forKey:@"fileName"];
+        }
+        else
+            [WTHelper WTLogError:error];
+    }
+    else if ([self.type isEqualToString:@"get_homework_state"]
+             || [self.type isEqualToString:MY_CLASS_GET_HOMEWORK_STATE]){
+        if (error.code == NO_ERROR) {
+            [WTHelper WTLog:@"success to get homework state "];
+            if (data != nil)
+                [dict setObject:data forKey:@"fileName"];
+        }
+        else
+            [WTHelper WTLogError:error];
+    }
+    else if ([self.type isEqualToString:@"get_lesson_homework"]
+             || [self.type isEqualToString:MY_CLASS_GET_LESSON_HOMEWORK]
+             || [self.type isEqualToString:MY_CLASS_MODIFY_LESSON_HOMEWORK]
+             || [self.type isEqualToString:MY_CLASS_ADD_HOMEWORK_REVIEW]
+             || [self.type isEqualToString:MY_CLASS_ADD_HOMEWOKR_RESULT]){
+        if (error.code == NO_ERROR) {
+            [WTHelper WTLog:@"success to get lesson homework"];
+            if (data != nil)
+                [dict setObject:data forKey:@"fileName"];
+        }
+        else
+            [WTHelper WTLogError:error];
+    }
+    
+    
+//    WT_USE_SCHOOL_LESSON_ROOM || WT_GET_SCHOOL_LESSON_CAMERA
+    else if ([self.type isEqualToString:WT_USE_SCHOOL_LESSON_ROOM]
+             || [self.type isEqualToString:WT_GET_SCHOOL_LESSON_CAMERA]
+             || [self.type isEqualToString:WT_GET_SCHOOL_LESSON_DETAIL]
+             || [self.type isEqualToString:WT_GET_SCHOOL_LESSON_CAMERA_BYLESSONID]
+             || [self.type isEqualToString:WT_RELEASE_SCHOOL_LESSON_ROOM]){
+        if (error.code == NO_ERROR) {
+            [WTHelper WTLog:[NSString stringWithFormat:@"success to %@",self.type]];
+            if (data != nil)
+                [dict setObject:data forKey:@"fileName"];
+        }
+        else
+            [WTHelper WTLogError:error];
+    }
+// Setting
+    else if ([self.type isEqualToString:WT_LATEST_VERSION]){
+        if (error.code == NO_ERROR) {
+            [WTHelper WTLog:[NSString stringWithFormat:@"success to %@",self.type]];
+            if (data != nil)
+                [dict setObject:data forKey:@"fileName"];
+        }
+        else
+            [WTHelper WTLogError:error];
+    }
+    
+    else{
+        if (error.code == NO_ERROR) {
+            [WTHelper WTLog:[NSString stringWithFormat:@"task:%@ is successful",self.key]];
+        }
+        else{
+            [WTHelper WTLogError:error];
+        }
+    }
+    
+    
+//    if ([self.notificationName isEqualToString:WT_GET_SCHOOL_MEMBERS]){
+//        [[NSNotificationCenter defaultCenter] postNotificationName:self.notificationName object:nil userInfo:nil];
+//    }
+//    
+//    if ([self.notificationName isEqualToString:WT_GET_SCHOOL_MEMBER_PHOTO_THUMBNAIL]){
+//        NSLog(@"123");
+//    }
+    
+    
+    if (self.needPostNotif) {
+        NSLog(@"need to post notif name : %@", self.notificationName);
+        self.isDataTransferDone = TRUE;
+        [[NSNotificationCenter defaultCenter] postNotificationName:self.notificationName object:nil userInfo:dict];
+        
+        if (self.observer) {
+            [[NSNotificationCenter defaultCenter] removeObserver:self.observer name:self.notificationName object:nil];
+        }
+    
+    }
+    
+    [self finish];
+   // [dict release];
+}
+
+-(void)finish
+{
+    if (self.key != nil) {
+        [[WTNetworkTaskManager defaultManager].queue removeObjectForKey:self.key];
+    }
+    
+    if ([WTNetworkTaskManager defaultManager].queue == nil || [[[WTNetworkTaskManager defaultManager].queue allValues] count] == 0) {
+        [[WTNetworkTaskManager defaultManager] finish];   // if no task is running, release the networktaskmanager
+    }
+    
+    self.notificationName = nil;
+    self.key = nil;
+    self.taskdict = nil;
+    self.notifdict = nil;
+    self.type = nil;
+    /*
+    if (self.request!=nil && ![self.request complete]) {
+        [self.request cancel];
+        self.request = nil;
+    }
+    */
+
+    
+    if (self.timer != nil) {
+        [self.timer invalidate];
+        self.timer = nil;
+    }
+    
+    [self autorelease];
+}
+
+-(void)dealloc
+{    
+    self.request = nil;
+    [super dealloc];
+    
+}
+
+-(BOOL) isTimerRunning
+{
+    return self.timer.isValid;
+}
+
+// deprecated
+-(void)didFinishNetworkIFCommunicationWithTag:(int)tag withData:(NSObject *)data
+{
+    
+}
+-(void)didFailNetworkIFCommunicationWithTag:(int)tag withData:(NSObject *)data
+{
+    
+}
+-(void)didFailNetworkIFCommunicationWithTag:(int)tag withUserData:(NSObject *)userData withData:(NSObject *)data
+{
+    
+}
+-(void)didFinishNetworkIFCommunicationWithTag:(int)tag withUserData:(NSObject *)userData withData:(NSObject *)data
+{
+    
+}
+
+
+-(void)setObserver:(id)observer{
+    _observer = observer;
+}
+
+
+@end

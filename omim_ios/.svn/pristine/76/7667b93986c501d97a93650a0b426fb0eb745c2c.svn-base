@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>IDESourceControlProjectFavoriteDictionaryKey</key>
+	<false/>
+	<key>IDESourceControlProjectIdentifier</key>
+	<string>8A5B47D8-406A-4732-81EF-2D1248E52ABF</string>
+	<key>IDESourceControlProjectName</key>
+	<string>product</string>
+	<key>IDESourceControlProjectOriginsDictionary</key>
+	<dict>
+		<key>AA482BB0B9EAD681060D513F82A05AA885DE0DD9</key>
+		<string>redmine.onemeter.co:om_im_ios_cam</string>
+	</dict>
+	<key>IDESourceControlProjectPath</key>
+	<string>omim/product.xcodeproj</string>
+	<key>IDESourceControlProjectRelativeInstallPathDictionary</key>
+	<dict>
+		<key>AA482BB0B9EAD681060D513F82A05AA885DE0DD9</key>
+		<string>../../..</string>
+	</dict>
+	<key>IDESourceControlProjectURL</key>
+	<string>redmine.onemeter.co:om_im_ios_cam</string>
+	<key>IDESourceControlProjectVersion</key>
+	<integer>111</integer>
+	<key>IDESourceControlProjectWCCIdentifier</key>
+	<string>AA482BB0B9EAD681060D513F82A05AA885DE0DD9</string>
+	<key>IDESourceControlProjectWCConfigurations</key>
+	<array>
+		<dict>
+			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
+			<string>public.vcs.git</string>
+			<key>IDESourceControlWCCIdentifierKey</key>
+			<string>AA482BB0B9EAD681060D513F82A05AA885DE0DD9</string>
+			<key>IDESourceControlWCCName</key>
+			<string>om_im_ios_cam</string>
+		</dict>
+	</array>
+</dict>
+</plist>

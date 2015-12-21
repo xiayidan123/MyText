@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="8191" systemVersion="14E46" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES">
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="8154"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner" customClass="DiscoveryVC">
+            <connections>
+                <outlet property="findNone_imageView" destination="3Ge-YD-Pbh" id="8W0-zh-p4b"/>
+                <outlet property="friendCircle_Btn" destination="tUb-KC-hQr" id="yNE-3Z-gr1"/>
+                <outlet property="funActivity_Btn" destination="ypd-a5-ENV" id="cbO-iB-5Y9"/>
+                <outlet property="view" destination="i5M-Pr-FkT" id="sfx-zR-JGt"/>
+            </connections>
+        </placeholder>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <view clearsContextBeforeDrawing="NO" contentMode="scaleToFill" id="i5M-Pr-FkT">
+            <rect key="frame" x="0.0" y="0.0" width="320" height="568"/>
+            <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+            <subviews>
+                <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="Jox-6S-Hsd" userLabel="功能区">
+                    <rect key="frame" x="0.0" y="64" width="320" height="90"/>
+                    <subviews>
+                        <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="YhH-QP-KeY" userLabel="乐趣活动">
+                            <rect key="frame" x="15" y="10" width="60" height="76"/>
+                            <subviews>
+                                <button opaque="NO" contentMode="scaleToFill" misplaced="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="ypd-a5-ENV" userLabel="乐趣活动">
+                                    <rect key="frame" x="5" y="8" width="50" height="50"/>
+                                    <state key="normal" image="icon_find_funactivities.png">
+                                        <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                                    </state>
+                                    <state key="highlighted" image="icon_find_funactivities_press.png"/>
+                                    <connections>
+                                        <action selector="funActivity:" destination="-1" eventType="touchUpInside" id="bYs-Ge-wl6"/>
+                                    </connections>
+                                </button>
+                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" text="乐趣活动" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="rg7-YS-EvD" userLabel="乐趣活动">
+                                    <rect key="frame" x="10" y="63" width="40" height="12"/>
+                                    <fontDescription key="fontDescription" type="boldSystem" pointSize="10"/>
+                                    <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
+                                    <nil key="highlightedColor"/>
+                                </label>
+                            </subviews>
+                            <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="calibratedRGB"/>
+                            <constraints>
+                                <constraint firstAttribute="height" constant="76" id="3x0-90-thj"/>
+                                <constraint firstAttribute="centerX" secondItem="ypd-a5-ENV" secondAttribute="centerX" id="F1G-VG-3F2"/>
+                                <constraint firstItem="rg7-YS-EvD" firstAttribute="centerX" secondItem="ypd-a5-ENV" secondAttribute="centerX" id="G1P-WP-AlM"/>
+                                <constraint firstAttribute="centerY" secondItem="ypd-a5-ENV" secondAttribute="centerY" constant="5" id="J9O-4r-cgQ"/>
+                                <constraint firstItem="rg7-YS-EvD" firstAttribute="top" secondItem="ypd-a5-ENV" secondAttribute="bottom" constant="5" id="Spf-zA-ecq"/>
+                                <constraint firstAttribute="width" constant="60" id="eAa-Zf-dJo"/>
+                            </constraints>
+                        </view>
+                        <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="tT4-38-7Hr" userLabel="好友圈">
+                            <rect key="frame" x="85" y="10" width="60" height="76"/>
+                            <subviews>
+                                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="tUb-KC-hQr" userLabel="好友圈">
+                                    <rect key="frame" x="5" y="8" width="50" height="50"/>
+                                    <state key="normal" image="icon_find_friendcircle_press.png">
+                                        <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                                    </state>
+                                    <state key="highlighted" image="icon_find_friendcircle_press.png"/>
+                                    <connections>
+                                        <action selector="friendCircle:" destination="-1" eventType="touchUpInside" id="fXr-GU-WDR"/>
+                                    </connections>
+                                </button>
+                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="好友圈" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="1gf-1a-gbh" userLabel="好友圈">
+                                    <rect key="frame" x="15" y="63" width="30" height="12"/>
+                                    <fontDescription key="fontDescription" type="boldSystem" pointSize="10"/>
+                                    <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
+                                    <nil key="highlightedColor"/>
+                                </label>
+                            </subviews>
+                            <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="calibratedRGB"/>
+                            <constraints>
+                                <constraint firstAttribute="centerX" secondItem="tUb-KC-hQr" secondAttribute="centerX" id="Bxx-C7-C5w"/>
+                                <constraint firstAttribute="centerX" secondItem="1gf-1a-gbh" secondAttribute="centerX" id="W4M-dZ-arZ"/>
+                                <constraint firstItem="1gf-1a-gbh" firstAttribute="top" secondItem="tUb-KC-hQr" secondAttribute="bottom" constant="5" id="dlA-H5-x9d"/>
+                                <constraint firstAttribute="centerY" secondItem="tUb-KC-hQr" secondAttribute="centerY" constant="5" id="lZ6-4p-RWD"/>
+                            </constraints>
+                        </view>
+                        <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="Kl2-ms-4iH" userLabel="校长团">
+                            <rect key="frame" x="153" y="10" width="60" height="76"/>
+                            <subviews>
+                                <button opaque="NO" contentMode="scaleToFill" misplaced="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="BWP-ph-ftZ" userLabel="校长团">
+                                    <rect key="frame" x="6" y="10" width="50" height="50"/>
+                                    <state key="normal" image="icon_myclass_leftpage_r.png">
+                                        <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                                    </state>
+                                    <state key="highlighted" image="icon_find_friendcircle_press.png"/>
+                                    <connections>
+                                        <action selector="go_buy:" destination="-1" eventType="touchUpInside" id="lo2-ke-lCq"/>
+                                    </connections>
+                                </button>
+                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" text="校长团" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="1jz-Vc-Due" userLabel="校长团">
+                                    <rect key="frame" x="15" y="64" width="30" height="12"/>
+                                    <fontDescription key="fontDescription" type="boldSystem" pointSize="10"/>
+                                    <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
+                                    <nil key="highlightedColor"/>
+                                </label>
+                            </subviews>
+                            <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="calibratedRGB"/>
+                            <constraints>
+                                <constraint firstAttribute="centerY" secondItem="BWP-ph-ftZ" secondAttribute="centerY" constant="5" id="6YG-uA-QFO"/>
+                                <constraint firstAttribute="centerX" secondItem="1jz-Vc-Due" secondAttribute="centerX" id="e5F-S0-fcQ"/>
+                                <constraint firstItem="1jz-Vc-Due" firstAttribute="top" secondItem="BWP-ph-ftZ" secondAttribute="bottom" constant="5" id="r4t-Np-i3q"/>
+                                <constraint firstAttribute="centerX" secondItem="BWP-ph-ftZ" secondAttribute="centerX" id="vpk-U1-rI4"/>
+                            </constraints>
+                        </view>
+                    </subviews>
+                    <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                    <constraints>
+                        <constraint firstItem="YhH-QP-KeY" firstAttribute="height" secondItem="tT4-38-7Hr" secondAttribute="height" id="3FP-BK-fhg"/>
+                        <constraint firstItem="Kl2-ms-4iH" firstAttribute="leading" secondItem="tT4-38-7Hr" secondAttribute="trailing" constant="8" symbolic="YES" id="52f-hD-Llt"/>
+                        <constraint firstAttribute="height" constant="90" id="5vw-qV-Cwi"/>
+                        <constraint firstItem="YhH-QP-KeY" firstAttribute="top" secondItem="Jox-6S-Hsd" secondAttribute="top" constant="10" id="99V-CG-B7o"/>
+                        <constraint firstItem="Kl2-ms-4iH" firstAttribute="bottom" secondItem="tT4-38-7Hr" secondAttribute="bottom" id="He1-o2-MaM"/>
+                        <constraint firstItem="Kl2-ms-4iH" firstAttribute="top" secondItem="tT4-38-7Hr" secondAttribute="top" id="N0e-cc-L0d"/>
+                        <constraint firstAttribute="trailing" secondItem="Kl2-ms-4iH" secondAttribute="trailing" constant="107" id="aNz-AU-Y26"/>
+                        <constraint firstItem="YhH-QP-KeY" firstAttribute="leading" secondItem="Jox-6S-Hsd" secondAttribute="leading" constant="15" id="et1-kB-kvN"/>
+                        <constraint firstItem="YhH-QP-KeY" firstAttribute="width" secondItem="tT4-38-7Hr" secondAttribute="width" id="hq8-cA-4Yt"/>
+                        <constraint firstItem="tT4-38-7Hr" firstAttribute="leading" secondItem="YhH-QP-KeY" secondAttribute="trailing" constant="10" id="rnf-xK-zJr"/>
+                        <constraint firstItem="YhH-QP-KeY" firstAttribute="centerY" secondItem="tT4-38-7Hr" secondAttribute="centerY" id="tXw-1q-YkB"/>
+                    </constraints>
+                </view>
+                <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="bg_section_divider_line_light.png" translatesAutoresizingMaskIntoConstraints="NO" id="MIg-M9-fdv" userLabel="线">
+                    <rect key="frame" x="0.0" y="154" width="320" height="1"/>
+                    <constraints>
+                        <constraint firstAttribute="height" constant="1" id="NkZ-dF-RTN"/>
+                    </constraints>
+                </imageView>
+                <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="bg_find_none.png" translatesAutoresizingMaskIntoConstraints="NO" id="3Ge-YD-Pbh" userLabel="无数据">
+                    <rect key="frame" x="111" y="235" width="99" height="99"/>
+                    <constraints>
+                        <constraint firstAttribute="height" constant="99" id="2ZL-cY-ao0"/>
+                        <constraint firstAttribute="width" constant="99" id="kpk-xs-gKQ"/>
+                    </constraints>
+                </imageView>
+            </subviews>
+            <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
+            <constraints>
+                <constraint firstAttribute="trailing" secondItem="MIg-M9-fdv" secondAttribute="trailing" id="2s2-86-NAq"/>
+                <constraint firstAttribute="centerX" secondItem="3Ge-YD-Pbh" secondAttribute="centerX" id="D7Y-il-DlX"/>
+                <constraint firstAttribute="centerY" secondItem="3Ge-YD-Pbh" secondAttribute="centerY" id="U5s-PK-icU"/>
+                <constraint firstItem="Jox-6S-Hsd" firstAttribute="top" secondItem="i5M-Pr-FkT" secondAttribute="top" constant="64" id="WFC-pF-PuD"/>
+                <constraint firstItem="Jox-6S-Hsd" firstAttribute="leading" secondItem="i5M-Pr-FkT" secondAttribute="leading" id="ZbV-aM-7KE"/>
+                <constraint firstItem="MIg-M9-fdv" firstAttribute="leading" secondItem="i5M-Pr-FkT" secondAttribute="leading" id="eiq-A4-Qus"/>
+                <constraint firstAttribute="trailing" secondItem="Jox-6S-Hsd" secondAttribute="trailing" id="hMo-W4-pKc"/>
+                <constraint firstItem="MIg-M9-fdv" firstAttribute="top" secondItem="Jox-6S-Hsd" secondAttribute="bottom" id="y1u-7J-PhX"/>
+            </constraints>
+            <simulatedScreenMetrics key="simulatedDestinationMetrics" type="retina4"/>
+            <point key="canvasLocation" x="191" y="291"/>
+        </view>
+    </objects>
+    <resources>
+        <image name="bg_find_none.png" width="99" height="99"/>
+        <image name="bg_section_divider_line_light.png" width="20" height="1"/>
+        <image name="icon_find_friendcircle_press.png" width="50" height="50"/>
+        <image name="icon_find_funactivities.png" width="50" height="50"/>
+        <image name="icon_find_funactivities_press.png" width="50" height="50"/>
+        <image name="icon_myclass_leftpage_r.png" width="45" height="45"/>
+    </resources>
+</document>

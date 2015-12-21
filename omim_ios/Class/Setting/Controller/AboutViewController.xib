@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="8191" systemVersion="14E46" targetRuntime="iOS.CocoaTouch" variant="6xAndEarlier" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES">
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="8154"/>
+        <capability name="Alignment constraints with different attributes" minToolsVersion="5.1"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner" customClass="AboutViewController">
+            <connections>
+                <outlet property="icon_height" destination="Axu-md-Kzu" id="PnG-ar-moN"/>
+                <outlet property="icon_width" destination="40D-Ze-5UN" id="tHk-3d-CGC"/>
+                <outlet property="imageView_icon" destination="4" id="13"/>
+                <outlet property="iv_background" destination="Mxd-Et-pgy" id="2Jj-fT-6xu"/>
+                <outlet property="lbl_company" destination="5" id="12"/>
+                <outlet property="lbl_name" destination="7" id="10"/>
+                <outlet property="lbl_version" destination="8" id="9"/>
+                <outlet property="support_btn" destination="6" id="11"/>
+                <outlet property="view" destination="1" id="3"/>
+            </connections>
+        </placeholder>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <view contentMode="scaleToFill" id="1">
+            <rect key="frame" x="0.0" y="64" width="320" height="504"/>
+            <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+            <subviews>
+                <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="Mxd-Et-pgy" userLabel="background image">
+                    <rect key="frame" x="0.0" y="0.0" width="320" height="504"/>
+                </imageView>
+                <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" image="shadow_under.png" translatesAutoresizingMaskIntoConstraints="NO" id="Vyx-Ug-oIV">
+                    <rect key="frame" x="0.0" y="0.0" width="320" height="4"/>
+                </imageView>
+                <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" misplaced="YES" text="" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="5">
+                    <fontDescription key="fontDescription" type="system" pointSize="12"/>
+                    <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
+                    <nil key="highlightedColor"/>
+                </label>
+                <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="6">
+                    <rect key="frame" x="89" y="316" width="133" height="44"/>
+                    <fontDescription key="fontDescription" type="boldSystem" pointSize="15"/>
+                    <state key="normal">
+                        <color key="titleColor" red="0.19607843459999999" green="0.30980393290000002" blue="0.52156865600000002" alpha="1" colorSpace="calibratedRGB"/>
+                        <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                    </state>
+                    <state key="highlighted">
+                        <color key="titleColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                    </state>
+                </button>
+                <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" text="一米家校" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="7">
+                    <rect key="frame" x="0.0" y="161" width="320" height="29"/>
+                    <fontDescription key="fontDescription" type="system" pointSize="24"/>
+                    <color key="textColor" red="0.0" green="0.77647058823529413" blue="0.18823529411764706" alpha="1" colorSpace="calibratedRGB"/>
+                    <nil key="highlightedColor"/>
+                </label>
+                <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" text="Label" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="8">
+                    <rect key="frame" x="142" y="190" width="36" height="17"/>
+                    <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                    <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
+                    <nil key="highlightedColor"/>
+                </label>
+                <imageView userInteractionEnabled="NO" contentMode="scaleToFill" image="defoult_logo.png" translatesAutoresizingMaskIntoConstraints="NO" id="4">
+                    <rect key="frame" x="109" y="82" width="103" height="79"/>
+                    <constraints>
+                        <constraint firstAttribute="width" constant="103" id="40D-Ze-5UN"/>
+                        <constraint firstAttribute="height" constant="79" id="Axu-md-Kzu"/>
+                    </constraints>
+                </imageView>
+            </subviews>
+            <color key="backgroundColor" red="0.98431372549019602" green="0.98039215686274506" blue="0.98431372549019602" alpha="1" colorSpace="calibratedRGB"/>
+            <constraints>
+                <constraint firstItem="Mxd-Et-pgy" firstAttribute="leading" secondItem="1" secondAttribute="leading" id="1VC-Tc-mIS"/>
+                <constraint firstAttribute="centerX" secondItem="4" secondAttribute="centerX" id="6dx-yj-zdW"/>
+                <constraint firstAttribute="bottom" secondItem="Mxd-Et-pgy" secondAttribute="bottom" id="ACl-zc-OvW"/>
+                <constraint firstItem="8" firstAttribute="top" secondItem="7" secondAttribute="bottom" id="Dhl-1u-kcm"/>
+                <constraint firstAttribute="bottom" secondItem="5" secondAttribute="bottom" constant="30" id="JMZ-jX-ZdU"/>
+                <constraint firstItem="7" firstAttribute="top" secondItem="4" secondAttribute="bottom" id="LVQ-Gz-Lo6"/>
+                <constraint firstAttribute="trailing" secondItem="7" secondAttribute="trailing" id="NXj-DH-9RU"/>
+                <constraint firstItem="7" firstAttribute="leading" secondItem="1" secondAttribute="leading" id="Yea-ya-1ID"/>
+                <constraint firstItem="5" firstAttribute="leading" secondItem="1" secondAttribute="leading" id="bB1-4d-nDx"/>
+                <constraint firstAttribute="trailing" secondItem="Mxd-Et-pgy" secondAttribute="trailing" id="epI-dU-7al"/>
+                <constraint firstItem="Mxd-Et-pgy" firstAttribute="top" secondItem="1" secondAttribute="top" id="fM2-ri-c0F"/>
+                <constraint firstAttribute="trailing" secondItem="5" secondAttribute="trailing" id="g2a-Hq-vK2"/>
+                <constraint firstItem="Mxd-Et-pgy" firstAttribute="top" secondItem="1" secondAttribute="top" id="gx0-I4-zW3"/>
+                <constraint firstAttribute="bottom" secondItem="Mxd-Et-pgy" secondAttribute="bottom" id="hzx-M6-h3V"/>
+                <constraint firstAttribute="trailing" secondItem="Mxd-Et-pgy" secondAttribute="trailing" id="jiP-cL-Gdj"/>
+                <constraint firstAttribute="centerX" secondItem="8" secondAttribute="centerX" id="qXo-lS-mfW"/>
+                <constraint firstItem="Mxd-Et-pgy" firstAttribute="leading" secondItem="1" secondAttribute="leading" id="sVv-fO-S1g"/>
+                <constraint firstAttribute="centerY" secondItem="8" secondAttribute="bottom" constant="45" id="tGF-Tc-HaK"/>
+            </constraints>
+            <simulatedNavigationBarMetrics key="simulatedTopBarMetrics" translucent="NO" prompted="NO"/>
+            <simulatedScreenMetrics key="simulatedDestinationMetrics" type="retina4"/>
+            <point key="canvasLocation" x="197" y="78"/>
+        </view>
+    </objects>
+    <resources>
+        <image name="defoult_logo.png" width="63" height="63"/>
+        <image name="shadow_under.png" width="320" height="4"/>
+    </resources>
+</document>

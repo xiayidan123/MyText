@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>class</key>
+	<string>班级交流</string>
+	<key>friends</key>
+	<string>同伴好友</string>
+	<key>lifeandrelax</key>
+	<string>生活休闲</string>
+	<key>hobit</key>
+	<string>兴趣爱好</string>
+	<key>studyandexam</key>
+	<string>学习考试</string>
+	<key>game</key>
+	<string>游戏动漫</string>
+	<key>others</key>
+	<string>其他</string>
+</dict>
+</plist>

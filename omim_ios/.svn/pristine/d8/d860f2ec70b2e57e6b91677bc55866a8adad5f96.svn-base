@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<array>
+	<array>
+		<dict>
+			<key>Image_name</key>
+			<string>addcontacts_icon_search</string>
+			<key>Title</key>
+			<string>Search</string>
+		</dict>
+		<dict>
+			<key>Image_name</key>
+			<string>addcontacts_icon_scan</string>
+			<key>Title</key>
+			<string>Scan QRCode</string>
+		</dict>
+	</array>
+	<array>
+		<dict>
+			<key>Image_name</key>
+			<string>addcontacts_icon_group</string>
+			<key>Title</key>
+			<string>Create a group</string>
+		</dict>
+	</array>
+	<array>
+		<dict>
+			<key>Image_name</key>
+			<string>addcontacts_icon_account</string>
+			<key>Title</key>
+			<string>Offical account</string>
+		</dict>
+	</array>
+	<array>
+		<dict>
+			<key>Image_name</key>
+			<string>addcontacts_icon_tellfriend</string>
+			<key>Title</key>
+			<string>Tell friend</string>
+		</dict>
+	</array>
+</array>
+</plist>

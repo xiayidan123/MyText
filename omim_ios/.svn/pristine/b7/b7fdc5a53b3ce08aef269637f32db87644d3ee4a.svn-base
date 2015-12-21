@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="9059" systemVersion="15A2301" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES">
+
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="8154"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner" customClass="OMMessageVC">
+            <connections>
+                <outlet property="chatList_tableView" destination="8DK-Rd-Pxe" id="eYc-R5-6eZ"/>
+                <outlet property="noChat_ImageView" destination="hwg-yx-qKN" id="BDb-Ox-5rG"/>
+                <outlet property="noChat_Label" destination="1yp-1Q-LkF" id="cdm-ZD-h8P"/>
+                <outlet property="noChat_View" destination="B8p-JP-Pgz" id="vEe-th-MCD"/>
+                <outlet property="searchBar" destination="hdR-kd-z7x" id="BxW-Xt-1sg"/>
+                <outlet property="searchDisplayController" destination="nUr-6o-Fi9" id="E0L-7E-o13"/>
+                <outlet property="view" destination="i5M-Pr-FkT" id="sfx-zR-JGt"/>
+            </connections>
+        </placeholder>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <view clearsContextBeforeDrawing="NO" contentMode="scaleToFill" id="i5M-Pr-FkT">
+            <rect key="frame" x="0.0" y="0.0" width="320" height="568"/>
+            <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+            <subviews>
+                <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="B8p-JP-Pgz" userLabel="noChat View">
+                    <rect key="frame" x="0.0" y="150" width="320" height="268"/>
+                    <subviews>
+                        <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="chat_list_bg.png" translatesAutoresizingMaskIntoConstraints="NO" id="hwg-yx-qKN" userLabel="no chat imgv">
+                            <rect key="frame" x="105" y="29" width="110" height="110"/>
+                            <animations/>
+                            <constraints>
+                                <constraint firstAttribute="height" constant="110" id="PWO-BA-Rgy"/>
+                                <constraint firstAttribute="width" constant="110" id="jbS-Wo-T2h"/>
+                            </constraints>
+                        </imageView>
+                        <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="没有会话" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="1yp-1Q-LkF" userLabel="no chat">
+                            <rect key="frame" x="0.0" y="149" width="320" height="21"/>
+                            <animations/>
+                            <constraints>
+                                <constraint firstAttribute="height" constant="21" id="mgD-tL-FaW"/>
+                            </constraints>
+                            <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                            <color key="textColor" white="0.66666666666666663" alpha="1" colorSpace="calibratedWhite"/>
+                            <nil key="highlightedColor"/>
+                        </label>
+                    </subviews>
+                    <animations/>
+                    <constraints>
+                        <constraint firstAttribute="centerX" secondItem="hwg-yx-qKN" secondAttribute="centerX" id="3Lc-EI-qsZ"/>
+                        <constraint firstItem="1yp-1Q-LkF" firstAttribute="top" secondItem="hwg-yx-qKN" secondAttribute="bottom" constant="10" id="6oz-OU-Wbr"/>
+                        <constraint firstAttribute="trailing" secondItem="1yp-1Q-LkF" secondAttribute="trailing" id="9ql-jY-NK1"/>
+                        <constraint firstAttribute="centerY" secondItem="hwg-yx-qKN" secondAttribute="centerY" constant="50" id="K0x-ud-B2o"/>
+                        <constraint firstItem="1yp-1Q-LkF" firstAttribute="leading" secondItem="B8p-JP-Pgz" secondAttribute="leading" id="riw-6V-B3B"/>
+                    </constraints>
+                </view>
+                <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" style="plain" separatorStyle="none" rowHeight="44" sectionHeaderHeight="22" sectionFooterHeight="22" translatesAutoresizingMaskIntoConstraints="NO" id="8DK-Rd-Pxe">
+                    <rect key="frame" x="0.0" y="64" width="320" height="504"/>
+                    <animations/>
+                    <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                    <searchBar key="tableHeaderView" contentMode="redraw" id="hdR-kd-z7x">
+                        <rect key="frame" x="0.0" y="0.0" width="320" height="44"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMaxY="YES"/>
+                        <animations/>
+                        <textInputTraits key="textInputTraits"/>
+                        <connections>
+                            <outlet property="delegate" destination="-1" id="H3a-ia-djH"/>
+                        </connections>
+                    </searchBar>
+                    <connections>
+                        <outlet property="dataSource" destination="-1" id="UbM-vP-spQ"/>
+                        <outlet property="delegate" destination="-1" id="Aj8-Ga-6Bf"/>
+                    </connections>
+                </tableView>
+            </subviews>
+            <animations/>
+            <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
+            <constraints>
+                <constraint firstItem="8DK-Rd-Pxe" firstAttribute="top" secondItem="i5M-Pr-FkT" secondAttribute="top" constant="64" id="0bl-vA-jFu"/>
+                <constraint firstItem="B8p-JP-Pgz" firstAttribute="leading" secondItem="i5M-Pr-FkT" secondAttribute="leading" id="4Ql-a5-f1X"/>
+                <constraint firstAttribute="centerY" secondItem="B8p-JP-Pgz" secondAttribute="centerY" id="9lj-80-htc"/>
+                <constraint firstAttribute="trailing" secondItem="8DK-Rd-Pxe" secondAttribute="trailing" id="Ads-Qb-mf4"/>
+                <constraint firstAttribute="centerX" secondItem="B8p-JP-Pgz" secondAttribute="centerX" id="E2l-Dx-esV"/>
+                <constraint firstItem="B8p-JP-Pgz" firstAttribute="top" secondItem="i5M-Pr-FkT" secondAttribute="top" constant="150" id="Qeu-9h-GLb"/>
+                <constraint firstAttribute="bottom" secondItem="8DK-Rd-Pxe" secondAttribute="bottom" id="eRZ-UP-WJO"/>
+                <constraint firstItem="8DK-Rd-Pxe" firstAttribute="leading" secondItem="i5M-Pr-FkT" secondAttribute="leading" id="s7l-d8-42L"/>
+                <constraint firstAttribute="bottom" secondItem="B8p-JP-Pgz" secondAttribute="bottom" constant="150" id="su7-5f-y2O"/>
+                <constraint firstAttribute="trailing" secondItem="B8p-JP-Pgz" secondAttribute="trailing" id="zHA-0f-LSe"/>
+            </constraints>
+            <simulatedScreenMetrics key="simulatedDestinationMetrics" type="retina4"/>
+        </view>
+        <searchDisplayController id="nUr-6o-Fi9">
+            <connections>
+                <outlet property="delegate" destination="-1" id="3tq-aF-mjd"/>
+                <outlet property="searchBar" destination="hdR-kd-z7x" id="Klv-Nj-pid"/>
+                <outlet property="searchContentsController" destination="-1" id="tnD-I5-JM6"/>
+                <outlet property="searchResultsDataSource" destination="-1" id="HhC-8F-l9o"/>
+                <outlet property="searchResultsDelegate" destination="-1" id="mJn-qc-02L"/>
+            </connections>
+        </searchDisplayController>
+    </objects>
+    <resources>
+        <image name="chat_list_bg.png" width="110" height="110"/>
+    </resources>
+</document>

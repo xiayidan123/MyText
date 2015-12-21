@@ -1,0 +1,111 @@
+//
+//  HomeworkStudentListCell.m
+//  dev01
+//
+//  Created by Huan on 15/5/21.
+//  Copyright (c) 2015年 wowtech. All rights reserved.
+//
+
+#import "HomeworkStudentListCell.h"
+#import "SchoolMember.h"
+#import "OMAlertViewForNet.h"
+@interface HomeworkStudentListCell()<UIAlertViewDelegate>
+
+
+@end
+
+
+@implementation HomeworkStudentListCell
+- (void)dealloc {
+    self.schoolMember = nil;
+    [_name_label release];
+    [_state_btn release];
+    [_widthLayout release];
+    [super dealloc];
+}
+
+- (void)layoutSubviews{
+    [super layoutSubviews];
+}
+
+- (void)setSchoolMember:(SchoolMember *)schoolMember{
+    if (_schoolMember != schoolMember) {
+        [_schoolMember release];
+        _schoolMember = [schoolMember retain];
+        self.name_label.text = _schoolMember.schoolName;
+        if (schoolMember.homework_state == SchoolMemberHomeworkState_NoSubmit) {
+            self.state_btn.enabled = YES;
+            self.accessoryType = UITableViewCellAccessoryNone;
+            UIImage *cannotImg = [UIImage imageNamed:@"btn_small_valid"];
+            UIEdgeInsets edge = UIEdgeInsetsMake(0, 10, 0, 10);
+            [self.state_btn setBackgroundImage:[cannotImg resizableImageWithCapInsets:edge resizingMode:UIImageResizingModeStretch] forState:UIControlStateNormal]; 
+            [self.state_btn setTitle:@"提醒交作业" forState:UIControlStateNormal];
+            [self.state_btn setTitleColor:[UIColor colorWithRed:0.09f green:0.67f blue:0.94f alpha:1.00f] forState:UIControlStateNormal];
+            
+        }else if (schoolMember.homework_state == SchoolMemberHomeworkState_Submit){
+            self.state_btn.enabled = YES;
+            self.widthLayout.constant = 40;
+            [self.state_btn setTitle:@"新提交" forState:UIControlStateNormal];
+            
+        }else if (schoolMember.homework_state == SchoolMemberHomeworkState_DidModify){
+            self.widthLayout.constant = 40;
+            [self.state_btn setTitle:@"已批改" forState:UIControlStateNormal];
+            [self.state_btn setTitleColor:[UIColor grayColor] forState:UIControlStateNormal];
+            self.state_btn.enabled = NO;
+        }else if (schoolMember.homework_state == SchoolMemberHomeworkState_DidRemind){
+            self.widthLayout.constant = 40;
+            [self.state_btn setTitle:@"已提醒" forState:UIControlStateNormal];
+            [self.state_btn setTitleColor:[UIColor grayColor] forState:UIControlStateNormal];
+            [self.state_btn setBackgroundImage:nil forState:UIControlStateNormal];
+            self.state_btn.enabled = NO;
+        }
+    }
+}
+
+
+- (IBAction)remindHomework:(id)sender {
+//    if (self.schoolMember.homework_state == SchoolMemberHomeworkState_NoSubmit && [self.delegate respondsToSelector:@selector(remindHomeworkWithSchoolMember:)]) {
+//        [self.delegate remindHomeworkWithSchoolMember:self.schoolMember];
+//        
+//        self.schoolMember.homework_state = SchoolMemberHomeworkState_DidRemind;
+//        self.widthLayout.constant = 40;
+//        [self.state_btn setTitle:@"已提醒" forState:UIControlStateNormal];
+//        [self.state_btn setTitleColor:[UIColor grayColor] forState:UIControlStateNormal];
+//        [self.state_btn setBackgroundImage:nil forState:UIControlStateNormal];
+//        self.state_btn.enabled = NO;
+//    }
+    UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:nil message:@"是否确定提醒学生交作业" delegate:self cancelButtonTitle:@"确定" otherButtonTitles:@"取消", nil];
+    [alertView show];
+    [super addSubview:alertView];
+    }
+
+
+- (void)awakeFromNib {
+    self.state_btn.titleLabel.font = [UIFont systemFontOfSize:13];
+}
+
+- (void)setSelected:(BOOL)selected animated:(BOOL)animated {
+    [super setSelected:selected animated:animated];
+
+    // Configure the view for the selected state
+}
+
+
+- (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex {
+    if (buttonIndex == 0) {
+        
+    if (self.schoolMember.homework_state == SchoolMemberHomeworkState_NoSubmit && [self.delegate respondsToSelector:@selector(remindHomeworkWithSchoolMember:)]) {
+            [self.delegate remindHomeworkWithSchoolMember:self.schoolMember];
+            
+            self.schoolMember.homework_state = SchoolMemberHomeworkState_DidRemind;
+            self.widthLayout.constant = 40;
+            [self.state_btn setTitle:@"已提醒" forState:UIControlStateNormal];
+            [self.state_btn setTitleColor:[UIColor grayColor] forState:UIControlStateNormal];
+            [self.state_btn setBackgroundImage:nil forState:UIControlStateNormal];
+            self.state_btn.enabled = NO;
+        }
+    }
+}
+
+
+@end

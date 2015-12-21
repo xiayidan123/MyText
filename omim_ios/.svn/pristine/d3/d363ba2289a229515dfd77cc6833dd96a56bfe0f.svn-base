@@ -1,0 +1,1441 @@
+/*
+ Localizable.strings
+ yuanqutong
+ 
+ Created by Harry on 14-1-18.
+ Copyright (c) 2014年 OneMeter Inc. All rights reserved.
+ */
+
+"messages" = "Message";
+"contacts" = "Contact";
+"friends" = "Social";
+"activities" = "Event";
+"settings" = "Setting";
+"send" = "Send";
+"error" = "Error";
+"canNotRecord" = "Unable to record";
+"Cancel" = "Cancel";
+
+"error1" = "Parameter error";
+"error2" = "Authentication error";
+"error3" = "Database error";
+"error4" = "Service under maintainence,please try again later";
+"error5" = "The version of app you are using is too low";
+"error99" = "Unknown error";
+"error-99" = "User doesn't exist";
+"error6" = "User already exist";
+"error7" = "You are not the group owner";
+"error8" = "Please setup your password first";
+"error9" = "Please setup your wowtalkid first";
+"error10" = "Group doesn't exist";
+"error11" = "Event doesn't exist";
+"error12" = "Usertype doesn't match";
+"error13" = "Timeline doesn't exist";
+"error14" = "Review doesn't exist";
+"error15" = "error15";
+"error16" = "error16";
+"error17" = "User authentication done";
+"error18" = "Invalid email address";
+"error19" = "Invalid phone number";
+
+/* WeekDays */
+"Weekday1" = "Sunday";
+"Weekday2" = "Monday";
+"Weekday3" = "Tuesday";
+"Weekday4" = "Wednesday";
+"Weekday5" = "Thursday";
+"Weekday6" = "Friday";
+"Weekday7" = "Saturday";
+
+/* APNS */
+"view_apns_txt" = "View";
+"apns_txt" = "%@:%@";
+"apns_answer_call"= "Answer";
+"apns_call"= "%@ is calling";
+"apns_missed_call" = "Missed call:%@";
+"apns_location" = "%@ sent you a location";
+"apns_stamp" = "%@ sent you a stamp";
+"apns_photo" = "%@ sent you a photo";
+"apns_voice" = "%@ sent you a voice";
+"apns_video" = "%@ sent you a video";
+"apns_vcf" = "%@ sent you a business card";
+"apns_secretmsg" = "you have new messages";
+"apns_newmoment" = "%@ has post a new moment";
+/* No comment provided by engineer. */
+" %@ is calling you" = " %@ is calling you";
+
+/* No comment provided by engineer. */
+" Reply " = " @ ";
+
+/* No comment provided by engineer. */
+" new notifications" = " new notifications";
+
+/* No comment provided by engineer. */
+"%@ has left this chatroom" = "%@ has left this chatroom";
+
+/* No comment provided by engineer. */
+"%@ has left this group" = "%@ has left this group";
+
+/* No comment provided by engineer. */
+"%@ has passed your friend request"= "%@ has passed your friend request";
+
+/* No comment provided by engineer. */
+"00:00" = "00:00";
+
+/* No comment provided by engineer. */
+"A location was received" = "A location was received";
+
+/* No comment provided by engineer. */
+"A location was sent" = "A location was sent";
+
+/* No comment provided by engineer. */
+"A multimedia message was received" = "A multimedia message was received";
+
+/* No comment provided by engineer. */
+"A multimedia message was sent" = "A multimedia message was sent";
+
+/* No comment provided by engineer. */
+"A photo was received" = "A photo was received";
+
+/* No comment provided by engineer. */
+"A photo was sent" = "A photo was sent";
+
+/* No comment provided by engineer. */
+"A stamp was received" = "A stamp was received";
+
+/* No comment provided by engineer. */
+"A stamp was sent" = "A stamp was sent";
+
+/* No comment provided by engineer. */
+"A video clip was received" = "A video clip was received";
+
+/* No comment provided by engineer. */
+"A video clip was sent" = "A video clip was sent";
+
+/* No comment provided by engineer. */
+"A voice message was received" = "A voice message was received";
+
+/* No comment provided by engineer. */
+"A voice message was sent" = "A voice message was sent";
+
+/* No comment provided by engineer. */
+"activities" = "activities";
+
+/* No comment provided by engineer. */
+"Answer" = "Answer";
+
+/* No comment provided by engineer. */
+"Answering" = "Answering...";
+
+/* No comment provided by engineer. */
+"Call" = "Call";
+
+/* No comment provided by engineer. */
+"Call incoming..." = "call incoming...";
+
+/* No comment provided by engineer. */
+"Calling..." = "Calling...";
+
+/* No comment provided by engineer. */
+"Cancel" = "Cancel";
+
+/* No comment provided by engineer. */
+"Cannot use this function" = "Cannot use this function";
+
+
+
+/* No comment provided by engineer. */
+"Decline" = "Decline";
+
+/* No comment provided by engineer. */
+"Declining" = "Declining";
+
+/* No comment provided by engineer. */
+"Delete" = "Delete";
+
+/* No comment provided by engineer. */
+"Empty Chat Room" = "Empty Chat Room";
+
+/* No comment provided by engineer. */
+"End" = "End";
+
+/* No comment provided by engineer. */
+"End Call" = "End Call";
+
+/* No comment provided by engineer. */
+"Ending" = "Ending";
+
+/* No comment provided by engineer. */
+"Establishing the video call..." = "Establishing the video call...";
+
+
+
+/* No comment provided by engineer. */
+"ID can't be empty" = "ID can't be empty";
+
+/* No comment provided by engineer. */
+"ID could be changed only once. Your friend could find you by ID" = "ID could be changed only once. Your friend could find you by ID";
+
+/* No comment provided by engineer. */
+"ID could only contains numbers and characters." = "ID could only contains numbers and characters.";
+
+/* No comment provided by engineer. */
+"ID's length is 20 digits at most." = "ID's length is 20 digits at most.";
+
+/* No comment provided by engineer. */
+"ID's length is 2 at least." = "ID's length is 2 at least.";
+
+/* No comment provided by engineer. */
+"Last Updated: %@" = "Last Updated: %@";
+
+/* Loading Status */
+"Loading more messages..." = "Loading more messages...";
+
+/* No comment provided by engineer. */
+"Loading more moments" = "Loading more moments";
+
+/* No comment provided by engineer. */
+"Loading..." = "Loading...";
+
+/* No comment provided by engineer. */
+"Location" = "Location";
+
+
+
+/* No comment provided by engineer. */
+"Network" = "Network";
+
+/* No comment provided by engineer. */
+"No member" = "No member";
+
+/* No comment provided by engineer. */
+"Nobody answer.Stop calling..." = "Nobody answer.Stop calling...";
+
+
+/* No comment provided by engineer. */
+"oops，network is down. Try it later" = "oops，network is down. Try it later";
+
+/* No comment provided by engineer. */
+"Paused" = "Paused";
+
+/* No comment provided by engineer. */
+"Paused by callee" = "Paused by callee";
+
+/* No comment provided by engineer. */
+"Photo" = "Photo";
+
+/* No comment provided by engineer. */
+"Please wait for a while.." = "Please wait for a while..";
+
+/* Pull down to load more messages */
+"Pull down to load more messages..." = "Pull down to load more messages...";
+
+/* No comment provided by engineer. */
+"Reached" = "Reached";
+
+/* No comment provided by engineer. */
+"Read" = "Read";
+
+/* No comment provided by engineer. */
+"Recording" = "Recording";
+
+/* Release to load more messages */
+"Release to load more messages..." = "Release to load more messages...";
+
+/* No comment provided by engineer. */
+"Remote Ringing..." = "Remote Ringing...";
+
+/* No comment provided by engineer. */
+"Sent" = "Sent";
+
+
+
+/* No comment provided by engineer. */
+"Support" = "Support";
+
+/* No comment provided by engineer. */
+"Unknown" = "Unknown";
+
+/* No comment provided by engineer. */
+"User is busy.Stop calling..." = "User is busy.Stop calling...";
+
+/* No comment provided by engineer. */
+"User you are calling doesn't have WowTalk account.\n\nDo you want to place a regular call instead?" = "User you are calling doesn't have WowTalk account.\n\nDo you want to place a regular call instead?";
+
+/* No comment provided by engineer. */
+"Video call has been set up" = "Video call has been set up";
+
+/* No comment provided by engineer. */
+"Videocall incoming..." = "videocall incoming...";
+
+/* No comment provided by engineer. */
+"WowTalk supports more types of messages now, please click me to update wowtalk to see this message!" = "Onmmeter supports more types of messages now, please click me to update wowtalk to see this message!";
+
+/* No comment provided by engineer. */
+"Yes" = "Yes";
+
+/* No comment provided by engineer. */
+"Yes and don't ask me again" = "Yes and don't ask me again";
+
+/* No comment provided by engineer. */
+"You had an incoming call" = "You had an incoming call";
+
+/* No comment provided by engineer. */
+"You had a missing call" = "You had a missing call";
+
+/* No comment provided by engineer. */
+"You just called others" = "You just called others";
+
+/* No comment provided by engineer. */
+"Your buddy's WowTalk version is too old to receive this message." = "Your buddy's WowTalk version is too old to receive this message.";
+
+/* No comment provided by engineer. */
+"upload photos" = "upload photos";
+
+/* No comment provided by engineer. */
+"Hide all the comments in the list" = "Hide all the comments in the list";
+
+/* No comment provided by engineer. */
+"Current location is not available" = "Current location is not available";
+
+/* No comment provided by engineer. */
+"Two passwords are different" = "Two passwords are different.";
+
+/* No comment provided by engineer. */
+"Previous password is wrong" = "Previous password is wrong";
+
+
+
+/* No comment provided by engineer. */
+" friends like it" = " friends like it";
+
+"like it" = " like it";
+
+/* No comment provided by engineer. */
+"Remind" = "Remind";
+
+/* No comment provided by engineer. */
+"Introduction" = "Introduction";
+
+/* No comment provided by engineer. */
+"Local contact" = "Local contact";
+
+/* No comment provided by engineer. */
+"Take a photo" = "Take a photo";
+
+/* No comment provided by engineer. */
+"Select from album" = "Select from album";
+
+/* No comment provided by engineer. */
+"Entertainment" = "Entertainment";
+
+
+
+/* No comment provided by engineer. */
+"Your application is not passed (%@)" = "Your application is not passed (%@)";
+
+/* No comment provided by engineer. */
+"Secret" = "Secret";
+
+/* No comment provided by engineer. */
+"Change password" = "Change password";
+
+/* No comment provided by engineer. */
+"Failed to change password" = "Failed to change password";
+
+/* No comment provided by engineer. */
+"Edit group" = "Edit group";
+
+/* No comment provided by engineer. */
+"Stop" = "Stop";
+
+/* No comment provided by engineer. */
+"Free chat" = "Free chat";
+
+/* No comment provided by engineer. */
+"Free videochat" = "Free videochat";
+
+/* No comment provided by engineer. */
+"Free call" = "Free call";
+
+/* No comment provided by engineer. */
+"Join Application / Invitation" = "Join Application / Invitation";
+
+/* No comment provided by engineer. */
+"Join Application" = "Join Application";
+
+/* No comment provided by engineer. */
+"Invitation" = "Invitation";
+
+/* No comment provided by engineer. */
+"All contacts" = "All contacts";
+
+/* No comment provided by engineer. */
+"About" = "About";
+
+/* No comment provided by engineer. */
+"Follow" = "Follow";
+
+/* No comment provided by engineer. */
+"Hobby" = "Hobby";
+
+/* No comment provided by engineer. */
+"Hobby" = "Hobby";
+
+/* No comment provided by engineer. */
+"Others" = "Others";
+
+/* No comment provided by engineer. */
+"Write your moment!" = "Write your moment!";
+
+/* No comment provided by engineer. */
+"Create a group" = "Create a group";
+
+/* No comment provided by engineer. */
+"Creator" = "Creator";
+
+/* No comment provided by engineer. */
+"Delete" = "Delete";
+
+/* No comment provided by engineer. */
+"Delete this moment" = "Delete this moment";
+
+/* No comment provided by engineer. */
+"Delete this comment" = "Delete this comment";
+
+/* No comment provided by engineer. */
+" join this chatroom" = " joins this chatroom";
+
+/* No comment provided by engineer. */
+" joins this group" = " joins this group";
+
+/* No comment provided by engineer. */
+"The moment is empty, please write something" = "The moment is empty, please write something";
+
+/* No comment provided by engineer. */
+"Comment list" = "Comment list";
+
+/* No comment provided by engineer. */
+"History" = "History";
+
+/* No comment provided by engineer. */
+"Deselect all" = "Deselect all";
+
+/* No comment provided by engineer. */
+"SMS" = "Send SMS";
+
+/* No comment provided by engineer. */
+"Send" = "Send";
+
+
+
+/* No comment provided by engineer. */
+"Send email" = "Send Email";
+
+/* No comment provided by engineer. */
+"unfollow" = "Unfollow";
+
+/* No comment provided by engineer. */
+"normal member" = "Normal";
+
+/* No comment provided by engineer. */
+"Others can add me" = "Others can add me";
+
+/* No comment provided by engineer. */
+"Adding" = "Adding";
+
+/* No comment provided by engineer. */
+"users nearby can find me" = "Users nearby can find me";
+
+/* No comment provided by engineer. */
+"Number can't be empty" = "Number can't be empty";
+
+/* No comment provided by engineer. */
+"Number contains invalid characters" = "Number contains invalid characters";
+
+
+/* No comment provided by engineer. */
+"Agree" = "Agree";
+
+
+
+/* No comment provided by engineer. */
+"comment list" = "Comment list";
+
+/* No comment provided by engineer. */
+"Replay" = "Replay";
+
+/* No comment provided by engineer. */
+"Replaying" = "Replaying";
+
+/* No comment provided by engineer. */
+"AppName_wowcity" = "WowCity";
+"AppName_wowtalkbiz" = "WowTalk";
+
+
+/* No comment provided by engineer. */
+"WowTalkID" = "WowTalkID";
+
+/* No comment provided by engineer. */
+"WowTalkID can be changed only once, are you sure？" = "WowTalkID can be changed only once, are you sure？";
+
+/* No comment provided by engineer. */
+"WowTalkID can be changed only once. Only numbers and characters are allowed. Its valid length is 2 - 20." = "WowTalkID can be changed only once. Only numbers and characters are allowed. Its valid length is 2 - 20.";
+
+/* No comment provided by engineer. */
+"WowTalk ID" = "ID:";
+
+/* No comment provided by engineer. */
+"Area" = "Area";
+
+/* No comment provided by engineer. */
+"Location" = "Location";
+
+/* No comment provided by engineer. */
+"Chatroom" = "Chatroom";
+
+/* No comment provided by engineer. */
+"Avatar" = "Avatar";
+
+/* No comment provided by engineer. */
+"Female" = "Female";
+
+/* No comment provided by engineer. */
+"Friend request" = "Friend request";
+
+/* No comment provided by engineer. */
+"Failed to send request" = "Failed to send request";
+
+/* No comment provided by engineer. */
+"Request is sent" = "Requested";
+
+/* No comment provided by engineer. */
+"OK" = "OK";
+
+/* No comment provided by engineer. */
+"Study" = "Study";
+
+/* No comment provided by engineer. */
+"Offical account" = "Offical account";
+
+/* No comment provided by engineer. */
+"Password can't be empty" = "Password can't be empty";
+
+
+/* No comment provided by engineer. */
+"Password's valid length is 6 - 20. Please use a complex password for your own security" = "Password's valid length is 6 - 20. Please use a complex password for your own security";
+
+/* No comment provided by engineer. */
+"Password can be 20 digits at most." = "Password can be 20 digits at most.";
+
+/* No comment provided by engineer. */
+"Password needs to be 6 digits at leaset" = "Password needs to be 6 digits at leaset";
+
+/* No comment provided by engineer. */
+"Your invitation is rejected" = "Your invitation is rejected";
+
+/* No comment provided by engineer. */
+"Added" = "Added";
+
+/* No comment provided by engineer. */
+"Friend has been added" = "Friend has been added";
+
+/* No comment provided by engineer. */
+"Bound" = "Bound";
+
+/* No comment provided by engineer. */
+"Start recording" = "Start recording";
+
+/* No comment provided by engineer. */
+"Finish recording" = "Finish recording";
+
+/* No comment provided by engineer. */
+"The record file is broken, please record it again" = "The record file is broken, please record it again";
+
+/* No comment provided by engineer. */
+"The recording time is too short, please record it again" = "The recording time is too short, please record it again";
+
+/* No comment provided by engineer. */
+"You have to add a record for this message" = "You have to add a record for this message";
+
+/* No comment provided by engineer. */
+"You have to add a photo for this message" = "You have to add a photo for this message";
+
+/* No comment provided by engineer. */
+"Join WowTalk with me" = "Join OneMeter with me";
+
+/* No comment provided by engineer. */
+"Sex" = "Sex";
+
+/* No comment provided by engineer. */
+"You could change group name after the creation" = "You could change group name after the creation";
+
+/* No comment provided by engineer. */
+"You have joined%@" = "You have joined%@";
+
+/* No comment provided by engineer. */
+"You have been removed from %@ by admin" = "You have been removed from %@ by admin";
+
+/* No comment provided by engineer. */
+"Slow network" = "Slow network";
+
+/* No comment provided by engineer. */
+"Become the first to like！" = "Become the first to like！";
+
+/* No comment provided by engineer. */
+"I am living in WowTalk. It is great, join me now!" = "I am living in OneMeter. It is great, join me now!";
+
+/* No comment provided by engineer. */
+"Mobile" = "Mobile";
+
+
+/* No comment provided by engineer. */
+"Open album" = "Open album";
+
+/* No comment provided by engineer. */
+"Reject" = "Reject";
+
+/* No comment provided by engineer. */
+"Press and talk" = "Press and talk";
+
+/* No comment provided by engineer. */
+"Accecpt" = "Accecpt";
+
+/* No comment provided by engineer. */
+"Search" = "Search";
+
+/* No comment provided by engineer. */
+"Search key can't be empty" = "Search key can't be empty";
+
+/* No comment provided by engineer. */
+"Search offical accounts" = "Search offical accounts";
+
+/* No comment provided by engineer. */
+"Search friends" = "Friends";
+
+/* No comment provided by engineer. */
+"Search groups" = "Groups";
+
+/* No comment provided by engineer. */
+"Play" = "Play";
+
+/* No comment provided by engineer. */
+"Hide" = "Hide";
+
+/* No comment provided by engineer. */
+"New moment" = "New moment";
+
+/* No comment provided by engineer. */
+"New comment" = "New comment";
+
+/* No comment provided by engineer. */
+"Software update" =  "Software update";
+
+/* No comment provided by engineer. */
+"Status can't be empty." = "Status can't be empty.";
+
+/* No comment provided by engineer. */
+"New friend" = "New friend";
+
+/* No comment provided by engineer. */
+"Do you accept the videochat invitaion" = "Do you accept the videochat invitaion";
+
+/* No comment provided by engineer. */
+"Nickname" = "Nickname";
+
+/* No comment provided by engineer. */
+"List him in contact" = "List him in contact";
+
+/* No comment provided by engineer. */
+"Not now" = "Not now";
+
+/* No comment provided by engineer. */
+"Friends" = "Social";
+
+/* No comment provided by engineer. */
+"Moments" = "Moments";
+
+/* No comment provided by engineer. */
+"Missed call" = "Missed call";
+
+/* No comment provided by engineer. */
+"not set" = "not set";
+
+/* No comment provided by engineer. */
+"Local contact" = "Local contact";
+
+/* No comment provided by engineer. */
+"is availble" = "is availble";
+
+/* No comment provided by engineer. */
+"Release to stop" = "Release to stop";
+
+/* No comment provided by engineer. */
+"See all members" = "View all";
+
+/* No comment provided by engineer. */
+"Check moments" = "See moments";
+
+/* No comment provided by engineer. */
+"Check group detail" = "Check group detail";
+
+/* No comment provided by engineer. */
+"is establishing the connection" = "is establishing the connection";
+
+/* No comment provided by engineer. */
+"is inviting the callee" = "is inviting the callee";
+
+/* No comment provided by engineer. */
+"This user have not activated WowTalk completely" = "This user have not activated completely";
+
+/* No comment provided by engineer. */
+"Failed to register" = "Failed to register";
+
+/* No comment provided by engineer. */
+"Registration successful" = "Registration successful";
+
+/* No comment provided by engineer. */
+"Event" = "Event";
+
+/* No comment provided by engineer. */
+"Message is too short, please record it again" = "Too short message";
+
+/* No comment provided by engineer. */
+"Receive messages" = "Receive messages";
+
+/* No comment provided by engineer. */
+"Add" = "Add";
+
+/* No comment provided by engineer. */
+"Add contacts" = "Add contacts";
+
+/* No comment provided by engineer. */
+"Add local contact" = "Save local contact to the list";
+
+/* No comment provided by engineer. */
+"Add this user as a friend" = "Add this user as a friend";
+
+/* No comment provided by engineer. */
+"Tips" = "Tips";
+
+/* No comment provided by engineer. */
+"Games" = "Games";
+
+/* No comment provided by engineer. */
+"View all comments" = "View all comments";
+
+/* No comment provided by engineer. */
+"Photo" = "Photo";
+
+/* No comment provided by engineer. */
+"Status" = "Status";
+
+/* No comment provided by engineer. */
+"Birthday" = "Birthday";
+
+/* No comment provided by engineer. */
+"Estate" = "Estate";
+
+/* No comment provided by engineer. */
+"Username can't be empty" = "Username can't be empty";
+
+/* No comment provided by engineer. */
+"You can't add this user as as friend due to his privacy setting" = "You can't add this user as as friend due to his privacy setting";
+
+
+"%@ Apply to join group %@" ="%@ Apply to join group %@";
+/* No comment provided by engineer. */
+"Male" = "Male";
+
+/* No comment provided by engineer. */
+"Logout" = "Logout";
+
+/* No comment provided by engineer. */
+"Album" = "Album";
+
+/* No comment provided by engineer. */
+"Nearby" = "Nearby";
+
+
+/* No comment provided by engineer. */
+"Are you sure to delete all system messages" = "Are you sure to delete all system messages";
+
+/* No comment provided by engineer. */
+"Upgrade now" = "Upgrade now";
+
+/* No comment provided by engineer. */
+"Adminstrator" = "Admin";
+
+/* No comment provided by engineer. */
+"Set up as adminstrator" = "Set up as adminstrator";
+
+/* No comment provided by engineer. */
+"cancel adminstrator" = "cancel adminstrator";
+
+/* No comment provided by engineer. */
+"System messages" = "System messages";
+
+/* No comment provided by engineer. */
+"Group name can't be empty"= "Group name can't be empty";
+
+/* No comment provided by engineer. */
+"Member authority" = "Member authority";
+
+/* No comment provided by engineer. */
+"bind phone" = "Bind this phone";
+
+/* No comment provided by engineer. */
+"bind this account" = "Bind this account";
+
+/* No comment provided by engineer. */
+"Bind email" = "Bind this email";
+
+/* No comment provided by engineer. */
+"Finish recording" = "Finish recording";
+
+/* No comment provided by engineer. */
+"Edit group" = "Edit group";
+
+/* No comment provided by engineer. */
+"Your network is slow, please try it later" = "Your network is slow, please try it later";
+
+/* No comment provided by engineer. */
+"Group Introduction" = "Intro";
+
+/* No comment provided by engineer. */
+"Group" = "Group";
+
+/* No comment provided by engineer. */
+"Group%@ is already dismissed" = "Group%@ is already dismissed";
+"TmpGroup%@ is already dismissed" = "サークル%@は既に解散されました";
+/* No comment provided by engineer. */
+"Group name" = "Group name";
+
+"Tmp Group name"="Tmp Group name";
+/* No comment provided by engineer. */
+"Group avatar" = "Group avatar";
+
+/* No comment provided by engineer. */
+"Member management" = "Member management";
+
+/* No comment provided by engineer. */
+"Group type" = "Group type";
+
+/* No comment provided by engineer. */
+"Group Chat" = "Group chat";
+
+/* No comment provided by engineer. */
+"Chatroom info" = "Chatroom info";
+
+/* No comment provided by engineer. */
+"Work" = "Work";
+
+/* No comment provided by engineer. */
+"Contact" = "Contact";
+
+/* No comment provided by engineer. */
+"self introduction" = "Introduction";
+
+/* No comment provided by engineer. */
+"Get a code" = "Get a code";
+
+/* No comment provided by engineer. */
+"Video" = "Video";
+
+/* No comment provided by engineer. */
+"likes it"= "likes it";
+
+/* No comment provided by engineer. */
+"Dismiss the group?" = "Dismiss the group?";
+
+/* No comment provided by engineer. */
+"Dismiss the group" = "Dismiss the group";
+
+/* No comment provided by engineer. */
+"Remove friend" = "Remove friend";
+
+
+/* No comment provided by engineer. */
+"Setting"= "Setting";
+
+/* No comment provided by engineer. */
+"Comment" = "Comment";
+
+/* No comment provided by engineer. */
+"Details" = "Detail";
+
+/* No comment provided by engineer. */
+"Please enter new password again" = "Please enter new password again";
+
+/* No comment provided by engineer. */
+"Request list" = "Request list";
+
+
+/* No comment provided by engineer. */
+"Enter account ID to search" = "Enter account ID";
+
+/* No comment provided by engineer. */
+"Enter official account ID to search" = "Enter official account ID";
+
+/* ID search for SC with no ID words*/
+"IDSearch" = "IDSearch";
+
+/* No comment provided by engineer. */
+"Please enter your email" = "Please enter your email";
+
+/* No comment provided by engineer. */
+"Please enter your phone number" = "Please enter your phone number";
+
+/* No comment provided by engineer. */
+"Please enter received code" = "Please enter received code";
+
+/* No comment provided by engineer. */
+"Please enter new password" = "Please enter new password";
+
+/* No comment provided by engineer. */
+"Please enter the password" = "Please enter the password";
+
+/* No comment provided by engineer. */
+"Please enter previous password" = "Please enter previous password";
+
+/* No comment provided by engineer. */
+"Please enter group name" = "Please enter group name";
+
+/* No comment provided by engineer. */
+"Please enter group ID or name" = "Please enter group ID or name";
+
+/* No comment provided by engineer. */
+"Please write group introduction" = "Please write group introduction";
+
+/* No comment provided by engineer. */
+"Please enter the email"= "Please enter the email";
+
+/* No comment provided by engineer. */
+"Please enter the code" = "Please enter the code";
+
+/* No comment provided by engineer. */
+"Account"= "Account";
+
+/* No comment provided by engineer. */
+"Like" = "Like";
+
+/* No comment provided by engineer. */
+"liked your moment" = "liked your moment";
+
+/* No comment provided by engineer. */
+"Distance" = "Distance";
+
+/* No comment provided by engineer. */
+
+"The status is too long" = "The status is too long";
+
+
+/* No comment provided by engineer. */
+"quit the chatroom" = "quit the chatroom";
+
+/* No comment provided by engineer. */
+"quit this group？" = "quit this group？";
+
+/* No comment provided by engineer. */
+"quit the group" = "quit the group";
+
+/* No comment provided by engineer. */
+"select" = "Select";
+
+/* No comment provided by engineer. */
+"select a group or chatroom" = "Select a group or chatroom";
+
+/* No comment provided by engineer. */
+"select all" = "select all";
+
+/* No comment provided by engineer. */
+"invite you to join" = "invite you to join";
+
+/* No comment provided by engineer. */
+"Email" = "Email";
+
+/* No comment provided by engineer. */
+"Invalid email" = "Invalid email";
+
+/* No comment provided by engineer. */
+"Clips" = "Clips";
+
+/* No comment provided by engineer. */
+"Additional information" = "Message";
+
+/* No comment provided by engineer. */
+"Nearby user" = "Nearby user";
+
+/* No comment provided by engineer. */
+"Nearby group" = "Nearby group";
+
+/* No comment provided by engineer. */
+"Privacy" = "Privacy";
+
+
+/* No comment provided by engineer. */
+"Authetication is needed" = "Authetication is needed";
+
+/* No comment provided by engineer. */
+"Verification code is sent" = "Verification code is sent";
+
+
+
+//added 0603
+"My profile" = "My profile";
+"Account" = "Account";
+"Tell friend" = "Tell friend";
+"Rate" = "Rate";
+"Feedback" ="Feedback";
+"Register" = "Register";
+"Quick Start" = "Quick Start";
+"Login" = "Login";
+"Username" = "Username";
+"Please input password" = "Please input password";
+"Please input password again" = "Please input password again";
+"Return" = "Return";
+"Create Account" = "Create account";
+
+"Please enter your email" = "Please enter your email";
+"No contact" = "No contact";
+
+
+//added 0604
+"Are you sure to logout?" = "Are you sure you want to logout?";
+"Please set your password first" = "Please set your password first";
+"unlink" = "unlink";
+
+"Failed to find the user" = "Failed to find the user";
+
+"Nickname is empty" = "Nickname is empty";
+
+"Group ID:" = "Group ID:";
+//added 0605
+"Modify WowTalkID Failed" = "Modify WowTalkID Failed";
+
+"This user haven't activated. You can send free messsages to him. He will receive your messages in the form of normal SMS. You can call him for free once he activates our service" = "This user haven't activated. You can send free messsages to him. He will receive your messages in the form of normal SMS. You can call him for free once he activates our service";
+
+"Message can't be empty" = "Message can't be empty";
+
+
+//added 0608
+"Forget pwd?"="Forget password?";
+"Please input ID" = "Please input ID";
+"Please input email or phone number" = "Please input email or phone number";
+"Find Password" = "Find Password";
+"Email or Number can't be empty" = "Email or Number can't be empty";
+"Find password failed" = "Find password failed";
+"Access code already sent" = "Access code already sent";
+"Return(%dsec)" = "Return(%dsec)";
+"Reset password failed" = "Reset password failed";
+"Reset password success" = "Reset password success";
+
+"Change Status" = "Update status";
+"Failed to change gender" = "Failed to change gender";
+"Failed to change birthday" = "Failed to change birthday";
+"Failed to change status" = "Failed to change status";
+"Failed to change nickname" = "Failed to change nickname";
+"Network is not available now" = "Network is not available now";
+"Failed to login" = "Failed to login";
+
+"Message"="Message";
+"Connecting..."  ="Connecting...";
+"Connection lost"="Connection lost";
+
+"Loading more" = "Loading more";
+
+//added 0613
+"Authetication failed" = "Authetication failed";
+"Your account has been login in other place" = "Your account has been login in other place. Login again to continue please";
+"Account authentication failed." = "Authetication failed. Login again to continue please";
+
+
+"Username needs to be 2 digits at least" =  "Username needs to be 2 digits at least";
+"Username needs to be 20 digits at most" = "Username needs to be 20 digits at most";
+
+"Search a group" = "Search a group";
+
+//added 0717
+"Add friend" = "Add friend";
+
+"Search official accounts" = "Search official accounts";
+"Account recommendation" = "Account recommendation";
+
+"Company ID" = "Company ID";
+
+"Start a chat" = "Start a chat";
+"Sign in" = "Sign in";
+
+// added 0718
+"minute" = "min";
+"second" = "sec";
+"hour" =    "hr";
+"day" =     "day";
+
+//added on 0720
+
+"Change chatroom's name" = "Change chatroom's name";
+"Failed to update chatroom's name" = "Failed to update chatroom's name";
+"Failed to bind"= "Failed to bind";
+"Failed to get the code"= "Failed to get the code";
+
+//added on 0722
+"Members(%d)"= "Members(%d)";
+"Basic" = "Basic";
+"Happy" = "Happy";
+"Sad" = "Sad";
+"Angry" = "Angry";
+"Animals" = "Animals";
+"Others" = "Others";
+
+// added for message composer
+"Voice" = "Voice";
+"Camera" = "Camera";
+"NormalCall" = "NormalCall";
+"Video Call" = "Video Call";
+
+// added 1121
+"Family Member" = "Family Member";
+"Scan QRCode" = "Scan QRCode";
+"QRCode Photo" = "Photo";
+"QRCode Flash" = "Flash";
+"QRCode My QRCode" = "My QRCode";
+
+"QRCode Card" = "QRCode Card";
+"Scan QRCode to add" = "Scan QRCode to add \nfriend";
+"Share QRCode" = "Share QRCode";
+"Save to gallery" = "Save to Gallery";
+"Public Account" = "Public Account";
+"Public Account Search" = "Search Public Account";
+"Event Detail" = "Event Detail";
+"Event Time" = "Time";
+"Event Area" = "Place";
+"Event Classic" = "Type";
+"Event Cost" = "Cost";
+"gatherings" = "Gatherings";
+"sports" = "Sports";
+"travel" = "Travel";
+"shows" = "Shows";
+"exhibitions" = "Exhibitions";
+"lectures" = "Lectures";
+"community_volunteers" = "CommunityVolunteers";
+"coupon_discount" = "DiscountCoupon";
+"others" = "Others";
+
+"header pull to refresh" = "Pull to refresh";
+"header release to refresh" = "Release to refresh";
+"header refreshing" = "Refreshing...";
+"header last refresh time" = "Last Refresh:";
+"header just now" = "Just Now";
+"header minute ago" = "minute ago";
+"header hour ago" = "hour ago";
+"done" = "Done";
+"empty item is not allowed" = "Please complete the apply info!";
+"footer pull up to load" = "Pull to load more";
+"footer loading" = "Loading...";
+"footer no more" = "Has No More";
+
+
+//added on 11.29
+"AnswerMoment" = "Answer";
+"Public" = "Public";
+"Public(Everyone can see)"="Everyone";
+"Limited" = "Limited";
+"Votes" = "Votes";
+"Vote" = "Vote";
+"You have already voted" = "You have already voted";
+"This survey is expired" = "This survey is expired";
+"Multiple selection. Deadline is " = "Multiple selection. Deadline is ";
+"Sinle selection. Deadline is " = "Sinle selection. Deadline is ";
+"Who can see this?" = "Who can see this?";
+"Limited to below" = "Limited to below";
+"Add departments" = "Add departments";
+"All" = "All";
+"Option is required" =  "Option is required";
+"Deadline" = "Deadline";
+"Multiselection" = "Multiselection";
+" Tap to finish recording" = " Tap to finish recording";
+"is Getting current location" = "is Getting current location";
+"Show current location" = "Show current location";
+"Add an option" = "Add an option";
+"Add photos" = "Add photos";
+"My timeline" = "My timeline";
+"My favorite" = "My favorite";
+"At least two options are required" = "At least two options are required";
+"Phone number is not valid." = "Phone number is not valid.";
+"Email address is not valid." = "Email address is not valid.";
+
+"VoteButton" = "Vote";
+
+
+//added on 2014.1.17
+"Press to record"="Press to record (Max 120secs)";
+"Write something"="Write something";
+
+
+// add on 2014.2.11
+// notification alert page
+"Notification Alert" = "Notifications";
+"Message Notification" = "Notifications";
+"Notification ON" = "ON";
+"Notification OFF" = "OFF";
+"Notification Setting Tip" = "Enable or disable OneMeter Notificaitions via [Setting]->[Notifications] on your iPhone.";
+"Notification Sound And Vibrate Mode" = "In-App Notification Mode";
+"Notification Sound" = "Sound";
+"Notification Vibrate" = "Vibration";
+"Notification Include" = "Include";
+"Notification New Message" = "New Message";
+"Notification Call" = "New Call";
+"Notification Other" = "Other Feature Alerts";
+"Notification Other Setting" = "Other Feature Alerts";
+"Notification All Moment" = "All Timeline";
+"Notification Friend Moment" = "Updates from my favarites";
+"Notification Status" = "News";
+"Notification Question" = "Q&A";
+"Notification Report" = "Sharing";
+"Notification Vote" = "Survey";
+
+"Moment Done" = "Done";
+
+// added on 2014.2.13
+"Check For Update" = "Check Update";
+
+"Chat" = "Chat";
+"Finish" = "Done";
+
+"Moment current status hint" = "What are you doing recently?";
+"Moment qa hint" = "What's your question?";
+"Moment sharing hint" = "What are you going to share?";
+"Moment survey hint" = "What kind of survey you want to do?";
+"All Member"="All Member";
+
+"Remove from Favorite"="Remove from Favorite";
+"Add to Favorite"="Add to Favorite";
+"View Share Range"="View Share Range";
+"Delete Timeline"="Delete Timeline";
+"Close" = "Close";
+
+//added on 2014.2.24
+"Chat History" = "Chat History";
+"The current status will be removed. Are you sure?" = "The current status will be removed. Are you sure?";
+"Remove cover" = "Remove cover";
+"Take a photo for cover" = "Take a photo for cover";
+"Select cover from album" = "Select cover from album";
+"timeline_all_empty_ind_txt"="Share life    Keep touching";
+"timeline_single_today"="Today";
+"timeline_single_detail_text"="Write a Sentence, take a photo,Begin record your life...";
+"Change Cover"="Change Cover";
+"Selected Photos"="Selected Photos";
+"close" = "Close";
+
+// activity
+"all activity" = "Activity";
+"joined activity" = "Joined Activity";
+"unjoined activity" = "Unjoined Activity";
+"no limit" = "No Limit";
+"activity time" = "Time";
+"activity place" = "Place";
+"activity number" = "Number";
+"activity apply" = "Signup";
+"activity cancel apply" = "Cancel";
+"detail time" = "Time";
+"detail place" = "Place";
+"detail classic" = "Type";
+"detail cost" = "Cost";
+"detail coin" = "Coin";
+"detail detail" = "Detail";
+"detail choose time" = "Choose Time";
+"activity type cycle" = "Circle";
+"activity type multi" = "Multidays";
+"activity joined" = "People who joined this time";
+"activity organizer" = "Organizer";
+"activity phonenumber" = "Contact";
+"activity photo" = "Photos";
+"activity apply info" = "Apply Info";
+"activity apply info incomplete" = "Apply info is incomplete!";
+"activity participate" = "Participate";
+"chosen date out of date" = "Chosen date if out of date!";
+"chosen date is full" = "Full enrollment of this date!";
+
+"Follow Public Account to get more information about their service"="Follow Public Account to get more information about their service";
+"Please Enter Your Name" = "Please Enter Your Name";
+"Please set avatar and nickname" = "Please set avatar and nickname!";
+"Failed to set avatar" = "Failed to set avatar!";
+"Enter WowCity" = "Enter HoneLife";
+"Set Remark" = "Set Remark";
+
+"Distance" = "Distance";
+"Recommended" = "Recommended";
+"Latest" = "Latest";
+
+"location.all" = "Country";
+"location.city" = "Province";
+"location.secret" = "Secret";
+"Choose Place" = "Choose Place";
+"nav done" = "Done";
+"not onemeter user qrcode" = "Not honelife user QR code";
+"ConfirmApplyJoinGroup"="Join";
+"unfollow_public_account_note"="Unfollow public account";
+"fix_group_chat_title"="Circle chat";
+"fix_tmp_group_chat_title"="Group chat";
+"GroupDetails" = "Detail";
+"Tmp Chatroom info" = "Tmp Group";
+"quit_multiplayer_session"="quit";
+"contacts_temp_group_delete_and_exit"="delete and quit";
+"Input is empty"="Input is empty";
+"No Chat Ind"="No Chats";
+"change_nickname"="Change My Name";
+"Apply to join the group"="optional message";
+"Make a call?"="Make a call with %@?";
+"Failed to login with atra auto"="login failed";
+
+
+//added on 2014.4.10
+"New moment can only contain no more than 600 words."="New moment can only contain no more than 600 words.";
+"Manage Accounts"="Manage Accounts";
+"Online"="Online";
+"Offline"="Offline";
+"Add Account"="Add Account";
+"Logout Current"="Logout Current";
+"Unread"=" Unread";
+"Account already added." = "Account already added.";
+"Adding account" = "Adding account";
+"Logging in" = "Logging in";
+"Switch Account"="Switch Account";
+"Switching account"="Switching account";
+"Switch to:%@"="Switch to:%@";
+"Remove account %@"="Remove account %@";
+"Logout current account"="Logout current account";
+"Logout failed"="Logout failed";
+"All the local cache of this account will be deleted. Are you sure?" = "All the local cache of this account will be deleted. Are you sure?";
+"Edit" = "Edit";
+"Done" = "Done";
+
+
+//added on 2014.5
+"Version"="Version";
+"Notice"="Notice";
+"Group has been disbanded."="Group has been disbanded.";
+"Buddy has been removed."="Buddy has been removed.";
+
+
+"Syncing Member List..." = "Syncing Member List...";
+"Syncing Group List..."="Syncing Group List...";
+
+"callee_no_answer"="Callee no answer";
+"callee_offline"="Callee offline";
+
+
+
+"deadlineError"="Please pick a day from today";
+"latestVersion"="This is the latest version";
+"survey_deadline_no_limit"="no limit";
+"operation_failed"="Operation Failed";
+"member_deleted"="Member has been deleted";
+
+"Copy"="Copy";
+"ip_imei_auth_failed"="Bind Auth Failed";
+"ip_auth_failed_text"="This ip address is not allowed for login. Please contact your adminstrator.";
+"imei_auth_failed_text"="This device is not allowed for login. Please contact your adminstrator.";
+
+
+
+// add for new design by yangjiankai 2014.9
+"login help"="Login help";
+"login help detail"="You need a WowTalk Account if you want to use it.Please contact the administrator if you forget the password";
+"I got it"="OK";
+"Add member"="Add member";
+"Delete member"="Delete member";
+"ChatHistory"="Chat history";
+"CallMenu"="Call";"countUnit"="";
+
+"call_pause"="Pause";
+"call_mute"="Mute";
+"call_speaker"="Speaker";
+"Password needs to be digits and characters combination only" = "Password needs to be digits and characters combination only";
+"device id title"="DeviceID";
+"save photo to album fail"="save photo to album fail";
+"save photo to album success"="save photo to album success";
+
+"Message size at most 800"="Maximum 800 characters";
+"comment max length 260"="Maximum 260 characters";
+"Moment content text max length 600"="(Maximum 260 characters)";
+
+"Load more"="Load more";
+
+"Create group failed!" = "Create group failed!";
+"Create group success!" = "Create group success!";
+"(However some information of the group is lost due to network problem.Please try again later.)" = "(However some information of the group is lost due to network problem.Please try again later.)";
+
+"Add members to group failed!" = "Create group failed because of server timeout.Please try again later.";
+
+"Hand-writing"="Hand-write";
+"New Hand-writing"="New Hand-writing";
+"Pic-voice" = "Pic-voice";
+
+
+"Write your story here"="Write your story here";
+"Pic-Voice Msg"="Pic-Voice Msg";
+"Add photo"="Add photo";
+"Preview"="Preview";
+"Photos" ="Photos";
+"Student"="Student";
+"Teacher"="Teacher";
+"Category"="Category";
+"Publisher"="Publisher";
+
+
+"Usertype" = "Usertype";
+"Failed to upload avatar"="Failed to upload avatar";
+"Add video"="Add video";
+"Take a video"="Take a video";
+
+
+"Invitation code can't be empty" = "Invitation code can't be empty";
+"Bind class success!"="Bind class success!";
+"Someone already bind this!"="Someone already bind this!";
+"Bind class failed!"="Bind class failed!";
+
+
+"deadline enabled?" = "Deadline setting";
+"A pic-voice message was sent" = "A pic-voice message was sent";
+"A pic-voice message was received" = "A pic-voice message was received";
+
+
+// add by yangbin
+
+"Parents haven't submitted comment oh" = "Parents haven't submitted comment oh";
+
+"You have been out of the group" = "You have been out of the group";
+
+// 课堂直播相关
+"Living..." = "Living...";
+
+"Save" = "Save";
+
+"Did not choose the classroom" = "Did not choose the classroom";
+
+
+"Did not choose the classroom, whether the preferred To choose the classroom" = "Did not choose the classroom, whether the preferred To choose the classroom";
+
+"Data error" = "Data error";
+
+"Modify the camera state failure" = "Modify the camera state failure";
+
+"No live" = "No live";
+
+"The opening date not later than the first class time" = "The opening date not later than the first class time";
+
+"The non WiFi network, may consume more traffic, whether to continue." = "The non WiFi network, may consume more traffic, whether to continue.";
+// add by liuhuan
+"Is Self" = "Is Self";
+
+"Discovery" = "Discovery";
+
+"take a picture" = "take a picture";
+
+"SendTo" = "SendTo";
+
+"photo album" = "photo album";
+
+"Apply" = "Apply";

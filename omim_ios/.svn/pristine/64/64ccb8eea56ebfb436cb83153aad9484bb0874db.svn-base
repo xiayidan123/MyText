@@ -1,0 +1,15 @@
+<?xml version='1.0' encoding='UTF-8' standalone='yes' ?>
+<bridgedata version='1'>
+	<labels version='1'>
+		<item key='album_photo_select@1.5x (1).png' label='待办事宜'/>
+		<item key='messages_icon_more@1.5x (1).png' label='待办事宜'/>
+		<item key='enter_messages_bg@1.5x (1).png' label='待办事宜'/>
+		<item key='enter_messages@1.5x (1).png' label='待办事宜'/>
+		<item key='contacts_icon_loupe@1.5x (1).png' label='待办事宜'/>
+		<item key='album_take_photo@1.5x (1).png' label='待办事宜'/>
+		<item key='messages_icon_voice@1.5x (1).png' label='待办事宜'/>
+		<item key='icon_add_white@1.5x (1).png' label='待办事宜'/>
+		<item key='messages_icon_stamp@1.5x (1).png' label='待办事宜'/>
+		<item key='contacts_bg_school@1.5x (1).png' label='待办事宜'/>
+	</labels>
+</bridgedata>

@@ -1,0 +1,60 @@
+//
+//  TCherHomeworkFrameModel.m
+//  dev01
+//
+//  Created by Huan on 15/8/4.
+//  Copyright (c) 2015年 wowtech. All rights reserved.
+//
+
+#import "TCherHomeworkFrameModel.h"
+#import "NewhomeWorkModel.h"
+#import "homeworkPhotosView.h"
+
+#define rightBtnWidth 45
+@implementation TCherHomeworkFrameModel
+
+
+- (void)setHomeworkModel:(NewhomeWorkModel *)homeworkModel{
+    if (_homeworkModel != homeworkModel) {
+        [_homeworkModel release];
+        _homeworkModel = [homeworkModel retain];
+        //整体宽度
+        CGFloat orignalWidth = [UIScreen mainScreen].bounds.size.width;
+        int count = _homeworkModel.homework_moment.multimedias.count;
+        NSUInteger length = _homeworkModel.homework_moment.text.length;
+        if (count) {//有配图
+            //照片View的宽度
+            CGSize photosViewSize = [homeworkPhotosView sizeWithCount:count isTeacher:YES];
+            CGFloat photosViewX = Margin;
+            CGFloat photosViewY = Margin;
+            self.photoViewFrame = (CGRect){{photosViewX,photosViewY},photosViewSize};
+            //右侧按钮
+            CGFloat rightBtnX = orignalWidth - rightBtnWidth;
+            CGFloat rightBtnY = photosViewY;
+            CGFloat rightBtnHeight = photosViewSize.height;
+            self.rightBtnFrame = (CGRect){{rightBtnX,rightBtnY},{rightBtnWidth,rightBtnHeight}};
+            if (length) {//有配图有标题
+                CGFloat contentX = photosViewX;
+                CGFloat contentY = CGRectGetMaxY(self.photoViewFrame) + Margin * 2;
+//                CGFloat maxW = orignalWidth - Margin;
+//                CGSize contentSize = [_homeworkModel.homework_moment.text sizeWithFont:ContentFont maxW:maxW];
+                CGFloat contentWidth = orignalWidth - Margin * 2;
+                CGFloat contentHeight = 50;
+                self.contentTextViewFrame  = (CGRect){{contentX,contentY},{contentWidth,contentHeight}};
+                self.checkViewSize = CGSizeMake(orignalWidth, CGRectGetMaxY(self.contentTextViewFrame));
+            }else{//有配图无标题
+                self.checkViewSize = CGSizeMake(orignalWidth, CGRectGetMaxY(self.photoViewFrame));
+            }
+            
+        }else{
+            CGFloat photosViewX = Margin;
+            CGFloat contentX = photosViewX;
+            CGFloat contentY = CGRectGetMaxY(self.photoViewFrame) + Margin * 2;
+            CGFloat contentWidth = orignalWidth - Margin * 2;
+            CGFloat contentHeight = 50;
+            self.contentTextViewFrame  = (CGRect){{contentX,contentY},{contentWidth,contentHeight}};
+        }
+    }
+}
+
+@end

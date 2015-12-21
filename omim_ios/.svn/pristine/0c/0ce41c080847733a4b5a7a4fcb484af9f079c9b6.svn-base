@@ -1,0 +1,162 @@
+//
+//  ActivityDetailImage.m
+//  dev01
+//
+//  Created by 杨彬 on 14-11-3.
+//  Copyright (c) 2014年 wowtech. All rights reserved.
+//
+
+#import "ActivityDetailImage.h"
+#import "WTFile.h"
+#import "WowTalkWebServerIF.h"
+#import "WTHeader.h"
+
+@implementation ActivityDetailImage
+{
+    CGFloat _w;
+    CGFloat _h;
+    NSString *_imagePath;
+    
+}
+
+
+- (instancetype)initWithFrame:(CGRect)frame andActivityModel:(ActivityModel *)activityModel
+{
+    self = [super initWithFrame:frame];
+    if (self) {
+        self.backgroundColor = [UIColor colorWithRed:204.0/255 green:204.0/255 blue:204.0/255 alpha:1];
+        _w = frame.size.width;
+        _h = frame.size.height;
+        
+        [self loadBgImageWithModel:activityModel];
+        
+        [self loadTitleViewWithModel:activityModel];
+        
+        [self loadMemberCountWithModel:activityModel];
+    }
+    return self;
+}
+
+
+- (void)loadBgImageWithModel:(ActivityModel *)activityModel{
+    UIImageView *imgv = [[UIImageView alloc]initWithFrame:CGRectMake(0, 0, _w, _h - 10)];
+    imgv.tag = 200;
+    imgv.backgroundColor = [UIColor blackColor];
+    
+    if (activityModel.mediaArray.count != 0){
+        for (int i=0; i<=activityModel.mediaArray.count; i++){
+            if (i == activityModel.mediaArray.count){
+                [WowTalkWebServerIF getEventMedia:activityModel.mediaArray[0] isThumb:NO showingOrder:5000 withCallback:@selector(didDownloadImage:) withObserver:nil];
+            }else{
+                NSString *filePath = [NSFileManager absolutePathForFileInDocumentFolder:[NSFileManager relativePathToDocumentFolderForFile:[NSString stringWithFormat:@"%@.%@",[activityModel.mediaArray[i] fileid],[activityModel.mediaArray[i] ext]] WithSubFolder:@"eventmedia"]];
+                BOOL isDirectory;
+                BOOL exist = [[NSFileManager defaultManager] fileExistsAtPath:filePath isDirectory:&isDirectory];
+                if (exist && !isDirectory){
+                    UIImage *bgImage = [[UIImage alloc]initWithContentsOfFile:filePath];
+                    
+                    UIImage *newImage = [self cutoutImage:bgImage scaleToSize:CGSizeMake(imgv.bounds.size.width, imgv.bounds.size.height)];
+                    imgv.image = newImage;
+                    [bgImage release];
+                    _imagePath = [filePath copy];
+                    
+                    break;
+                }
+            }
+        }
+    }
+    
+    [self addSubview:imgv];
+    [imgv release];
+}
+
+
+- (void)didDownloadImage:(NSNotification *)notif{
+    NSError* error = [[notif userInfo] valueForKey:WT_ERROR];
+    if (error.code == NO_ERROR) {
+        
+    }
+}
+
+
+
+- (void)loadTitleViewWithModel:(ActivityModel *)activityModel{
+    UIView *maskView = [[UIView alloc]initWithFrame:CGRectMake(0, 200, _w, 44)];
+    maskView.backgroundColor = [UIColor blackColor];
+    maskView.alpha = 0.5;
+    
+    UILabel *titleLabel = [[UILabel alloc]initWithFrame:CGRectMake(16, 0, maskView.bounds.size.width, maskView.bounds.size.height)];
+    titleLabel.text = activityModel.text_title;
+    titleLabel.textColor = [UIColor whiteColor];
+    titleLabel.font = [UIFont systemFontOfSize:17];
+    [maskView addSubview:titleLabel];
+    [titleLabel release];
+    
+    [self addSubview:maskView];
+    [maskView release];
+}
+
+- (void)loadMemberCountWithModel:(ActivityModel *)activityModel{
+    UILabel *memberCountLabel = [[UILabel alloc]initWithFrame:CGRectMake(0, 0, _w - 12, 72)];
+    memberCountLabel.tag = 300;
+    memberCountLabel.text = activityModel.member_count;
+    memberCountLabel.textColor = [UIColor whiteColor];
+    memberCountLabel.font = [UIFont systemFontOfSize:72];
+    memberCountLabel.textAlignment = NSTextAlignmentRight;
+    [self addSubview:memberCountLabel];
+    [memberCountLabel release];
+    
+    UILabel *asideLabel = [[UILabel alloc]initWithFrame:CGRectMake(0, memberCountLabel.bounds.size.height, _w - 12, 12)];
+    asideLabel.text = NSLocalizedString(@"人报名",nil);
+    asideLabel.textColor = [UIColor whiteColor];
+    asideLabel.font = [UIFont systemFontOfSize:12];
+    asideLabel.textAlignment = NSTextAlignmentRight;
+    [self addSubview:asideLabel];
+    [asideLabel release];
+}
+
+
+#pragma mark - cutoutImage
+
+- (UIImage *)cutoutImage:(UIImage *)originalImage scaleToSize:(CGSize)size{
+    if (!originalImage || originalImage.size.height== 0 ||originalImage.size.width == 0 || size.width==0 || size.height == 0){
+        return nil;
+    }
+    CGFloat widthscale =  originalImage.size.width / size.width ;
+    CGFloat heightscale = originalImage.size.height / size.height;
+    CGFloat scale = 1;
+    
+    if (widthscale < heightscale){
+        scale = widthscale;
+    }else{
+        scale = heightscale;
+    }
+    
+    CGSize newSize2 = CGSizeMake(size.width * scale, size.height * scale);
+    UIGraphicsBeginImageContext(CGSizeMake(newSize2.width, newSize2.height));
+    
+    // 绘制改变大小的图片
+    [originalImage drawInRect:CGRectMake(-originalImage.size.width/2 + newSize2.width/2, -originalImage.size.height/2 + newSize2.height/2, originalImage.size.width, originalImage.size.height)];
+    
+    // 从当前context中创建一个改变大小后的图片
+    UIImage* scaledImage = UIGraphicsGetImageFromCurrentImageContext();
+    
+    // 使当前的context出堆栈
+    UIGraphicsEndImageContext();
+    
+    return scaledImage;
+}
+
+
+
+#pragma mark - modifImageSize
+
+- (void)modifImageContentOff:(CGFloat )distance{
+    UIImageView *imageView = (UIImageView *)[self viewWithTag:200];
+    CGFloat newHeight = _h + distance - 10;
+    CGFloat newWidth = _w / (_h-10) * newHeight;
+    imageView.frame = CGRectMake(_w/2 - newWidth/2, _h - newHeight-10, newWidth, newHeight);
+
+}
+
+
+@end

@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="8191" systemVersion="14E46" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES">
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="8154"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner" customClass="GiftViewController">
+            <connections>
+                <outlet property="view" destination="i5M-Pr-FkT" id="sfx-zR-JGt"/>
+            </connections>
+        </placeholder>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <view clearsContextBeforeDrawing="NO" contentMode="scaleToFill" id="i5M-Pr-FkT">
+            <rect key="frame" x="0.0" y="0.0" width="320" height="568"/>
+            <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+            <subviews>
+                <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" image="gift_bg.png" translatesAutoresizingMaskIntoConstraints="NO" id="V19-5O-o5j">
+                    <rect key="frame" x="0.0" y="0.0" width="320" height="568"/>
+                </imageView>
+                <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" image="gift_bg_points.png" translatesAutoresizingMaskIntoConstraints="NO" id="rLv-D7-i8t">
+                    <rect key="frame" x="14" y="74" width="292" height="115"/>
+                </imageView>
+                <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" image="gift_title.png" translatesAutoresizingMaskIntoConstraints="NO" id="K5Q-n4-O4K">
+                    <rect key="frame" x="89" y="83" width="143" height="97"/>
+                </imageView>
+                <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" image="gift_bg_ribbon.png" translatesAutoresizingMaskIntoConstraints="NO" id="kUB-gb-HfE">
+                    <rect key="frame" x="32" y="197" width="257" height="58"/>
+                </imageView>
+                <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" image="gift_title_2.png" translatesAutoresizingMaskIntoConstraints="NO" id="1jc-nw-P6e">
+                    <rect key="frame" x="98" y="207" width="125" height="17"/>
+                </imageView>
+                <view contentMode="scaleToFill" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="1Jl-pA-9hu">
+                    <rect key="frame" x="36" y="263" width="249" height="249"/>
+                    <subviews>
+                        <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" image="gift_lottery_1.png" translatesAutoresizingMaskIntoConstraints="NO" id="bZ3-xv-r3J">
+                            <rect key="frame" x="0.0" y="0.0" width="83" height="83"/>
+                        </imageView>
+                        <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" image="gift_lottery_2.png" translatesAutoresizingMaskIntoConstraints="NO" id="lJR-q0-KqO">
+                            <rect key="frame" x="83" y="0.0" width="83" height="83"/>
+                        </imageView>
+                        <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" image="gift_lottery_1.png" translatesAutoresizingMaskIntoConstraints="NO" id="Npe-bC-sHY">
+                            <rect key="frame" x="166" y="0.0" width="83" height="83"/>
+                        </imageView>
+                        <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" image="gift_lottery_2.png" translatesAutoresizingMaskIntoConstraints="NO" id="9US-DC-HDU">
+                            <rect key="frame" x="0.0" y="83" width="83" height="83"/>
+                        </imageView>
+                        <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" image="gift_lottery_3.png" translatesAutoresizingMaskIntoConstraints="NO" id="6iv-Bm-Wkj">
+                            <rect key="frame" x="83" y="83" width="84" height="83"/>
+                        </imageView>
+                        <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" image="gift_lottery_2.png" translatesAutoresizingMaskIntoConstraints="NO" id="DIx-so-TQH">
+                            <rect key="frame" x="166" y="83" width="83" height="83"/>
+                        </imageView>
+                        <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" image="gift_lottery_1.png" translatesAutoresizingMaskIntoConstraints="NO" id="P4u-6w-tqZ">
+                            <rect key="frame" x="0.0" y="166" width="83" height="83"/>
+                        </imageView>
+                        <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" image="gift_lottery_2.png" translatesAutoresizingMaskIntoConstraints="NO" id="gbf-eO-Vyq">
+                            <rect key="frame" x="83" y="166" width="83" height="83"/>
+                        </imageView>
+                        <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" image="gift_lottery_1.png" translatesAutoresizingMaskIntoConstraints="NO" id="hxa-Ot-fyr">
+                            <rect key="frame" x="166" y="166" width="83" height="83"/>
+                        </imageView>
+                        <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" image="gift_lottery_start.png" translatesAutoresizingMaskIntoConstraints="NO" id="IHU-CG-0Yn">
+                            <rect key="frame" x="103" y="97" width="44" height="44"/>
+                        </imageView>
+                        <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" image="gift_thanks.png" translatesAutoresizingMaskIntoConstraints="NO" id="eXv-RB-qvF">
+                            <rect key="frame" x="8" y="184" width="66" height="48"/>
+                        </imageView>
+                        <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" image="gift_red_papaer.png" translatesAutoresizingMaskIntoConstraints="NO" id="2Ix-rg-uWY">
+                            <rect key="frame" x="191" y="97" width="32" height="33"/>
+                        </imageView>
+                        <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="10积分" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Izl-qP-rs1">
+                            <rect key="frame" x="180" y="137" width="55" height="21"/>
+                            <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                            <color key="textColor" red="1" green="0.019607843137254902" blue="0.34901960784313724" alpha="1" colorSpace="calibratedRGB"/>
+                            <nil key="highlightedColor"/>
+                        </label>
+                        <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="10" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="2F4-TM-1wX">
+                            <rect key="frame" x="186" y="109" width="42" height="21"/>
+                            <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                            <color key="textColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="calibratedRGB"/>
+                            <nil key="highlightedColor"/>
+                        </label>
+                        <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" image="gift_red_papaer.png" translatesAutoresizingMaskIntoConstraints="NO" id="x6F-A6-YFk">
+                            <rect key="frame" x="23" y="17" width="32" height="33"/>
+                        </imageView>
+                        <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="100" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="0Lg-hm-5Lw">
+                            <rect key="frame" x="16" y="29" width="42" height="21"/>
+                            <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                            <color key="textColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="calibratedRGB"/>
+                            <nil key="highlightedColor"/>
+                        </label>
+                        <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="100积分" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Pov-Ty-Q7h">
+                            <rect key="frame" x="6" y="54" width="69" height="21"/>
+                            <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                            <color key="textColor" red="1" green="0.019607843140000001" blue="0.34901960780000002" alpha="1" colorSpace="calibratedRGB"/>
+                            <nil key="highlightedColor"/>
+                        </label>
+                    </subviews>
+                    <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
+                </view>
+            </subviews>
+            <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
+            <simulatedNavigationBarMetrics key="simulatedTopBarMetrics" barStyle="black" prompted="NO"/>
+            <nil key="simulatedBottomBarMetrics"/>
+            <freeformSimulatedSizeMetrics key="simulatedDestinationMetrics"/>
+        </view>
+    </objects>
+    <resources>
+        <image name="gift_bg.png" width="320" height="568"/>
+        <image name="gift_bg_points.png" width="292" height="115"/>
+        <image name="gift_bg_ribbon.png" width="257" height="58"/>
+        <image name="gift_lottery_1.png" width="83" height="83"/>
+        <image name="gift_lottery_2.png" width="83" height="83"/>
+        <image name="gift_lottery_3.png" width="84" height="83"/>
+        <image name="gift_lottery_start.png" width="44" height="44"/>
+        <image name="gift_red_papaer.png" width="32" height="33"/>
+        <image name="gift_thanks.png" width="66" height="48"/>
+        <image name="gift_title.png" width="143" height="97"/>
+        <image name="gift_title_2.png" width="125" height="17"/>
+    </resources>
+</document>

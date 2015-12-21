@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="9059" systemVersion="15A2301" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES">
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="9049"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner" customClass="PreviewPhotos">
+            <connections>
+                <outlet property="TopConstraint" destination="aWi-mq-wRO" id="5La-9M-t3V"/>
+                <outlet property="collectionView" destination="nBh-H0-qhG" id="mBz-ja-Ube"/>
+                <outlet property="isSelectedBtn" destination="3yt-QT-s6c" id="Xgf-JM-YR9"/>
+                <outlet property="view" destination="i5M-Pr-FkT" id="sfx-zR-JGt"/>
+            </connections>
+        </placeholder>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <view clearsContextBeforeDrawing="NO" contentMode="scaleToFill" id="i5M-Pr-FkT">
+            <rect key="frame" x="0.0" y="0.0" width="320" height="568"/>
+            <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+            <subviews>
+                <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" fixedFrame="YES" bounces="NO" pagingEnabled="YES" showsHorizontalScrollIndicator="NO" showsVerticalScrollIndicator="NO" dataMode="none" translatesAutoresizingMaskIntoConstraints="NO" id="nBh-H0-qhG">
+                    <rect key="frame" x="0.0" y="0.0" width="320" height="568"/>
+                    <animations/>
+                    <collectionViewFlowLayout key="collectionViewLayout" minimumLineSpacing="10" minimumInteritemSpacing="10" id="1Ms-LP-aLU">
+                        <size key="itemSize" width="50" height="50"/>
+                        <size key="headerReferenceSize" width="0.0" height="0.0"/>
+                        <size key="footerReferenceSize" width="0.0" height="0.0"/>
+                        <inset key="sectionInset" minX="0.0" minY="0.0" maxX="0.0" maxY="0.0"/>
+                    </collectionViewFlowLayout>
+                    <connections>
+                        <outlet property="dataSource" destination="-1" id="pDT-48-sZd"/>
+                        <outlet property="delegate" destination="-1" id="5gq-rj-Nqy"/>
+                    </connections>
+                </collectionView>
+                <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="84j-Qu-gen">
+                    <rect key="frame" x="0.0" y="0.0" width="320" height="64"/>
+                    <subviews>
+                        <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="FBz-7W-Ok3">
+                            <rect key="frame" x="8" y="17" width="46" height="30"/>
+                            <animations/>
+                            <constraints>
+                                <constraint firstAttribute="height" constant="30" id="Jim-K1-Z8b"/>
+                                <constraint firstAttribute="width" constant="46" id="N5E-5K-Lqk"/>
+                            </constraints>
+                            <fontDescription key="fontDescription" type="system" pointSize="12"/>
+                            <state key="normal" title="返回">
+                                <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                            </state>
+                            <connections>
+                                <action selector="backAction:" destination="-1" eventType="touchUpInside" id="UcN-8f-NWI"/>
+                            </connections>
+                        </button>
+                        <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="3yt-QT-s6c">
+                            <rect key="frame" x="269" y="17" width="46" height="30"/>
+                            <animations/>
+                            <fontDescription key="fontDescription" type="system" pointSize="12"/>
+                            <state key="normal" title="选中">
+                                <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                            </state>
+                            <connections>
+                                <action selector="selecteAction:" destination="-1" eventType="touchUpInside" id="RaV-na-WEU"/>
+                            </connections>
+                        </button>
+                    </subviews>
+                    <animations/>
+                    <color key="backgroundColor" white="0.0" alpha="1" colorSpace="calibratedWhite"/>
+                    <constraints>
+                        <constraint firstItem="FBz-7W-Ok3" firstAttribute="height" secondItem="3yt-QT-s6c" secondAttribute="height" id="8yH-M9-7MF"/>
+                        <constraint firstItem="FBz-7W-Ok3" firstAttribute="width" secondItem="3yt-QT-s6c" secondAttribute="width" id="97Q-yl-Nhr"/>
+                        <constraint firstAttribute="trailing" secondItem="3yt-QT-s6c" secondAttribute="trailing" constant="5" id="DJD-ib-wbj"/>
+                        <constraint firstAttribute="height" constant="64" id="HVr-XU-bJ5"/>
+                        <constraint firstAttribute="centerY" secondItem="FBz-7W-Ok3" secondAttribute="centerY" id="PQe-zU-rh0"/>
+                        <constraint firstAttribute="centerY" secondItem="3yt-QT-s6c" secondAttribute="centerY" id="ngh-YV-PFD"/>
+                        <constraint firstItem="FBz-7W-Ok3" firstAttribute="leading" secondItem="84j-Qu-gen" secondAttribute="leading" constant="8" id="odZ-mz-dXD"/>
+                    </constraints>
+                </view>
+            </subviews>
+            <animations/>
+            <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
+            <constraints>
+                <constraint firstAttribute="trailing" secondItem="84j-Qu-gen" secondAttribute="trailing" id="aNx-SB-nzb"/>
+                <constraint firstItem="84j-Qu-gen" firstAttribute="top" secondItem="i5M-Pr-FkT" secondAttribute="top" id="aWi-mq-wRO"/>
+                <constraint firstItem="84j-Qu-gen" firstAttribute="leading" secondItem="i5M-Pr-FkT" secondAttribute="leading" id="kvZ-mG-t5T"/>
+            </constraints>
+            <simulatedScreenMetrics key="simulatedDestinationMetrics" type="retina4"/>
+        </view>
+    </objects>
+</document>

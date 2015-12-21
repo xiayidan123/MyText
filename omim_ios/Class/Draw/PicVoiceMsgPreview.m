@@ -1,0 +1,329 @@
+//
+//  PicVoiceMsgPreview
+//  omim
+//
+//  Created by coca on 2013/02/21.
+//  Copyright (c) 2014年 OneMeter Inc. All rights reserved.
+//
+
+#import "PicVoiceMsgPreview.h"
+#import "PublicFunctions.h"
+#import "Constants.h"
+#import "Colors.h"
+#import "WTHeader.h"
+#import <AssetsLibrary/AssetsLibrary.h>
+#import "PicVoiceMsgProgressView.h"
+#import "PDColoredProgressView.h"
+#import "Base64.h"
+
+
+@interface PicVoiceMsgPreview (){
+    int seconds;
+    int totalseconds;
+    BOOL isPlaying;
+}
+@property (retain, nonatomic) IBOutlet UIImageView *iv_background;
+@property (retain, nonatomic) IBOutlet UIImageView *iv_recordPlay;
+@property (retain, nonatomic) IBOutlet UILabel *lbl_recordDuration;
+@property (retain, nonatomic) IBOutlet UIView *uv_record;
+@property (nonatomic,retain) AVAudioPlayer* recordPlayer;
+@property (nonatomic,retain) NSTimer* timer;
+@property (nonatomic,retain) PicVoiceMsgProgressView* progressView;
+
+@end
+
+
+@implementation PicVoiceMsgPreview
+@synthesize iv_background;
+@synthesize photoMsgURL;
+@synthesize textMsg;
+@synthesize recordMsg;
+@synthesize uv_record;
+@synthesize lbl_recordDuration;
+@synthesize iv_recordPlay;
+@synthesize dirName;
+@synthesize imagePath;
+@synthesize thumbnailPath;
+@synthesize delegate;
+
+-(void)configNav{
+    
+    UILabel* label = [[[UILabel alloc] init] autorelease];
+    label.text = NSLocalizedString(@"Pic-Voice Msg",nil);
+    label.font = [UIFont fontWithName:@"Helvetica-Bold" size:20];
+    label.textAlignment = NSTextAlignmentCenter;
+    label.textColor = [UIColor whiteColor];
+    label.backgroundColor = [UIColor clearColor];
+    [label sizeToFit];
+    self.navigationItem.titleView = label;
+    
+    UIBarButtonItem *barButton = [PublicFunctions getCustomNavButtonOnLeftSide:YES target:self image:[UIImage imageNamed:@"icon_back_white"] selector:@selector(goBack)];
+    [self.navigationItem addLeftBarButtonItem:barButton];
+    [barButton release];
+
+    
+    UIBarButtonItem *rightBarButton = [PublicFunctions getCustomNavButtonWithText:NSLocalizedString(@"Send", nil) withTextColor:[UIColor whiteColor] target:self selection:@selector(generateNewMsgSend)];
+    self.navigationItem.rightBarButtonItem = rightBarButton;
+    [rightBarButton release];
+
+
+}
+
+- (void)viewDidLoad
+{
+    [super viewDidLoad];
+
+    [self configNav];
+  
+    
+    
+    
+    if (IS_IOS7) {
+        [self.view setAutoresizesSubviews:FALSE];
+        [self.view setAutoresizingMask:UIViewAutoresizingNone];
+        self.edgesForExtendedLayout = UIRectEdgeNone;
+        self.automaticallyAdjustsScrollViewInsets = NO;
+    }
+    
+    if(self.photoMsgURL) {
+        [[PublicFunctions defaultAssetsLibrary] assetForURL:self.photoMsgURL
+                                                resultBlock:^(ALAsset *asset){
+                                                    ALAssetRepresentation *defaultRep = [asset defaultRepresentation];
+                                                    dispatch_async(dispatch_get_main_queue(), ^{
+                                                        
+                                                        [iv_background setImage:[UIImage imageWithCGImage:[defaultRep fullResolutionImage]
+                                                                                                    scale:[defaultRep scale]
+                                                                                              orientation:[defaultRep orientation]]];
+                                                    });
+                                                }
+                                               failureBlock:^(NSError *error){}];
+    }
+    
+    
+    if (self.textMsg){
+        UITextView *textView = [[UITextView alloc]initWithFrame:CGRectMake(0, iv_background.frame.origin.y+ iv_background.frame.size.height + 10 , self.view.bounds.size.width, 100)];
+        textView.text = self.textMsg;
+        textView.backgroundColor = [UIColor clearColor];
+        textView.editable = NO;
+        textView.font = [UIFont systemFontOfSize:20];
+        textView.textColor = [UIColor colorWithRed:0.59 green:0.59 blue:0.59 alpha:1];
+        [self.view addSubview:textView];
+        [textView release];
+    }
+    
+
+    if (self.recordMsg) {
+        uv_record.hidden = NO;
+        totalseconds = self.recordMsg.duration;
+        
+        self.progressView = [[[PicVoiceMsgProgressView alloc] initWithProgressViewStyle:UIProgressViewStyleDefault] autorelease];
+        self.progressView.frame = CGRectMake(-10, 0, uv_record.frame.size.width+10,  uv_record.frame.size.height);
+
+        [self.uv_record addSubview: self.progressView];
+        [self.uv_record bringSubviewToFront:iv_recordPlay];
+        [self.uv_record bringSubviewToFront:lbl_recordDuration];
+
+        [self.view bringSubviewToFront:uv_record];
+
+    }
+    else{
+        uv_record.hidden = YES;
+    }
+
+    
+    
+   
+    NSLog(@"textMsg=%@",self.textMsg);
+    
+}
+
+- (void)viewDidAppear:(BOOL)animated{
+    [super viewDidAppear:animated];
+   
+    if (self.recordMsg) {
+
+        [self startPlaying];
+    }
+}
+
+- (void)viewWillDisappear:(BOOL)animated{
+    [self.recordPlayer stop];
+}
+
+
+- (void)goBack
+{
+    [self.navigationController popViewControllerAnimated:YES];
+}
+
+
+- (void)dealloc {
+    [iv_background release];
+    [super dealloc];
+}
+- (void)viewDidUnload {
+    [self setIv_background:nil];
+    [super viewDidUnload];
+}
+
+
+#pragma mark - Methods
+
+- (void)generateNewMsgSend{
+    self.navigationItem.rightBarButtonItem.enabled = NO;
+    
+    UIImage *image = [self.iv_background image];
+    
+    if (image==nil) {
+        return;
+    }
+    
+    // write local data
+    
+    self.imagePath = [NSFileManager randomRelativeFilePathInDir:self.dirName ForFileExtension:JPG];
+    self.thumbnailPath = [NSFileManager randomRelativeFilePathInDir:self.dirName ForFileExtension:JPG];
+
+    
+    
+    CGSize targetSize = [image calculateTheScaledSize:CGSizeMake(image.size.width, image.size.height) withMaxSize: CGSizeMake(PhotoMaxWidth, PhotoMaxHeight)];
+
+    UIImage* scaledImage = [image resizeToSize:targetSize];
+    
+    
+    CGSize maxThumbnailSize = CGSizeMake(MULTIMEDIACELL_THUMBNAIL_MAX_X, MULTIMEDIACELL_THUMBNAIL_MAX_Y);
+
+    CGSize targetSizeThumbnail = [scaledImage calculateTheScaledSize:CGSizeMake(scaledImage.size.width, scaledImage.size.height) withMaxSize: maxThumbnailSize];
+
+    UIImage* thumbnailImage = [image resizeToSize:targetSizeThumbnail];
+    
+    
+    NSData * data = [NSData dataWithData:UIImageJPEGRepresentation(scaledImage, 1.0f)];//1.0f = 100% quality
+    
+    [data writeToFile:[NSFileManager absolutePathForFileInDocumentFolder:self.imagePath] atomically:YES];
+    
+    NSData * data2 = [NSData dataWithData:UIImageJPEGRepresentation(thumbnailImage, 1.0f)];  //1.0f = 100% quality
+    
+    [data2 writeToFile: [NSFileManager absolutePathForFileInDocumentFolder:self.thumbnailPath] atomically:YES];
+
+    
+    
+    
+//    NSData *nsdata = [self.textMsg dataUsingEncoding:NSUTF8StringEncoding];
+//    
+//    NSString *base64Encoded = [nsdata base64EncodedStringWithOptions:0];
+//    
+//    NSData *nsdataFromBase64String = [[[NSData alloc]initWithBase64EncodedString:base64Encoded options:0] autorelease];
+//    
+//    self.textMsg = [[[NSString alloc]initWithData:nsdataFromBase64String encoding:NSUTF8StringEncoding] autorelease];
+   
+
+    [WowTalkWebServerIF uploadMsgFile:self.recordMsg withCallback:@selector(didUploadRecordFile:) withObserver:self];
+    
+
+}
+
+
+-(void)didUploadRecordFile:(NSNotification*) notif
+{
+    NSError* error = [[notif userInfo] valueForKey:WT_ERROR];
+    if (error.code == NO_ERROR) {
+        [self.delegate getDataFromPVMP:self];
+        UIViewController *VC = self.navigationController.viewControllers[[self.navigationController.viewControllers count] - 3];
+        [self.navigationController popToViewController:VC animated:YES];
+    }
+    
+    self.navigationItem.rightBarButtonItem.enabled = YES;
+}
+
+
+
+
+-(void)startPlaying{
+    isPlaying = YES;
+    NSURL* url = [NSURL fileURLWithPath:[NSFileManager absolutePathForFileInDocumentFolder:[NSFileManager relativePathToDocumentFolderForFile:@"temprecorder" WithSubFolder:SDK_MOMENT_MEDIA_DIR withExtention:AAC]]];
+    
+    NSError* err;
+    self.recordPlayer = [[[AVAudioPlayer alloc] initWithContentsOfURL:url error:&err] autorelease];
+    
+    if (self.recordPlayer == nil) {
+        [WTHelper WTLogError:err];
+        //     NSLog(@"%@",err.localizedDescription);
+    }
+    
+    [self.recordPlayer setNumberOfLoops:0];
+    self.recordPlayer.delegate = self;
+    [self.recordPlayer prepareToPlay];
+    [self.recordPlayer play];
+  
+    
+    seconds= 0;
+    self.timer = [NSTimer scheduledTimerWithTimeInterval:0.1 target:self selector:@selector(changePlayTime:) userInfo:nil repeats:YES];
+    [self.timer fire];
+    
+}
+
+
+-(void)changePlayTime:(NSTimer*)timer
+{
+    seconds=self.recordPlayer.currentTime;
+    if (seconds > totalseconds) {
+        seconds=totalseconds;
+    }
+    [self setPlayTime:seconds];
+    
+    float prograss = (float) seconds/totalseconds;
+    self.progressView.progress = prograss;
+    [self.progressView setNeedsLayout];
+    
+    if(seconds/totalseconds >0.3){
+        [iv_recordPlay setImage:[UIImage imageNamed:@"play_right"]];
+        [lbl_recordDuration setTextColor:[UIColor whiteColor]];
+    }
+
+}
+
+
+
+
+-(void)setPlayTime:(int)secs{
+    
+    int min = secs /60 ;
+    int leftseconds = secs %60;
+    
+    NSString* minstr = nil;
+    if (min<10) {
+        minstr = [NSString stringWithFormat:@"%d%d",0,min];
+    }
+    else{
+        minstr = [NSString stringWithFormat:@"%d",min];
+    }
+    
+    NSString* secstr = nil;
+    if (leftseconds<10) {
+        secstr = [NSString stringWithFormat:@"%d%d",0,leftseconds];
+    }
+    else
+        secstr = [NSString stringWithFormat:@"%d",leftseconds];
+    
+    lbl_recordDuration.text = [NSString stringWithFormat:@"%@:%@",minstr,secstr];
+}
+
+-(void)audioPlayerDidFinishPlaying:(AVAudioPlayer *)player successfully:(BOOL)flag
+{
+    
+    isPlaying = FALSE;
+    [self.recordPlayer stop];
+    
+    [self setPlayTime:totalseconds];
+    
+    if (self.timer) {
+        [self.timer invalidate];
+        self.timer = nil;
+    }
+
+    //TODO: change back the play_button init image
+    
+}
+
+
+@end

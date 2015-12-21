@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="8191" systemVersion="14E46" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES">
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="8154"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner"/>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" reuseIdentifier="recently" id="gTV-IL-0wX" customClass="SendToRecently">
+            <rect key="frame" x="0.0" y="0.0" width="388" height="586"/>
+            <autoresizingMask key="autoresizingMask"/>
+            <view key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center">
+                <rect key="frame" x="0.0" y="0.0" width="388" height="586"/>
+                <subviews>
+                    <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" style="plain" separatorStyle="default" rowHeight="44" sectionHeaderHeight="22" sectionFooterHeight="22" translatesAutoresizingMaskIntoConstraints="NO" id="zeh-6a-sHS">
+                        <rect key="frame" x="0.0" y="0.0" width="388" height="586"/>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                        <connections>
+                            <outlet property="dataSource" destination="gTV-IL-0wX" id="rPE-V8-MlT"/>
+                            <outlet property="delegate" destination="gTV-IL-0wX" id="y7h-ze-qeE"/>
+                        </connections>
+                    </tableView>
+                </subviews>
+                <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
+            </view>
+            <constraints>
+                <constraint firstItem="zeh-6a-sHS" firstAttribute="leading" secondItem="gTV-IL-0wX" secondAttribute="leading" id="6Bz-wQ-F1H"/>
+                <constraint firstAttribute="trailing" secondItem="zeh-6a-sHS" secondAttribute="trailing" id="Czb-Os-KUx"/>
+                <constraint firstAttribute="bottom" secondItem="zeh-6a-sHS" secondAttribute="bottom" id="SeR-nC-OOa"/>
+                <constraint firstItem="zeh-6a-sHS" firstAttribute="top" secondItem="gTV-IL-0wX" secondAttribute="top" id="WGO-FX-8jv"/>
+            </constraints>
+            <size key="customSize" width="388" height="586"/>
+            <connections>
+                <outlet property="tableView" destination="zeh-6a-sHS" id="Ote-Gm-LnA"/>
+            </connections>
+            <point key="canvasLocation" x="289" y="334"/>
+        </collectionViewCell>
+    </objects>
+</document>

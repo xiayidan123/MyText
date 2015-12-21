@@ -1,0 +1,1444 @@
+/*
+ Localizable.strings
+ yuanqutong
+ 
+ Created by Harry on 14-1-18.
+ Copyright (c) 2014年 OneMeter Inc. All rights reserved.
+ */
+
+"messages" =  "消息";
+"contacts" = "小伙伴";
+"friends" = "好友圈";
+"activities" = "活动";
+"settings" = "设置";
+"send" = "发送";
+"error" = "错误";
+"canNotRecord" = "无法进行录音";
+
+
+"error1" = "参数错误";
+"error2" = "身份验证失败";
+"error3" = "数据库错误";
+"error4" = "正在维护，请稍后";
+"error5" = "您使用的版本太低";
+"error99" = "未知错误";
+"error-99" = "用户不存在";
+"error6" = "用户已经存在";
+"error7" = "您并非组的创建者";
+"error8" = "您尚未设置过密码，请先设置";
+"error9" = "您尚未修改过您的id";
+"error10" = "组不存在";
+"error11" = "活动不存在";
+"error12" = "用户类型不匹配";
+"error13" = "动态不存在";
+"error14" = "评论不存在";
+"error15" = "";
+"error16" = "还有不存在";
+"error17" = "用户已验证";
+"error18" = "不是有效的邮箱";
+"error19" = "不是有效的手机号码";
+
+/* WeekDays */
+"Weekday1" = "星期日";
+"Weekday2" = "星期一";
+"Weekday3" = "星期二";
+"Weekday4" = "星期三";
+"Weekday5" = "星期四";
+"Weekday6" = "星期五";
+"Weekday7" = "星期六";
+
+/* APNS */
+"view_apns_txt" = "查看";
+"apns_txt" = "%@:%@";
+"apns_answer_call"= "接听";
+"apns_call"= "%@ 来电中";
+"apns_missed_call" = "未接来电:%@";
+"apns_location" = "%@给你发来位置消息";
+"apns_stamp" = "%@给你发来表情消息";
+"apns_photo" = "%@给你发来一张图片";
+"apns_voice" = "%@给你发来一段语音留言";
+"apns_video" = "%@给你发来一段视频留言";
+"apns_vcf" = "%@给你发来一张名片信息";
+"apns_secretmsg" = "你有新的消息";
+
+
+/* No comment provided by engineer. */
+" %@ is calling you" = " %@ 来电";
+
+/* No comment provided by engineer. */
+" Reply " = "@";
+
+/* No comment provided by engineer. */
+" new notifications" = " 新通知";
+
+/* No comment provided by engineer. */
+"%@ has left this chatroom" = "%@ 离开了聊天室";
+
+/* No comment provided by engineer. */
+"%@ has left this group" = "%@ 离开了群组";
+
+/* No comment provided by engineer. */
+"%@ has passed your friend request"= "%@ 通过了你的好友请求";
+
+/* No comment provided by engineer. */
+"00:00" = "00:00";
+
+/* No comment provided by engineer. */
+"A location was received" = "收到了一条位置信息";
+
+/* No comment provided by engineer. */
+"A location was sent" = "发送了一条位置信息";
+
+/* No comment provided by engineer. */
+"A multimedia message was received" = "收到了一条多媒体信息";
+
+/* No comment provided by engineer. */
+"A multimedia message was sent" = "发送了一条多媒体信息";
+
+/* No comment provided by engineer. */
+"A photo was received" = "收到了一张照片";
+
+/* No comment provided by engineer. */
+"A photo was sent" = "发送了一张照片";
+
+/* No comment provided by engineer. */
+"A stamp was received" = "收到了一个表情";
+
+/* No comment provided by engineer. */
+"A stamp was sent" = "发送了一个表情";
+
+/* No comment provided by engineer. */
+"A video clip was received" = "收到了一段视频";
+
+/* No comment provided by engineer. */
+"A video clip was sent" = "发送了一段视频";
+
+/* No comment provided by engineer. */
+"A voice message was received" = "收到了一段语音";
+
+/* No comment provided by engineer. */
+"A voice message was sent" = "发送了一段语音";
+
+/* No comment provided by engineer. */
+"activities" = "活动";
+
+/* No comment provided by engineer. */
+"Answer" = "接听";
+
+/* No comment provided by engineer. */
+"Answering" = "应答中...";
+
+/* No comment provided by engineer. */
+"Call" = "电话";
+
+/* No comment provided by engineer. */
+"Call incoming..." = "来电中...";
+
+/* No comment provided by engineer. */
+"Calling..." = "呼叫中...";
+
+
+/* No comment provided by engineer. */
+"Cannot use this function" = "不能使用此功能";
+
+
+
+/* No comment provided by engineer. */
+"Decline" = "拒绝";
+
+/* No comment provided by engineer. */
+"Declining" = "拒绝中";
+
+/* No comment provided by engineer. */
+"Delete" = "删除";
+
+/* No comment provided by engineer. */
+"Empty Chat Room" = "聊天室为空";
+
+/* No comment provided by engineer. */
+"End" = "结束";
+
+/* No comment provided by engineer. */
+"End Call" = "结束通话";
+
+/* No comment provided by engineer. */
+"Ending" = "结束中";
+
+/* No comment provided by engineer. */
+"Establishing the video call..." = "正在建立视频通话...";
+
+
+
+/* No comment provided by engineer. */
+"ID can't be empty" = "账号不能为空";
+
+/* No comment provided by engineer. */
+"ID could be changed only once. Your friend could find you by ID" = "账号只能被修改一次，你的朋友可以通过账号来找到你";
+
+/* No comment provided by engineer. */
+"ID could only contains numbers and characters." = "账号只能包含数字和字母";
+
+/* No comment provided by engineer. */
+"ID's length is 20 digits at most." = "账号最长为20位";
+
+/* No comment provided by engineer. */
+"ID's length is 2 at least." = "账号最短为2位";
+
+/* No comment provided by engineer. */
+"Last Updated: %@" = "最近更新: %@";
+
+/* Loading Status */
+"Loading more messages..." = "读取更多消息...";
+
+/* No comment provided by engineer. */
+"Loading more moments" = "读取更多动态";
+
+/* No comment provided by engineer. */
+"Loading..." = "读取中...";
+
+/* No comment provided by engineer. */
+"Location" = "位置";
+
+
+
+/* No comment provided by engineer. */
+"Network" = "网络";
+
+/* No comment provided by engineer. */
+"No member" = "无成员";
+
+/* No comment provided by engineer. */
+"Nobody answer.Stop calling..." = "无人应答，停止中...";
+
+
+/* No comment provided by engineer. */
+"oops，network is down. Try it later" = "网络慢，请稍后重试";
+
+/* No comment provided by engineer. */
+"Paused" = "暂停";
+
+/* No comment provided by engineer. */
+"Paused by callee" = "对方暂停通话";
+
+/* No comment provided by engineer. */
+"Photo" = "照片";
+
+/* No comment provided by engineer. */
+"Please wait for a while.." = "请等待..";
+
+/* Pull down to load more messages */
+"Pull down to load more messages..." = "往下拉获得更多消息...";
+
+/* No comment provided by engineer. */
+"Reached" = "已达";
+
+/* No comment provided by engineer. */
+"Read" = "已读";
+
+/* No comment provided by engineer. */
+"Recording" = "录音中";
+
+/* Release to load more messages */
+"Release to load more messages..." = "松开读取更多消息...";
+
+/* No comment provided by engineer. */
+"Remote Ringing..." = "远端响铃...";
+
+/* No comment provided by engineer. */
+"Sent" = "已发";
+
+
+
+/* No comment provided by engineer. */
+"Support" = "支持";
+
+/* No comment provided by engineer. */
+"Unknown" = "未知";
+
+/* No comment provided by engineer. */
+"User is busy.Stop calling..." = "用户忙，停止呼叫...";
+
+/* No comment provided by engineer. */
+"User you are calling doesn't have WowTalk account.\n\nDo you want to place a regular call instead?" = "对方没有使用一米家校.\n\n 您是否想拨打普通电话";
+
+/* No comment provided by engineer. */
+"Video call has been set up" = "视频通话已经建立";
+
+/* No comment provided by engineer. */
+"Videocall incoming..." = "视频来电...";
+
+/* No comment provided by engineer. */
+"WowTalk supports more types of messages now, please click me to update wowtalk to see this message!" = "一米家校支持更多的类型的短信，请点击升级";
+
+/* No comment provided by engineer. */
+"Yes" = "是的";
+
+/* No comment provided by engineer. */
+"Yes and don't ask me again" = "不再问我";
+
+/* No comment provided by engineer. */
+"You had an incoming call" = "你有来电";
+
+/* No comment provided by engineer. */
+"You had a missing call" = "你有未接来电";
+
+/* No comment provided by engineer. */
+"You just called others" = "你拨打了一个免费电话";
+
+/* No comment provided by engineer. */
+"Your buddy's WowTalk version is too old to receive this message." = "对方的版本太低，无法接受此消息";
+
+/* No comment provided by engineer. */
+"upload photos" = "上传照片";
+
+/* No comment provided by engineer. */
+"Hide all the comments in the list" = "不再显示列表中的评论";
+
+/* No comment provided by engineer. */
+"Current location is not available" = "当前位置不可用";
+
+/* No comment provided by engineer. */
+"Two passwords are different" = "两次输入密码不一致";
+
+
+/* No comment provided by engineer. */
+" friends like it" = " 人按了赞。";
+"like it" = "赞了这条动态";
+
+/* No comment provided by engineer. */
+"Introduction" = "介绍";
+
+/* No comment provided by engineer. */
+"Local contact" = "本地联系人";
+
+/* No comment provided by engineer. */
+"Take a photo" = "拍照";
+
+/* No comment provided by engineer. */
+"Select from album" = "从相册选择";
+
+/* No comment provided by engineer. */
+"Entertainment" = "娱乐休闲";
+
+
+
+/* No comment provided by engineer. */
+"Your application is not passed (%@)" = "您的入群申请未被通过 (%@)";
+
+/* No comment provided by engineer. */
+"Secret" = "保密";
+
+/* No comment provided by engineer. */
+"Change password" = "修改密码";
+
+/* No comment provided by engineer. */
+"Failed to change password" = "修改密码失败";
+
+/* No comment provided by engineer. */
+"Edit group" = "编辑群组";
+
+/* No comment provided by engineer. */
+"Stop" = "停止";
+
+/* No comment provided by engineer. */
+"Free chat" = "免费聊天";
+
+/* No comment provided by engineer. */
+"Free videochat" = "免费视频";
+
+/* No comment provided by engineer. */
+"Free call" = "免费通话";
+
+/* No comment provided by engineer. */
+"Join Application / Invitation" = "入群申请";
+
+/* No comment provided by engineer. */
+"Join Application" = "入群申请";
+
+/* No comment provided by engineer. */
+"Invitation" = "邀请";
+
+/* No comment provided by engineer. */
+"All contacts" = "所有联系人";
+
+/* No comment provided by engineer. */
+"About" = "关于本软件";
+
+/* No comment provided by engineer. */
+"Follow" = "关注";
+
+/* No comment provided by engineer. */
+"Hobby" = "兴趣爱好";
+
+/* No comment provided by engineer. */
+"Hobby" = "兴趣爱好";
+
+/* No comment provided by engineer. */
+"Others" = "其他";
+
+/* No comment provided by engineer. */
+"Write your moment!" = "写下你的美妙时刻!";
+
+/* No comment provided by engineer. */
+"Create a group" = "创建群组";
+
+/* No comment provided by engineer. */
+"Creator" = "创建者";
+
+/* No comment provided by engineer. */
+"Delete" = "删除";
+
+/* No comment provided by engineer. */
+"Delete this moment" = "删除这条动态";
+
+/* No comment provided by engineer. */
+"Delete this comment" = "删除这条评论";
+
+/* No comment provided by engineer. */
+" join this chatroom" = " 加入了本多人对话";
+
+/* No comment provided by engineer. */
+" joins this group" = " 加入了群组";
+
+/* No comment provided by engineer. */
+"The moment is empty, please write something" = "动态为空，写点什么吧";
+
+/* No comment provided by engineer. */
+"Comment list" = "回复列表";
+
+/* No comment provided by engineer. */
+"History" = "历史";
+
+/* No comment provided by engineer. */
+"Deselect all" = "取消所有";
+
+/* No comment provided by engineer. */
+"SMS" = "发送短信";
+
+/* No comment provided by engineer. */
+"Send" = "发送";
+
+/* No comment provided by engineer. */
+"Message" = "消息";
+
+/* No comment provided by engineer. */
+"Send email" = "发送邮件";
+
+/* No comment provided by engineer. */
+"Cancel" = "取消";
+
+/* No comment provided by engineer. */
+"unfollow" = "取消关注";
+
+/* No comment provided by engineer. */
+"normal member" = "普通";
+
+/* No comment provided by engineer. */
+"Set up as adminstrator" = "设为管理员";
+
+/* No comment provided by engineer. */
+"cancel adminstrator" = "取消管理员";
+
+/* No comment provided by engineer. */
+"Others can add me" = "别人可以加我";
+
+/* No comment provided by engineer. */
+"users nearby can find me" = "附近的人可以看到我";
+
+/* No comment provided by engineer. */
+"Number can't be empty" = "号码不能为空";
+
+/* No comment provided by engineer. */
+"Number contains invalid characters" = "号码包含非法字符";
+
+/* No comment provided by engineer. */
+"Failed to update chatroom's name" = "修改失败,请稍后再试";
+
+
+
+/* No comment provided by engineer. */
+"comment list" = "回复列表";
+
+/* No comment provided by engineer. */
+"Replay" = "回放";
+
+/* No comment provided by engineer. */
+"Replaying" = "回放中";
+
+/* No comment provided by engineer. */
+"AppName_wowtalkbiz" = "WowTalk Biz";
+
+/* No comment provided by engineer. */
+"WowTalkID" = "一米家校账号";
+
+/* No comment provided by engineer. */
+"WowTalkID can be changed only once, are you sure？" = "一米家校 账号只能被修改一次，你确定吗？";
+
+/* No comment provided by engineer. */
+"WowTalkID can be changed only once. Only numbers and characters are allowed. Its valid length is 2 - 20." = "一米家校账号 只能被修改一次，需要由数字和字母组成，长度为2-20";
+
+/* No comment provided by engineer. */
+"WowTalk ID" = "账号:";
+
+/* No comment provided by engineer. */
+"Area" = "地区";
+
+/* No comment provided by engineer. */
+"Location" = "位置";
+
+/* No comment provided by engineer. */
+"Chatroom" = "多人对话";
+
+/* No comment provided by engineer. */
+"Avatar" = "头像";
+
+/* No comment provided by engineer. */
+"Female" = "女";
+
+/* No comment provided by engineer. */
+"Friend request" = "好友请求";
+
+/* No comment provided by engineer. */
+"Failed to send request" = "发送请求失败";
+
+
+/* No comment provided by engineer. */
+"OK" = "确定";
+
+/* No comment provided by engineer. */
+"Study" = "学习考试";
+
+/* No comment provided by engineer. */
+"Offical account" = "官方帐号";
+
+/* No comment provided by engineer. */
+"Password can't be empty" = "密码不能为空";
+
+/* No comment provided by engineer. */
+"Previous password is wrong" = "密码错误,请重新输入";
+
+
+/* No comment provided by engineer. */
+"Password's valid length is 6 - 20. Please use a complex password for your own security" = "密码的合法长度为6-20，为了您的帐号安全，推荐使用数字和字母大小写混用的密码";
+
+/* No comment provided by engineer. */
+"Password can be 20 digits at most." = "密码最长为20位";
+
+/* No comment provided by engineer. */
+"Password needs to be 6 digits at leaset" = "密码最短为6位";
+
+/* No comment provided by engineer. */
+"Your invitation is rejected" = "您的邀请被拒绝";
+
+/* No comment provided by engineer. */
+"Added" = "已添加";
+
+/* No comment provided by engineer. */
+"Adding" = "添加中";
+
+/* No comment provided by engineer. */
+"Friend has been added" = "好友已经被添加";
+
+/* No comment provided by engineer. */
+"Bound" = "已绑定";
+
+/* No comment provided by engineer. */
+"Start recording" = "开始录音";
+
+/* No comment provided by engineer. */
+"Finish recording" = "停止录音";
+
+/* No comment provided by engineer. */
+"The record file is broken, please record it again" = "录音文件已经损坏，请重新录制";
+
+/* No comment provided by engineer. */
+"The recording time is too short, please record it again" = "录音太短，请重新录制";
+
+/* No comment provided by engineer. */
+"You have to add a record for this message" = "预览前必须录制音频";
+
+/* No comment provided by engineer. */
+"You have to add a photo for this message" = "预览前必须添加图片";
+
+/* No comment provided by engineer. */
+"Join WowTalk with me" = "一起使用一米家校吧！";
+
+/* No comment provided by engineer. */
+"Sex" = "性别";
+
+/* No comment provided by engineer. */
+"You could change group name after the creation" = "你可以在创建群组后修改组名";
+
+/* No comment provided by engineer. */
+"You have joined%@" = "你已经加入%@";
+
+/* No comment provided by engineer. */
+"You have been removed from %@ by admin" = "你已经被管理员移出 %@";
+
+/* No comment provided by engineer. */
+"Slow network" = "没有网络";
+
+/* No comment provided by engineer. */
+"Become the first to like！" = "成为第一个赞的人吧";
+
+/* No comment provided by engineer. */
+"I am living in WowTalk. It is great, join me now!" = "我正在使用一米家校，你也一起来吧";
+
+/* No comment provided by engineer. */
+"Mobile" = "手机";
+
+
+/* No comment provided by engineer. */
+"Open album" = "打开相册";
+
+/* No comment provided by engineer. */
+"Reject" = "拒绝";
+
+/* No comment provided by engineer. */
+"Press and talk" = "按住录音";
+
+/* No comment provided by engineer. */
+"Accecpt" = "接受";
+
+/* No comment provided by engineer. */
+"Search" = "搜索";
+
+/* No comment provided by engineer. */
+"Search key can't be empty" = "搜素关键字不能为空";
+
+/* No comment provided by engineer. */
+"Search offical accounts" = "搜索官方帐号";
+
+/* No comment provided by engineer. */
+"Search friends" = "搜索好友";
+
+/* No comment provided by engineer. */
+"Search groups" = "搜索群组";
+
+/* No comment provided by engineer. */
+"Play" = "播放";
+
+/* No comment provided by engineer. */
+"Hide" = "隐藏";
+
+/* No comment provided by engineer. */
+"New moment" = "新动态";
+
+/* No comment provided by engineer. */
+"New comment" = "新评论";
+
+/* No comment provided by engineer. */
+"New version" = "新版本";
+
+/* No comment provided by engineer. */
+"Status can't be empty." = "签名不能为空";
+
+/* No comment provided by engineer. */
+"New friend" = "新朋友";
+
+/* No comment provided by engineer. */
+"Do you accept the videochat invitaion" = "你是否接受视频邀请";
+
+/* No comment provided by engineer. */
+"Nickname" = "昵称";
+
+/* No comment provided by engineer. */
+"List him in contact" = "保存到联系人";
+
+/* No comment provided by engineer. */
+"Not now" = "下次再说";
+
+/* No comment provided by engineer. */
+"Friends" = "朋友们";
+
+/* No comment provided by engineer. */
+"Moments" = "好友圈";
+
+"MomentsTitleAll" = "好友圈";
+"MomentsTitleSingle" = "%s的动态";
+
+/* No comment provided by engineer. */
+"Missed call" = "未接来电";
+
+/* No comment provided by engineer. */
+"not set" = "未设定";
+
+/* No comment provided by engineer. */
+"Local contact" = "手机通讯录";
+
+/* No comment provided by engineer. */
+"is availble" = "来啦";
+
+/* No comment provided by engineer. */
+"Release to stop" = "松开停止";
+
+/* No comment provided by engineer. */
+"See all members" = "查看全部";
+
+/* No comment provided by engineer. */
+"Check moments" = "查看动态";
+
+/* No comment provided by engineer. */
+"Check group detail" = "查看群组详细";
+
+/* No comment provided by engineer. */
+"is establishing the connection" = "正在建立连接";
+
+/* No comment provided by engineer. */
+"is inviting the callee" = "正在邀请对方";
+
+/* No comment provided by engineer. */
+"This user have not activated WowTalk completely" = "用户还未完全激活";
+
+/* No comment provided by engineer. */
+"Failed to register" = "注册失败";
+
+/* No comment provided by engineer. */
+"Registration successful" = "注册成功";
+
+/* No comment provided by engineer. */
+"Event" = "活动";
+
+/* No comment provided by engineer. */
+"Message is too short, please record it again" = "消息太短，请重新录制";
+
+/* No comment provided by engineer. */
+"Receive messages" = "接受消息";
+
+/* No comment provided by engineer. */
+"Add" = "添加";
+
+/* No comment provided by engineer. */
+"Add contacts" = "添加联系人";
+
+/* No comment provided by engineer. */
+"Add local contact" = "添加手机联系人至列表";
+
+/* No comment provided by engineer. */
+"Add this user as a friend" = "添加为好友";
+
+/* No comment provided by engineer. */
+"Tips" = "温馨提示";
+
+/* No comment provided by engineer. */
+"Remind" = "提示";
+
+/* No comment provided by engineer. */
+"Games" = "游戏竞技";
+
+/* No comment provided by engineer. */
+"View all comments" = "查看全部";
+
+/* No comment provided by engineer. */
+"Photo" = "相册";
+
+/* No comment provided by engineer. */
+"Status" = "签名";
+
+/* No comment provided by engineer. */
+"Birthday" = "生日";
+
+/* No comment provided by engineer. */
+"Estate" = "置业安家";
+
+/* No comment provided by engineer. */
+"Username can't be empty" = "账号不能为空";
+
+/* No comment provided by engineer. */
+"You can't add this user as as friend due to his privacy setting" = "由于对方的隐私设置，你不能添加其为好友";
+
+/* No comment provided by engineer. */
+
+"%@ Apply to join group %@" ="%@申请加入群组%@";
+/* No comment provided by engineer. */
+"Male" = "男";
+
+/* No comment provided by engineer. */
+"Logout" = "登出";
+
+/* No comment provided by engineer. */
+"Album" = "相册";
+
+/* No comment provided by engineer. */
+"Nearby" = "附近的人";
+
+
+/* No comment provided by engineer. */
+"Are you sure to delete all system messages" = "你确定要删除所有的系统消息";
+
+/* No comment provided by engineer. */
+"Upgrade now" = "立刻升级";
+
+/* No comment provided by engineer. */
+"Adminstrator" = "管理员";
+
+/* No comment provided by engineer. */
+"Set up as adminstrator" = "设为管理员";
+
+/* No comment provided by engineer. */
+"System messages" = "系统消息";
+
+/* No comment provided by engineer. */
+"Group name can't be empty"= "组名不能为空";
+
+/* No comment provided by engineer. */
+"Member authority" = "成员权限";
+
+/* No comment provided by engineer. */
+"bind phone" = "绑定手机";
+
+/* No comment provided by engineer. */
+"bind this account" = "绑定帐号";
+
+/* No comment provided by engineer. */
+"Bind email" = "绑定邮箱";
+
+/* No comment provided by engineer. */
+"Finish recording" = "停止录音";
+
+/* No comment provided by engineer. */
+"Edit group" = "编辑群组";
+
+/* No comment provided by engineer. */
+"Your network is slow, please try it later" = "网络慢，请稍后再试";
+
+/* No comment provided by engineer. */
+"Group Introduction" = "介绍";
+
+/* No comment provided by engineer. */
+"Group" = "群组";
+
+/* No comment provided by engineer. */
+"Group%@ is already dismissed" = "群组%@ 已经被解散";
+
+/* No comment provided by engineer. */
+"Group name" = "群组名称";
+
+"Tmp Group name"="临时组名称";
+/* No comment provided by engineer. */
+"Group avatar" = "群组头像";
+
+/* No comment provided by engineer. */
+"Member management" = "成员管理";
+
+/* No comment provided by engineer. */
+"Group type" = "群组类型";
+
+/* No comment provided by engineer. */
+"Group Chat" = "组聊";
+
+/* No comment provided by engineer. */
+"Chatroom info" = "聊天室信息";
+
+/* No comment provided by engineer. */
+"Work" = "行业交流";
+
+/* No comment provided by engineer. */
+"Contact" = "联系人";
+
+/* No comment provided by engineer. */
+"self introduction" = "介绍";
+
+/* No comment provided by engineer. */
+"Get a code" = "获得验证码";
+
+/* No comment provided by engineer. */
+"Video" = "视频";
+
+/* No comment provided by engineer. */
+"likes it"= "赞了它";
+
+/* No comment provided by engineer. */
+"Dismiss the group?" = "解散群组？";
+
+/* No comment provided by engineer. */
+"Dismiss the group" = "解散群组";
+
+/* No comment provided by engineer. */
+"Remove friend" = "删除好友";
+
+/* No comment provided by engineer. */
+"Setting"= "设置";
+
+/* No comment provided by engineer. */
+"Comment" = "评论";
+
+/* No comment provided by engineer. */
+"Details" = "详细";
+
+/* No comment provided by engineer. */
+"Please enter new password again" = "请再次输入新密码";
+
+/* No comment provided by engineer. */
+"Request list" = "请求列表";
+
+
+/* No comment provided by engineer. */
+"Request is sent" = "请求已发送";
+
+
+/* No comment provided by engineer. */
+"Enter account ID to search" = "输入用户ID搜索";
+
+/* No comment provided by engineer. */
+"Enter official account ID to search" = "输入官方帐号ID搜索";
+
+/*ID search */
+"IDSearch" = "帐号搜索";
+
+/* No comment provided by engineer. */
+"Please enter your email" = "请输入邮箱";
+
+/* No comment provided by engineer. */
+"Please enter your phone number" = "请输入手机号码";
+
+/* No comment provided by engineer. */
+"Please enter received code" = "请输入收到的验证码";
+
+/* No comment provided by engineer. */
+"Please enter new password" = "请输入新密码";
+
+/* No comment provided by engineer. */
+"Please enter the password" = "密码";
+
+/* No comment provided by engineer. */
+"Please enter previous password" = "请输入旧密码";
+
+/* No comment provided by engineer. */
+"Please enter group name" = "请输入组名";
+
+/* No comment provided by engineer. */
+"Please enter group ID or name" = "请输入组名或者组ID";
+
+/* No comment provided by engineer. */
+"Please write group introduction" = "写点组简介吧";
+
+/* No comment provided by engineer. */
+"Please enter the email"= "请输入邮箱";
+
+/* No comment provided by engineer. */
+"Please enter the code" = "请输入验证码";
+
+/* No comment provided by engineer. */
+"Account"= "账号";
+
+/* No comment provided by engineer. */
+"Like" = "赞";
+
+/* No comment provided by engineer. */
+"liked your moment" = "赞了你的动态";
+
+/* No comment provided by engineer. */
+"Distance" = "距离";
+
+/* No comment provided by engineer. */
+
+"The status is too long" = "签名太长";
+
+
+/* No comment provided by engineer. */
+"quit the chatroom" = "退出聊天室";
+
+/* No comment provided by engineer. */
+"quit this group？" = "退出群组？";
+
+/* No comment provided by engineer. */
+"quit the group" = "退出群组";
+
+/* No comment provided by engineer. */
+"select" = "选择好友";
+
+/* No comment provided by engineer. */
+"select a group or chatroom" = "选择一个群组和多人会话";
+
+/* No comment provided by engineer. */
+"select all" = "选择全部";
+
+/* No comment provided by engineer. */
+"invite you to join" = "邀请你加入";
+
+/* No comment provided by engineer. */
+"Email" = "邮件";
+
+/* No comment provided by engineer. */
+"Invalid email" = "非法邮箱地址";
+
+/* No comment provided by engineer. */
+"Clips" = "部";
+
+/* No comment provided by engineer. */
+"Additional information" = "附加信息";
+
+/* No comment provided by engineer. */
+"Nearby user" = "附近的人";
+
+/* No comment provided by engineer. */
+"Nearby group" = "附近的组";
+
+/* No comment provided by engineer. */
+"Privacy" = "隐私设定";
+
+
+/* No comment provided by engineer. */
+"Authetication is needed" = "好友需要验证";
+
+/* No comment provided by engineer. */
+"Verification code is sent" = "验证码已经发送";
+
+
+
+//added 0603
+"My profile" = "个人信息";
+"Account" = "账号";
+"Tell friend" = "告诉朋友";
+"Rate" = "评价";
+"Feedback" ="反馈";
+"Register" = "注册";
+"Quick Start" = "快速开始";
+"Login" = "登录";
+"Username" = "用户名";
+"Please input password" = "密码";
+"Please input password again" = "请再次输入密码";
+"Return" = "返回";
+"Create Account" = "创建帐号";
+
+"Please enter your ID" = "账号";
+"No contact" = "无联系人";
+
+//added 0604
+"Are you sure to logout?" = "你确定要登出吗?";
+"Please set your password first" = "请先设置您的密码";
+"unlink" = "解除绑定";
+"Failed to find the user" = "查找失败";
+"Nickname is empty" = "昵称为空";
+
+"Group ID:" = "群组号:";
+//added 0605
+"Modify WowTalkID Failed" = "WowTalkID修改失败";
+"This user haven't activated. You can send free messsages to him. He will receive your messages in the form of normal SMS. You can call him for free once he activates our service" = "此联系人尚未激活，您还无法与他进行免费通话. 但您可以直接发起免费的文字聊天，此消息将以普通短信的形式发送给对方.";
+
+"Message can't be empty" = "消息不能为空";
+
+//added 0608
+"Forget pwd?"="忘记密码?";
+"Please input ID" = "请输入账号";
+"Please input email or phone number" = "请输入邮箱或手机号";
+"Find Password" = "取回密码";
+"Email or Number can't be empty" = "邮箱或号码不能为空";
+"Find password failed" = "找回密码失败";
+"Access code already sent" = "验证码已发送，请查收";
+"Return(%dsec)" = "返回(%d秒)";
+"Reset password failed" = "重设密码失败";
+"Reset password success" = "重设密码成功";
+"Change Status" = "编辑签名";
+"Failed to change gender" = "修改性别失败";
+"Failed to change birthday" = "修改生日失败";
+"Failed to change status" = "修改签名失败";
+"Failed to change nickname" = "修改昵称失败";
+"Network is not available" = "您暂时没有网络";
+"Failed to login" = "登录失败";
+"    Message    "="    会话    ";
+"Connecting..."="连接中...";
+"Connection lost"="连接解除";
+"Loading more" = "获取更多";
+
+//added 0613
+"Authetication failed" = "账号/手机号或者密码错误,请重新输入";
+"Your account has been login in other place" = "你的账号已在别处登录。请重新登录后再使用。";
+"Account authentication failed." = "认证失败。请重新登录后再使用。";
+
+"Username needs to be 2 digits at least" =  "用户名最少为2位";
+"Username needs to be 20 digits at most" = "用户名最多为20位";
+
+"Search a group" = "搜索群组";
+"Add friend" = "加为好友";
+"Company ID" = "企业ID";
+"Password" = "密码";
+
+"Search official accounts" = "搜索官方帐号";
+"Account recommendation" = "推荐官方帐号";
+
+
+"Start a chat" = "新会话";
+"Sign in" = "登陆";
+
+
+
+"Change chatroom's name" = "修改组名";
+
+//added on 0722
+"Members(%d)"= "会话成员(%d人)";
+"Basic" = "常用";
+"Happy" = "开心";
+"Sad" = "伤心";
+"Angry" = "生气";
+"Animals" = "动物";
+"Others" = "其他";
+// added 0718
+"minute" = "分前";
+"second" = "秒前";
+"hour" =   "小时前";
+"day" =   "天前";
+
+// added for message composer
+"Voice" = "语音";
+"Camera" = "相机";
+"NormalCall" = "语音通话";
+"Video Call" = "视频通话";
+
+// added 1121
+"Family Member" = "家庭成员";
+"Scan QRCode" = "扫一扫";
+"QRCode Photo" = "相册";
+"QRCode Flash" = "补光灯";
+"QRCode My QRCode" = "我的二维码";
+
+"QRCode Card" = "二维码名片";
+"Scan QRCode to add" = "扫一扫二维码，\n加我为一米家校好友";
+"Share QRCode" = "分享二维码";
+"Save to gallery" = "保存至相册";
+"Public Account" = "公众账号";
+"Public Account Search" = "公众账号搜索";
+"Event Detail" = "活动详情";
+"Event Time" = "时间";
+"Event Area" = "地点";
+"Event Classic" = "类型";
+"Event Cost" = "费用";
+"gatherings" = "聚会";
+"sports" = "运动";
+"travel" = "旅行";
+"shows" = "表演";
+"exhibitions" = "展览";
+"lectures" = "演讲";
+"community_volunteers" = "社区志愿者";
+"coupon_discount" = "优惠券";
+"others" = "其它";
+
+"header pull to refresh" = "下拉刷新";
+"header release to refresh" = "释放立即刷新";
+"header refreshing" = "正在刷新";
+"header last refresh time" = "上次刷新：";
+"header just now" = "刚刚";
+"header minute ago" = "分钟前";
+"header hour ago" = "小时前";
+"done" = "完成";
+"empty item is not allowed" = "请填写完整报名信息！";
+"footer pull up to load" = "上拉加载更多";
+"footer loading" = "加载中...";
+"footer no more" = "没有更多";
+"close" = "关闭";
+
+// activity
+"all activity" = "全部活动";
+"joined activity" = "已报名的活动";
+"unjoined activity" = "未报名的活动";
+"no limit" = "无限制";
+"activity time" = "时间";
+"activity place" = "地点";
+"activity number" = "人数";
+"activity apply" = "报名";
+"activity cancel apply" = "取消报名";
+"detail time" = "时间";
+"detail place" = "地点";
+"detail classic" = "类型";
+"detail cost" = "费用";
+"detail coin" = "金币";
+"detail detail" = "详细说明";
+"detail choose time" = "选择参加活动的时间";
+"activity type cycle" = "周期";
+"activity type multi" = "多天";
+"activity joined" = "本期活动参加人数";
+"activity organizer" = "主办方";
+"activity phonenumber" = "联系电话";
+"activity photo" = "图片";
+"activity apply info" = "报名信息";
+"activity apply info incomplete" = "报名信息不完整！";
+"activity participate" = "参加者";
+"chosen date out of date" = "所选择的日期已过期！";
+"chosen date is full" = "所选择的日期报名人数已满！";
+
+"Follow Public Account to get more information about their service" = "关注公众号，获取更多服务和咨询";
+"Please Enter Your Name" = "请输入昵称";
+"Please set avatar and nickname" = "请设置头像以及昵称！";
+"Failed to set avatar" = "设置头像失败";
+"Enter 一米家校" = "进入一米家校";
+"Set Remark" = "设置备注名";
+
+"Distance" = "距离";
+"Recommended" = "推荐";
+"Latest" = "最新";
+
+"location.all" = "全国";
+"location.city" = "城市";
+"location.secret" = "秘密";
+"Choose Place" = "选择地点";
+"nav done" = "确定";
+"not onemeter user qrcode" = "这是一米家校用户以外的QR码";
+"ConfirmApplyJoinGroup"="加入";
+"unfollow_public_account_note"="已经解除关注";
+"fix_group_chat_title"="组聊";
+"fix_tmp_group_chat_title"="多人对话";
+"GroupDetails" = "详细";
+"Tmp Chatroom info" = "临时组";
+"quit_multiplayer_session"="退出";
+"contacts_temp_group_delete_and_exit"="退出并删除临时群组";
+"Input is empty"="输入为空";
+"No Chat Ind"="没有会话";
+"change_nickname"="更改名字";
+"Apply to join the group"="请输入验证消息";
+"Make a call?"="和%@通话吗？";
+"Failed to login with atra auto"="登陆失败";
+
+//add 2014/10
+"All"="全部";
+"Notice"="通知";
+"Q&A"="问答";
+"Study"="学习";
+"Life"="生活";
+"Survey"="投票";
+"Video"="视频教程";
+"Decide"= "确定";
+"Change Cover" = "更换封面";
+
+
+
+//added on 11.29
+"AnswerMoment" = "回答";
+"Public" = "公开";
+"Public(Everyone can see)"="公司内所有人";
+"Limited" = "设限";
+"Votes" = "票";
+"Vote" = "票";
+"You have already voted" = "已投票";
+"This survey is expired" = "投票已过期";
+"Multiple selection. Deadline is " = "复选. 截止日期是 ";
+"Sinle selection. Deadline is " = "单选. 截止日期是 ";
+"Who can see this?" = "可见范围";
+"Limited to below" = "受限如下";
+"Add departments" = "添加可见部门";
+"All" = "全部";
+"Option is required" =  "至少需要二个选项";
+"Deadline" = "截止日期";
+"Multiselection" = "允许复选";
+" Tap to finish recording" = "点击结束录音";
+"is Getting current location" = "正在获取当前位置";
+"Show current location" = "显示当前位置";
+"Add an option" = "添加选项";
+"Add photos" = "添加照片";
+"My timeline" = "我的动态";
+"My favorite" = "我的收藏";
+"At least two options are required" = "至少需要二个选项";
+"Phone number is not valid." = "电话号码有误";
+"Email address is not valid." = "邮箱地址有误";
+
+"VoteButton" = "投票";
+
+//added on 2014.1.17
+"Press to record"="按下录音(最大120秒)";
+"Write something"="写点什么吧";
+
+// notification alert page
+"Notification Alert" = "通知提醒";
+"Message Notification" = "消息通知";
+"Notification ON" = "ON";
+"Notification OFF" = "OFF";
+"Notification Setting Tip" = "如果你要关闭或开启新消息通知，请在iPhone的“设置”，”通知“功能中，找到应用程序”一米家校“进行更改";
+"Notification Sound And Vibrate Mode" = "In-App通知模式";
+"Notification Sound" = "铃声";
+"Notification Vibrate" = "振动";
+"Notification Include" = "包括";
+"Notification New Message" = "新信息";
+"Notification Call" = "电话";
+"Notification Other" = "其它服务提醒";
+"Notification Other Setting" = "其他服务提醒设置";
+"Notification All Moment" = "所有可见动态";
+"Notification Friend Moment" = "常用联系人动态";
+"Notification Status" = "状态";
+"Notification Question" = "问答";
+"Notification Report" = "报告";
+// add on 2014.2.12
+"Moment Done" = "完成";
+
+// added on 2014.2.13
+"Check For Update" = "检查更新";
+
+"Chat" = "会话";
+"Finish" = "完成";
+
+"Moment current status hint" = "最近在干什么？";
+"Moment qa hint" = "要问点什么呢？";
+"Moment sharing hint" = "打算分享点什么？";
+"Moment survey hint" = "要做什么样的问卷调查？";
+"All Member"="所有成员";"Notification Vote" = "投票";"Remove from Favorite"="从我的收藏里删除";
+"Add to Favorite"="添加到我的收藏";
+"View Share Range"="查看可见范围";
+"Delete Timeline"="删除动态";
+"Close" = "关闭";
+"Chat History" = "聊天记录";
+"The current status will be removed. Are you sure?" = "现在的签名将被删除。您确定吗？";
+"Remove cover" = "删除动态封面";
+"Take a photo for cover" = "拍一张封面";
+"Select cover from album" = "从相册里选封面";
+"timeline_all_empty_ind_txt"="分享生活 留住感动";
+"timeline_single_today"="今天";
+"timeline_single_detail_text"="写一段话, 拍一张照片,开始记录你的生活...";
+"Change Cover"="修改封面";
+"Selected Photos"="选取封面";
+" join this chatroom" = " 加入了本多人对话";
+" joins this group" = " 加入了群组";
+"Already Added"="已添加";
+"Register success!"="注册成功！";
+"Failed to register"="注册失败";
+"Deadline"="截止日期";
+"Multiselection"="可多选";
+"Who can see this?"="公开范围";
+"Public(Everyone can see)"="公开";
+"Limited"="受限";
+"Finish"="完成";
+"Moment survey hint"="投票内容";
+"Show current location"="加入当前位置信息";
+
+
+
+//added on 2014.4.10
+"New moment can only contain no more than 600 words."="新建动态最多只能包含600文字。";
+"Manage Accounts"="管理账户";
+"Online"="利用中";
+"Offline"="离线";
+"Add Account"="添加账号";
+"Logout Current"="退出当前账号";
+"Switch Account"="切换账号";
+"Unread"="件未读";
+"Account already added." = "该账户已经存在于列表中。";
+"Adding あccount" = "添加账号中";
+"Logging in" = "登录中";
+"Switching account"="账号切换中";
+"Switch to:%@"="切换到:%@";
+"Remove account %@"="删除账号%@";
+"Logout current account"="登出当前账号";
+"Logout failed"="账号登出失败";
+"All the local cache of this account will be deleted. Are you sure?" = "该账户的所有本地缓存将不再保留";
+"Edit" = "编辑";
+"Done" = "确定";
+
+//added on 2014.5
+"Version"="版本号";
+"Notice"="通知";
+"Group has been disbanded."="选定组已经被解散";
+"Buddy has been removed."="选定联系人已经被删除。";
+
+"Syncing Member List..." = "社员列表同期中...";
+"Syncing Group List..."="部门列表同期中...";
+
+"callee_no_answer"="您呼叫的用户无法接通";
+"callee_offline"="您呼叫的用户暂时不在线";
+
+
+"deadlineError"="请选择今天以后的日期";
+"latestVersion"="已经是最新版本了";
+"survey_deadline_no_limit"="没有限制";
+"operation_failed"="操作失败";
+"member_deleted"="联系人已经被删除";
+
+"Copy"="拷贝";
+"ip_imei_auth_failed"="绑定验证失败";
+"ip_auth_failed_text"="该IP地址已由管理员限制登录。请与管理员进行联系。";
+"imei_auth_failed_text"="该设备已由管理员限制登陆。请与管理员进行联系。";
+
+
+// add for new design by yangjiankai 2014.9
+"login help"="登录帮助";
+"login help detail"="您需要一个WowTalk的账号才能使用该产品。如果您没有账号或者忘记了密码，请联系管理员";
+"I got it"="OK";
+"Add member"="添加成员";
+"Delete member"="删除成员";
+"ChatHistory"="聊天历史";
+"CallMenu"="电话";
+"countUnit"="人";
+"call_pause"="暂停";
+"call_mute"="静音";
+"call_speaker"="免提";
+"Password needs to be digits and characters combination only" = "密码需要是英数字的组合";
+"device id title"="终端ID";
+"save photo to album fail"="保存图片到相册失败";
+"save photo to album success"="保存图片到相册完成";
+
+"Message size at most 800"="消息最大长度800字符";
+"comment max length 260"="评论最大长度260字符";
+"Moment content text max length 600"="(最大长度600字符)";
+
+
+"Load more"="读取更多";
+"Create group failed!" = "群组创建失败!";
+"(However some information of the group is lost due to network problem.Please try again later.)" = "（然而创建过程中部分信息丢失。请再次尝试补全。）";
+"Create group success!" = "群组创建成功!";
+
+"Add members to group failed!" = "服务器处理超时，多人会话创建失败。请稍后重新尝试。";
+
+
+"Hand-writing"="图文写";
+"New Hand-writing"="新建图文写消息";
+"Pic-voice" = "图文音";
+
+"Write your story here"="写下要分享的故事";
+"Pic-Voice Msg"="图文音消息";
+"Add photo"="选择图片";
+"Preview"="预览";
+"Photos" ="照片";
+"Student"="学生";
+"Teacher"="老师";
+"Category"="分类";
+"Publisher"="分享者";
+
+"Usertype" = "用户类型";
+"Failed to upload avatar"="修改头像失败";
+"Add video"="添加视频";
+"Take a video"="拍一段视频";
+
+"Invitation code can't be empty" = "邀请码不能为空";
+"Bind class success!"="添加新课堂成功!可以在校园内板块看到相应更新。";
+"Someone already bind this!"="该邀请码已经被使用!";
+"Bind class failed!"="添加新课堂失败!";
+
+"deadline enabled?" = "截止日期设置";
+
+"A pic-voice message was sent" = "发送了一条图文音信息";
+"A pic-voice message was received" = "收到了一条图文音信息";
+
+
+// add by yangbin
+
+"Parents haven't submitted comment oh" = "家长还没提交意见哦";
+
+"You have been out of the group" = "您已经被请出该群";
+
+// 课堂直播相关
+"Living..." = "直播中...";
+
+"Save" = "保存";
+
+"Did not choose the classroom" = "还未选择教室";
+
+"Did not choose the classroom, whether the preferred To choose the classroom" = "还未选择教室,是否先去选择教室";
+
+"Data error" = "数据错误";
+
+"Modify the camera state failure" = "修改摄像头状态失败";
+
+"No live" = "暂无直播";
+
+"The opening date not later than the first class time" = "开班日期不能晚于第一节课上课时间";
+
+"The non WiFi network, may consume more traffic, whether to continue." = "当前为非wifi网咯，可能消耗更多流量，是否继续。";
+// add by liuhuan
+"Is Self" = "自己";
+
+"Discovery" = "发现";
+
+"take a picture" = "拍照";
+
+"SendTo" = "发送到";
+
+"photo album" = "相册";
+
+"Apply" = "申请";

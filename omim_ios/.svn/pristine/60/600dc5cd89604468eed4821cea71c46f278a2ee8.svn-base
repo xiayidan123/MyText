@@ -1,0 +1,63 @@
+//
+//  HomeworkState.m
+//  dev01
+//
+//  Created by Huan on 15/5/21.
+//  Copyright (c) 2015年 wowtech. All rights reserved.
+//
+
+#import "HomeworkState.h"
+#import "NewhomeWorkModel.h"
+#import "SchoolMember.h"
+
+@implementation HomeworkState
+
+-(void)dealloc{
+    self.homework_id = nil;
+    self.students = nil;
+    [super dealloc];
+}
+- (instancetype)initWithDict:(NSDictionary *)dic{
+    self = [super init];
+    if (self) {
+        self.homework_id = dic[@"homework_id"];
+        self.students = [self parseCameraWithObj:dic[@"students"]];
+    }
+    return self;
+}
+
+- (NSMutableArray *)parseCameraWithObj:(id)body{
+    if (body == nil)return nil;
+    
+    NSMutableArray *dicArray = nil;
+    id parseStu = body[@"student"];
+    id student = nil;
+    if ([parseStu isKindOfClass:[NSDictionary class]]) {
+        student = [[NSDictionary alloc] initWithDictionary:parseStu];
+    }else{
+        student = [[NSMutableArray alloc]initWithArray:parseStu];
+    }
+    
+    if ([student isKindOfClass:[NSArray class]]){
+        dicArray = [[NSMutableArray alloc]initWithArray:student];
+    }else{
+        dicArray = [[NSMutableArray alloc]init];
+        [dicArray addObject:student];
+    }
+    NSMutableArray *studentArray = [[NSMutableArray alloc] init];
+    NSInteger count = dicArray.count;
+    for (int i=0; i<count; i++){
+        SchoolMember *student = [SchoolMember SchoolMemberWithDic:dicArray[i]];
+        [studentArray addObject:student];
+    }
+    [dicArray release];
+    
+    return [studentArray autorelease];
+}
+
++ (instancetype)HomeworkWithDict:(NSDictionary *)dic{
+    return [[[self alloc] initWithDict:dic] autorelease];
+}
+
+
+@end

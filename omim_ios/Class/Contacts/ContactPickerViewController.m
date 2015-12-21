@@ -1,0 +1,1037 @@
+//
+//  AddChatMemberViewController.m
+//  omim
+//
+//  Created by Harry on 14-2-20.
+//  Copyright (c) 2014年 OneMeter Inc. All rights reserved.
+//
+
+#import "ContactPickerViewController.h"
+#import <QuartzCore/QuartzCore.h>
+
+#import "ContactPreviewCell.h"
+#import "ContactInfoViewController.h"
+
+
+#import "AddContactViewController.h"
+#import "AddChatMemberCell.h"
+
+#import "TabbarViewController.h"
+#import "ContactInfoViewController.h"
+
+
+#import "AppDelegate.h"
+#import "Constants.h"
+#import "TabBarViewController.h"
+
+#import "WTHeader.h"
+#import "MessagesVC.h"
+#import "PublicFunctions.h"
+#import "OMMessageVC.h"
+#import "AddressBookViewController.h"
+#import "GroupPickerViewController.h"
+#import "AddressBookManager.h"
+
+//#import "BizContactListViewController.h"
+
+
+
+@interface ContactPickerViewController ()
+{
+    int indexOffset;
+    BOOL isCreatingGroup;
+    BOOL _isSearching;
+    
+    BOOL isChecked;
+    UIButton *cancelButton;
+    
+}
+
+@property (nonatomic,retain) NSMutableArray* contacts;
+@property (nonatomic,retain) NSMutableArray* indexForNotEmptySection;
+@property (nonatomic,retain) NSMutableArray* filteredContacts;
+@property (nonatomic,retain) UIImageView* iv_blanksquare;
+@end
+
+@implementation ContactPickerViewController
+
+@synthesize addContactViewController;
+@synthesize contactInfoViewController;
+
+@synthesize selectContactTableView;
+@synthesize confirmButton;
+
+@synthesize isAddGroupMembers;
+@synthesize groupID;
+
+@synthesize delegate = _delegate;
+
+
+-(BOOL)buddyAlreadyExisting:(Buddy*)buddy
+{
+    for (Buddy* abuddy in self.exsitingBuddys ) {
+        if ([abuddy.userID isEqualToString:buddy.userID]) {
+            return TRUE;
+        }
+    }
+    return FALSE;
+}
+
+#pragma mark -
+#pragma mark - navigation config
+-(void)goBack
+{
+    [self.navigationController popViewControllerAnimated:YES];
+}
+
+-(void)configNav
+{
+    UILabel* label = [[[UILabel alloc] init] autorelease];
+    label.text =  NSLocalizedString(@"select",nil);
+    label.font = [UIFont fontWithName:@"STHeitiSC-Light" size:20];
+    label.textAlignment = NSTextAlignmentCenter;
+    label.textColor = [UIColor whiteColor];
+    label.backgroundColor = [UIColor clearColor];
+    [label sizeToFit];
+    self.navigationItem.titleView = label;
+    
+
+    
+    UIBarButtonItem *barButton = [PublicFunctions getCustomNavButtonOnLeftSide:YES target:self image:[UIImage imageNamed:@"icon_back_white"] selector:@selector(goBack)];
+       [self.navigationItem addLeftBarButtonItem:barButton];
+    [barButton release];
+    
+}
+
+#pragma mark - init data
+
+-(void)initData
+{
+    
+    indexOffset = 0;
+    
+    UILocalizedIndexedCollation *theCollation = [UILocalizedIndexedCollation currentCollation];
+    
+    if (self.contacts == nil) {
+        self.contacts = [[[NSMutableArray alloc] init] autorelease];
+    }
+    else{
+        [self.contacts removeAllObjects];
+    }
+    
+    if(self.indexForNotEmptySection == nil){
+        self.indexForNotEmptySection = [[[NSMutableArray alloc] init] autorelease];
+    }
+    else{
+        [self.indexForNotEmptySection removeAllObjects];
+    }
+    
+    // int offset = 0;
+    
+    // save section 0 for functions.
+    if (self.isChosenToStartAChat) {
+        Buddy* buddy1 = [[Buddy alloc] init];
+        buddy1.nickName = NSLocalizedString(@"select a group or chatroom", nil);
+        NSArray* arrFunction;
+
+        Buddy* buddy2 = [[Buddy alloc] init];
+        buddy2.nickName = NSLocalizedString(@"Add local contact", nil);
+        
+//        arrFunction = [NSArray arrayWithObjects:buddy1,buddy2, nil];
+        arrFunction = [NSArray arrayWithObject:buddy1];
+        [buddy1 release];
+        [buddy2 release];
+        
+        [self.contacts addObject:arrFunction];
+        
+        [self.indexForNotEmptySection addObject:[NSNumber numberWithInt:0]];
+        indexOffset = 1;
+    }
+    
+    if (self.isAddMembersToStartAGroupChat) {
+
+        Buddy* buddy = [[Buddy alloc] init];
+        buddy.nickName = NSLocalizedString(@"Add local contact", nil);
+        
+      //  NSArray* arrFunction = [NSArray arrayWithObjects:buddy, nil];
+        [buddy release];
+//        [self.contacts addObject:arrFunction];
+        
+//        [self.indexForNotEmptySection addObject:[NSNumber numberWithInt:0]];
+//        indexOffset = 1;
+        
+    }
+    
+    if (self.isManageGroupMember) {
+        Buddy* buddy = [[Buddy alloc] init];
+        buddy.nickName = NSLocalizedString(@"Add local contact", nil);
+       // NSArray* arrLocalBook = [NSArray arrayWithObject:buddy];
+        
+        [buddy release];
+//        [self.contacts addObject:arrLocalBook];
+//        [self.indexForNotEmptySection addObject:[NSNumber numberWithInt:0]];
+//        indexOffset = 1;
+        
+    }
+    
+    NSMutableArray* storedcontacts = [Database getContactListWithoutOfficialAccounts];
+    
+    for (Buddy* buddy in storedcontacts) {
+        
+        NSInteger sect = [theCollation sectionForObject:buddy collationStringSelector:@selector(nickName)];
+        buddy.sectionNumber = sect + indexOffset; // + 1 because we have a function section.
+    }
+    
+    NSInteger highSection = [[theCollation sectionTitles] count];
+    NSMutableArray *sectionArrays = [NSMutableArray arrayWithCapacity:highSection];
+    
+    for (int i = 0; i < highSection; i++) {
+        NSMutableArray *sectionArray = [[[NSMutableArray alloc] init] autorelease];
+        [sectionArrays addObject:sectionArray];
+    }
+    
+    for (Buddy * buddy in storedcontacts) {
+        if ([self buddyAlreadyExisting:buddy]) {
+            continue;
+        }
+        [(NSMutableArray *)[sectionArrays objectAtIndex:buddy.sectionNumber -indexOffset ] addObject:buddy]; // add to the right section
+    }
+    
+    for (NSMutableArray *sectionArray in sectionArrays) {
+        NSArray *sortedSection = [theCollation sortedArrayFromArray:sectionArray
+                                            collationStringSelector:@selector(nickName)];   // order the data in the same section
+        
+        [self.contacts addObject:sortedSection];
+        if ([sortedSection count] != 0) {
+            int section = [sectionArrays indexOfObject:sectionArray];
+            [self.indexForNotEmptySection addObject:[NSNumber numberWithInt:section + indexOffset]];  // ascend order
+        }
+    }
+}
+
+
+#pragma mark -
+#pragma mark table related
+
+// return the real section stored in self.contacts
+-(NSUInteger) realSectionIndex:(NSInteger)tableSectionIndex
+{
+    return [[self.indexForNotEmptySection objectAtIndex:tableSectionIndex] integerValue];
+}
+
+// return the section in the table
+-(NSUInteger) tableSectionIndex:(NSUInteger)realSectionIndex
+{
+    
+    NSUInteger tablesection = 0;
+    
+    for (int i = 0 ;i <[self.indexForNotEmptySection count]; i ++) {
+        
+        NSUInteger tmprealsection = [[self.indexForNotEmptySection objectAtIndex:i] integerValue] - indexOffset; // section number in indextitle.
+        
+        if (tmprealsection< realSectionIndex && i > tablesection) {
+            tablesection = i;
+            continue;
+        }
+        
+        if ( tmprealsection == realSectionIndex ) {
+            tablesection = i;
+        }
+        
+        if (tmprealsection>realSectionIndex){
+            break;
+        }
+    }
+    
+    return tablesection;
+}
+
+- (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    return CONTACT_TABLEVIEWCELL_HEIGHT;
+}
+
+- (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
+{
+    if([tableView isEqual: self.selectContactTableView]) return [self.indexForNotEmptySection count];
+    else return 1;
+}
+
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
+{
+	if ([tableView isEqual: self.selectContactTableView]){
+        NSInteger realsection = [self realSectionIndex:section];
+        return [[self.contacts objectAtIndex:realsection] count];
+    }
+    else
+        return [self.filteredContacts count];
+}
+
+- (NSArray *)sectionIndexTitlesForTableView:(UITableView *)tableView {
+    if([tableView isEqual:self.selectContactTableView]){
+        return [[UILocalizedIndexedCollation currentCollation] sectionIndexTitles];
+    }
+    else return nil;
+}
+
+- (NSInteger)tableView:(UITableView *)tableView sectionForSectionIndexTitle:(NSString *)title atIndex:(NSInteger)index
+{
+    if ([tableView isEqual:self.selectContactTableView]) {
+        NSUInteger num =  [self tableSectionIndex:[[UILocalizedIndexedCollation currentCollation] sectionForSectionIndexTitleAtIndex:index]];
+        return num;
+    }
+    return nil;
+}
+
+- (UIView *)tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section
+{
+    if (tableView == self.selectContactTableView) {
+        
+//        if (self.isAddMembersToStartAGroupChat || self.isManageGroupMember) {
+//            if (section == 0) {
+//                return nil;
+//            }
+//        }
+//        else{
+//            if (section == 0) {
+//                return nil;
+//            }
+//        }
+//        
+//        
+//        NSString *sectionTitle;
+//        
+//        NSInteger realsection = [self realSectionIndex:section];  //section number in contacts
+//        
+//        sectionTitle = [[[UILocalizedIndexedCollation currentCollation] sectionTitles] objectAtIndex:(realsection-indexOffset)];
+//        
+//        UILabel *nameLabel = [[[UILabel alloc] init] autorelease];
+//        nameLabel.frame = CGRectMake(TABLE_HEADER_LABEL_X_OFFSET, TABLE_HEADER_LABEL_Y_OFFSET, TABLE_HEADER_LABEL_WIDTH, TABLE_HEADER_LABEL_HEIGHT);
+//        nameLabel.backgroundColor = [UIColor clearColor];
+//        nameLabel.textColor = POPLISTVIEW_TABLEVIEW_CELL_TEXT_COLOR;
+//        nameLabel.font = [UIFont fontWithName:TABLE_HEADER_LABEL_FONT_NAME size:TABLE_HEADER_LABEL_FONT_SIZE];
+//        nameLabel.text = sectionTitle;
+//        
+//        UIImageView *imageView = [[UIImageView alloc] initWithFrame:CGRectMake(0, 0, IPHONE_WIDTH, TABLE_HEADER_IMAGEVIEW_HEIGHT)];
+//        imageView.image = [UIImage imageNamed:CONTACT_TABLEVIEW_SECTION_IMAGE];
+//        
+//        [imageView addSubview:nameLabel];
+//        return [imageView autorelease];
+        
+        if (self.isChosenToStartAChat) {
+            if (section == 0) {
+                return nil;
+            }
+        }
+        
+        
+        NSString *sectionTitle;
+        
+        NSInteger realsection = [self realSectionIndex:section];  //section number in contacts
+        
+        sectionTitle = [[[UILocalizedIndexedCollation currentCollation] sectionTitles] objectAtIndex:(realsection-indexOffset)];
+        
+        UILabel *nameLabel = [[[UILabel alloc] init] autorelease];
+        nameLabel.frame = CGRectMake(TABLE_HEADER_LABEL_X_OFFSET, TABLE_HEADER_LABEL_Y_OFFSET, TABLE_HEADER_LABEL_WIDTH, TABLE_HEADER_LABEL_HEIGHT);
+        nameLabel.backgroundColor = [UIColor clearColor];
+        nameLabel.textColor = POPLISTVIEW_TABLEVIEW_CELL_TEXT_COLOR;
+        nameLabel.font = [UIFont fontWithName:TABLE_HEADER_LABEL_FONT_NAME size:TABLE_HEADER_LABEL_FONT_SIZE];
+        nameLabel.text = sectionTitle;
+        
+        UIImageView *imageView = [[UIImageView alloc] initWithFrame:CGRectMake(0, 0, IPHONE_WIDTH, TABLE_HEADER_IMAGEVIEW_HEIGHT)];
+        imageView.image = [UIImage imageNamed:CONTACT_TABLEVIEW_SECTION_IMAGE];
+        
+        [imageView addSubview:nameLabel];
+        return [imageView autorelease];
+    }
+    else {
+        return nil;
+    }
+}
+
+- (CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section
+{
+    
+    if (tableView == self.selectContactTableView) {
+//        if (self.isAddMembersToStartAGroupChat || self.isManageGroupMember) {
+//            if (section == 0) {
+//                return 0;
+//            }
+//        }
+//        else{
+//            if (section == 0) {
+//                return 0;
+//            }
+//                
+//        }
+//        return CONTACT_TABLEVIEWCELL_SECTION_HEIGHT;
+        if (self.isChosenToStartAChat && section == 0) {
+            return 0;
+        }
+        return CONTACT_TABLEVIEWCELL_SECTION_HEIGHT;
+    }
+    
+    else return 0;
+}
+
+- (UITableViewCell *)tableView:(UITableView *)tableView
+		 cellForRowAtIndexPath:(NSIndexPath *)indexPath {
+    
+    if (![tableView isEqual:self.selectContactTableView]) {
+        NSInteger row = indexPath.row;
+        AddChatMemberCell *cell = [tableView dequeueReusableCellWithIdentifier:@"contactCell"];
+        if (cell == nil) {
+            cell = [[[AddChatMemberCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"contactCell"] autorelease];
+        }
+        else{
+            NSArray *subviews = [[NSArray alloc] initWithArray:cell.contentView.subviews];
+            for (UIView *subview in subviews) {
+                [subview removeFromSuperview];
+            }
+            [subviews release];
+        }
+        
+        Buddy* buddy ;
+        buddy = [self.filteredContacts objectAtIndex:row];
+        
+        [cell loadContent:buddy];
+        
+        //TODO:change the number to local name
+        if ([buddy.buddy_flag isEqualToString:@"2"]) {
+            ABPerson* person  = [AddressBookManager personWithNumber:buddy.phoneNumber];
+            if (person) {
+                [cell.nameLabel setText:person.compositeName];
+                [cell.signatureLabel setText:buddy.phoneNumber];
+            }
+            else{
+                [cell.nameLabel setText:buddy.phoneNumber];
+            }
+            
+        }
+        else{
+            [cell.nameLabel setText:buddy.nickName];
+            [cell.signatureLabel setText:buddy.status];
+        }
+        
+        if ([self.selectedBuddys indexOfObject:buddy] != NSNotFound){
+            [cell setChecked:YES];
+        }
+        else
+            [cell setChecked:NO];
+        
+        return cell;
+    }
+    // contact table
+    else{
+//        if (indexPath.section == 0) {
+        if (indexPath.section == 0 && self.isChosenToStartAChat) {
+            UITableViewCell* cell = [tableView dequeueReusableCellWithIdentifier:@"functionCell"];
+            if (cell==nil) {
+                cell = [[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleValue1 reuseIdentifier:@"functionCell"] autorelease];
+                UIImageView* dividerImageview = [[[UIImageView alloc] initWithFrame:CGRectMake(0.0f, 49.0f, 320.0f, 2.0f)] autorelease];
+                [dividerImageview setImage:[UIImage imageNamed:DIVIDER_IMAGE_320]];
+                [cell.contentView addSubview:dividerImageview];
+                
+            }
+            
+            if (self.isChosenToStartAChat) {
+                if (indexPath.row == 0) {
+                    cell.textLabel.text = NSLocalizedString(@"select a group or chatroom", nil);
+                }
+                else
+                    cell.textLabel.text = NSLocalizedString(@"Add local contact", nil);
+            }
+            if (self.isManageGroupMember) {
+                cell.textLabel.text = NSLocalizedString(@"Add local contact", nil);
+            }
+            if (self.isAddMembersToStartAGroupChat) {
+                cell.textLabel.text = NSLocalizedString(@"Add local contact", nil);
+            }
+            
+            return cell;
+        }
+        else{
+            NSInteger section = indexPath.section;
+            NSInteger row = indexPath.row;
+            NSInteger realsection = [self realSectionIndex:section];
+            AddChatMemberCell *cell = [tableView dequeueReusableCellWithIdentifier:@"contactCell"];
+            if (cell == nil) {
+                cell = [[[AddChatMemberCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"contactCell"] autorelease];
+            }
+            else{
+                NSArray *subviews = [[NSArray alloc] initWithArray:cell.contentView.subviews];
+                for (UIView *subview in subviews) {
+                    [subview removeFromSuperview];
+                }
+                [subviews release];
+            }
+            Buddy* buddy ;
+            buddy = [[self.contacts objectAtIndex:realsection] objectAtIndex:row];
+            
+            [cell loadContent:buddy];
+            
+            if ([buddy.buddy_flag isEqualToString:@"2"]) {
+                ABPerson* person  = [AddressBookManager personWithNumber:buddy.phoneNumber];
+                if (person) {
+                    [cell.nameLabel setText:person.compositeName];
+                    [cell.signatureLabel setText:buddy.phoneNumber];
+                }
+                else{
+                    [cell.nameLabel setText:buddy.phoneNumber];
+                }
+            }
+            else{
+                [cell.nameLabel setText:buddy.nickName];
+                [cell.signatureLabel setText:buddy.status];
+            }
+            
+            if ([self.selectedBuddys indexOfObject:buddy] != NSNotFound){
+                [cell setChecked:YES];
+            }
+            else
+                [cell setChecked:NO];
+            
+            
+            return cell;
+            
+        }
+        
+    }
+}
+
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    [tableView deselectRowAtIndexPath:indexPath animated:YES];
+    
+    NSInteger section = indexPath.section;
+    NSInteger row = indexPath.row;
+//    if (section == 0) {
+    if (section == 0 && self.isChosenToStartAChat) {
+        if ([tableView isEqual:self.selectContactTableView]) {
+            if (self.isChosenToStartAChat) {
+                if (row == 0) {
+                    GroupPickerViewController* gpvc = [[GroupPickerViewController alloc] init];
+                    [self.navigationController pushViewController:gpvc animated:YES];
+                    [gpvc release];
+                }
+                else{
+                    AddressBookViewController* abvc = [[AddressBookViewController alloc] init];
+                    [self.navigationController pushViewController:abvc animated:YES];
+                    [abvc release];
+                }
+            }
+            if (self.isManageGroupMember) {
+                AddressBookViewController* abvc = [[AddressBookViewController alloc] init];
+                [self.navigationController pushViewController:abvc animated:YES];
+                [abvc release];
+            }
+            if (self.isAddMembersToStartAGroupChat) {
+                AddressBookViewController* abvc = [[AddressBookViewController alloc] init];
+                [self.navigationController pushViewController:abvc animated:YES];
+                [abvc release];
+            }
+        }
+        else
+        {
+            Buddy* buddy ;
+            
+            buddy = [self.filteredContacts objectAtIndex:row];
+            
+            if([self.selectedBuddys indexOfObject:buddy] == NSNotFound){
+                [self.selectedBuddys addObject:buddy];
+                [self animateAddingBuddy:buddy];
+            }
+            else{
+                
+                [self animateRemovingBuddy:buddy atIndex:[self.selectedBuddys indexOfObject:buddy]];
+                [self.selectedBuddys removeObject:buddy];
+            }
+            [self.searchDisplayController.searchResultsTableView reloadData];
+        }
+        
+    }
+    else{
+        NSInteger realsection = [self realSectionIndex:section];
+        Buddy* buddy ;
+        UITableViewCell *cell = [tableView cellForRowAtIndexPath:indexPath];
+        if ([cell isKindOfClass:[AddChatMemberCell class]]){
+            [(AddChatMemberCell *)cell setChecked:YES];
+            [(AddChatMemberCell *)cell setChecked:NO];
+        }
+
+
+        if (_isSearching){
+           buddy = [self.filteredContacts objectAtIndex:row];
+        }else{
+            buddy = [[self.contacts objectAtIndex:realsection] objectAtIndex:row];
+        }
+        
+        
+        if([self.selectedBuddys indexOfObject:buddy] == NSNotFound){
+            [self.selectedBuddys addObject:buddy];
+            [self animateAddingBuddy:buddy];
+            if (tableView != self.selectContactTableView) {
+                isChecked = YES;
+                [cancelButton setTitle:@"确认"  forState:UIControlStateNormal];
+                NSLog(@"---");
+            }
+            
+            [(AddChatMemberCell *)cell setChecked:YES];
+        }
+        else{
+            
+            [self animateRemovingBuddy:buddy atIndex:[self.selectedBuddys indexOfObject:buddy]];
+            [self.selectedBuddys removeObject:buddy];
+            if (tableView != self.selectContactTableView) {
+                isChecked = NO;
+                [cancelButton setTitle:@"取消"  forState:UIControlStateNormal];
+            }
+
+            [(AddChatMemberCell *)cell setChecked:NO];
+        }
+        [self.selectContactTableView reloadData];
+    }
+    
+}
+
+#pragma mark -
+#pragma mark - animation of adding and removing
+
+-(void)remove:(id)sender
+{
+    UIButton *b = (UIButton *)sender;
+    
+    NSInteger index = b.tag;
+    //   NSLog(@"index: %d",index);
+    Buddy* buddy = [self.selectedBuddys objectAtIndex:index];
+    
+    [self animateRemovingBuddy:buddy atIndex:index];
+    
+    [self.selectedBuddys removeObjectAtIndex:index];
+    
+    [self.selectContactTableView reloadData];
+}
+
+- (void)setButtonFrame
+{
+    [UIView beginAnimations:@"movement" context:nil];
+    [UIView setAnimationCurve:UIViewAnimationCurveEaseInOut];
+    [UIView setAnimationDuration:0.3f];
+    [UIView setAnimationRepeatCount:0];
+    
+    int i = 0;
+    for (i = 0; i<[self.buddyButtons count]; i++) {
+        [[self.buddyButtons objectAtIndex:i] setFrame:CGRectMake(45*i + 5, 4, 40, 40)];
+    }
+    
+    [self.iv_blanksquare setFrame:CGRectMake(45*i + 5, 4, 40, 40)];
+    
+    [UIView commitAnimations];
+    
+}
+
+-(void)animateAddingBuddy:(Buddy*)buddy
+{
+    UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];
+    [self.buddyButtons addObject:button];
+    
+    button.tag = [self.buddyButtons count] - 1;
+    [button addTarget:self action:@selector(remove:) forControlEvents:UIControlEventTouchUpInside];
+    
+    [button setFrame:CGRectMake(45*([self.buddyButtons count] - 1) + 5, 4, 40, 40)];
+    
+    [button setBackgroundColor:[UIColor clearColor]];
+    button.layer.masksToBounds = YES;
+    button.layer.cornerRadius = 5.0f;
+    
+    [self.sv_container addSubview:button];
+    
+    NSData *data = [AvatarHelper getThumbnailForUser:buddy.userID];
+    if (data)
+        [button setBackgroundImage:[UIImage imageWithData:data] forState:UIControlStateNormal];
+    else{
+        if ([buddy.buddy_flag isEqualToString:@"2"]) {
+            [button setBackgroundImage:[UIImage imageNamed: DEFAULT_AVATAR_OFFLINE_IMAGE_90] forState:UIControlStateNormal];
+        }
+        else
+            [button setBackgroundImage:[UIImage imageNamed:DEFAULT_AVATAR] forState:UIControlStateNormal];
+    }
+    
+    self.sv_container.contentSize = CGSizeMake(45*[self.buddyButtons count] + 1, 42) ; // including the blank square
+    
+    if([self.buddyButtons count] > 4){
+        self.sv_container.contentOffset = CGPointMake(45*([self.buddyButtons count]-5) + 20, 0);
+        self.sv_container.scrollEnabled = TRUE;
+    }
+    else{
+        self.sv_container.contentOffset = CGPointMake(0, 0);
+        self.sv_container.scrollEnabled = FALSE;
+    }
+    
+    //  NSLog(@"size:%f, %f", self.sv_container.contentSize.width, self.sv_container.contentSize.height);
+    
+    //  NSLog(@"frame w: %f, %f",self.sv_container.frame.size.width,self.sv_container.frame.size.height);
+    
+    
+    
+    //  NSString *str  = [NSString stringWithFormat:@"%d",[self.buddyButtons count]];
+    NSString *title = [NSString stringWithFormat:@"%@(%zi)",NSLocalizedString(@"Decide",nil),[self.buddyButtons count]] ;
+    [self.confirmButton setTitle:title forState:UIControlStateNormal];
+    
+    [self setButtonFrame];
+    
+}
+
+
+-(void)animateRemovingBuddy:(Buddy*)buddy atIndex:(NSInteger)index
+{
+    UIButton* button = [self.buddyButtons objectAtIndex:index];
+    
+    [button removeFromSuperview];
+    
+    [self.buddyButtons removeObject:button];
+    
+    for (NSInteger i = index;i<[self.buddyButtons count];i++) {
+        UIButton* btn = [self.buddyButtons objectAtIndex:i];
+        btn.tag = i;
+    }
+    
+    self.sv_container.contentSize = CGSizeMake(45*[self.buddyButtons count], 42);
+    
+    NSString *title = [NSString stringWithFormat:@"%@(%zi)",NSLocalizedString(@"Decide",nil),[self.buddyButtons count]] ;
+    [self.confirmButton setTitle:title forState:UIControlStateNormal];
+    
+    [self setButtonFrame];
+    
+    
+}
+
+#pragma mark -
+#pragma mark - view lifecycle
+
+- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
+{
+    self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
+    if (self) {
+    }
+    return self;
+}
+
+- (void)viewDidLoad
+{
+    [super viewDidLoad];
+    
+    [self configNav];
+    
+    _isSearching = NO;
+    
+    self.selectContactTableView.backgroundColor = [UIColor colorWithHexString:SETTING_BACKGROUND_COLOR];
+    self.selectContactTableView.backgroundView = nil;
+    
+    if (self.exsitingBuddys == nil) {
+        self.exsitingBuddys = [[[NSMutableArray alloc] init] autorelease];
+    }
+    
+    //Search bar
+    self.searchDisplayController.delegate = self;
+    
+    [self initData];
+    
+    self.buddyButtons = [[[NSMutableArray alloc] init] autorelease];
+    self.selectedBuddys = [[[NSMutableArray alloc] init] autorelease];
+    
+   // self.bottomBar = [[[UIImageView alloc] initWithImage:[UIImage imageNamed:SELECT_CONTACT_BAR_IMAGE]] autorelease];
+    self.bottomBar = [[UIImageView alloc] init];
+    [self.bottomBar setBackgroundColor:[UIColor whiteColor]];
+    [self.bottomBar setFrame:CGRectMake(0, [UISize screenHeightNotIncludingStatusBarAndNavBar] - 49, [UISize screenWidth], 49)];
+    
+    [self.view addSubview:self.bottomBar];
+    
+    self.bottomBar.userInteractionEnabled = TRUE;
+    
+    self.sv_container = [[[UIScrollView alloc] initWithFrame:CGRectMake(0, 0, [UISize screenWidth] - 70, 49)] autorelease];
+    
+    [self.bottomBar addSubview:self.sv_container];
+    
+    self.sv_container.delegate = self;
+    self.sv_container.scrollEnabled = FALSE;
+    self.sv_container.showsHorizontalScrollIndicator = FALSE;
+    
+    self.iv_blanksquare = [[[UIImageView alloc] initWithFrame:CGRectMake(5, 4, 40, 40)] autorelease];
+    [self.iv_blanksquare setImage:[PublicFunctions strecthableImage:SELECT_CONTACT_BOX]];
+    
+    [self.sv_container addSubview:self.iv_blanksquare];
+    
+    self.confirmButton = [[[UIButton alloc] initWithFrame:CGRectMake(self.sv_container.frame.size.width+5, 6 , 60, 37)] autorelease];
+    [self.bottomBar addSubview:self.confirmButton];
+    
+    [self.confirmButton setBackgroundImage:[PublicFunctions strecthableImage:MESSAGE_SEND_BUTTON_IMAGE] forState:UIControlStateNormal];
+    
+    [self.confirmButton addTarget:self action:@selector(confirmButtonClick) forControlEvents:UIControlEventTouchUpInside];
+    
+    self.confirmButton.titleLabel.font = [UIFont boldSystemFontOfSize:15];
+    [self.confirmButton setTitle:[NSString stringWithFormat:@"%@(%d)",NSLocalizedString(@"Decide",nil),0] forState:UIControlStateNormal];
+    
+    
+    if (IS_IOS7) {
+        [self.view setAutoresizesSubviews:FALSE];
+        [self.view setAutoresizingMask:UIViewAutoresizingNone];
+        self.edgesForExtendedLayout = UIRectEdgeNone;
+        self.automaticallyAdjustsScrollViewInsets = NO;
+    }
+    
+    isCreatingGroup=false;
+
+}
+
+- (void)viewWillAppear:(BOOL)animated
+{
+    self.selectContactTableView.frame = CGRectMake(0, 0, 320, [UISize screenHeightNotIncludingStatusBarAndNavBar] - 40);
+}
+
+- (void)didReceiveMemoryWarning
+{
+    [super didReceiveMemoryWarning];
+}
+
+- (void)confirmButtonClick
+{
+    if (isCreatingGroup) {
+        return;
+    }
+    
+    [WTHelper WTLog:@"create temp group"];
+    isCreatingGroup=true;
+    
+    if (self.isManageGroupMember) {
+        
+        if (self.delegate && [self.delegate respondsToSelector:@selector(didChooseGroupMembers:withRequestor:)]) {
+            [self.delegate didChooseGroupMembers:self.selectedBuddys withRequestor:self];
+            [self goBack];
+        }
+    }
+    
+    if (self.isChosenToStartAChat) {
+        if ([self.selectedBuddys count] == 1) {
+            Buddy *buddy = [self.selectedBuddys objectAtIndex:0];
+            [((AppDelegate *)[UIApplication sharedApplication].delegate).tabBarVC.omMessageVC fComposeWowTalkMsgToUser:buddy withFirstChat:NO];
+            [((AppDelegate *)[UIApplication sharedApplication].delegate).tabBarVC jumpToOtherVCWithIndex:0];
+        }
+        else if([self.selectedBuddys count] > 1){
+            [WowTalkWebServerIF createTemporaryChatRoom:NSLocalizedString( @"Chatroom", nil)withCallback:@selector(didCreateGroup:) withObserver:self];
+        }
+    }
+    
+    if (self.isAddMembersToStartAGroupChat) {
+        [self.selectedBuddys addObjectsFromArray:self.exsitingBuddys];
+        [WowTalkWebServerIF createTemporaryChatRoom:NSLocalizedString( @"Chatroom", nil)withCallback:@selector(didCreateGroup:) withObserver:self];
+        
+    }
+}
+
+
+- (void)didCreateGroup:(NSNotification *)notification
+{
+    NSError* error = [[notification userInfo] valueForKey:WT_ERROR];
+    if (error.code == NO_ERROR)
+    {
+        NSString *groupid = [[notification userInfo] objectForKey:WT_GROUP_ID];
+        self.groupID = groupid;
+        
+        // add myself into the chatroom.
+        Buddy * buddy = [[Buddy alloc] init];
+        buddy.userID = [WTUserDefaults getUid];
+        [Database storeMember:buddy ToChatRoom:self.groupID];
+        
+        //add more members.
+        NSLog(@"222");
+        
+        [WowTalkWebServerIF groupChat_AddMembers:groupID withMembers:self.selectedBuddys withCallback:@selector(addMembers:) withObserver:self];
+        [buddy release];
+    }
+    else {
+        UIAlertView* alert = [[UIAlertView alloc] initWithTitle:nil message:NSLocalizedString(@"Create group failed!", nil) delegate:nil cancelButtonTitle:NSLocalizedString(@"OK", nil) otherButtonTitles: nil];
+        
+        [alert show];
+        [alert release];
+        
+        isCreatingGroup=false;
+        
+    }
+
+}
+
+
+- (void)addMembers:(NSNotification *)notification
+{
+    NSError* error = [[notification userInfo] valueForKey:WT_ERROR];
+    if (error.code == NO_ERROR) {
+        
+        [self.navigationController popToRootViewControllerAnimated:NO];
+        [((AppDelegate *)[UIApplication sharedApplication].delegate).tabBarVC.omMessageVC createGroupChatRoom:self.selectedBuddys withGroupID:groupID];
+        ((AppDelegate *)[UIApplication sharedApplication].delegate).tabBarVC.omMessageVC.isTemporaryChatPop = YES;
+//        [((AppDelegate *)[UIApplication sharedApplication].delegate).tabbarVC selectTabAtIndex:TAB_MESSAGE];
+        [((AppDelegate *)[UIApplication sharedApplication].delegate).tabBarVC jumpToOtherVCWithIndex:0];
+        
+        
+        [WowTalkWebServerIF groupChat_GetGroupMembers:groupID withCallback:nil withObserver:nil];
+    }
+    else {
+        UIAlertView* alert = [[UIAlertView alloc] initWithTitle:nil message:NSLocalizedString(@"Create group failed!", nil) delegate:nil cancelButtonTitle:NSLocalizedString(@"OK", nil) otherButtonTitles: nil];
+        
+        [alert show];
+        [alert release];
+        
+        isCreatingGroup=false;
+        
+    }
+
+    
+}
+
+
+
+#pragma mark -
+#pragma mark UISearchDisplayController Delegate Methods
+
+- (BOOL)searchDisplayController:(UISearchDisplayController *)controller shouldReloadTableForSearchString:(NSString *)searchString
+{
+    [self filterContentForSearchText:searchString];
+    
+    return YES;
+}
+
+- (void) searchDisplayControllerWillBeginSearch:(UISearchDisplayController *)controller{
+    
+    // isSearchMode = YES;
+    
+    _isSearching = YES;
+    
+    [self.searchDisplayController.searchResultsTableView setBackgroundColor:[UIColor colorWithHexString:SETTING_BACKGROUND_COLOR]];
+    [self.searchDisplayController.searchResultsTableView setSeparatorStyle:UITableViewCellSeparatorStyleNone];
+    [self.searchDisplayController.searchBar setTintColor:[UIColor blackColor]];
+    
+//    for(UIView *subView in self.searchDisplayController.searchBar.subviews)
+//    {
+//        if ([subView isKindOfClass:[UIButton class]])
+//        {
+//            UIButton* btn = (UIButton*) subView;
+//            btn.titleLabel.textColor = [UIColor redColor]; // not working here.
+//        }
+//    }
+    
+    self.searchDisplayController.searchBar.showsCancelButton = YES;
+    if (IS_IOS7) {
+        
+        for (id searchbutton in self.searchDisplayController.searchBar.subviews)
+            
+        {
+            
+            UIView *view = (UIView *)searchbutton;
+            
+            cancelButton = (UIButton *)[view.subviews objectAtIndex:2];
+            
+            cancelButton.enabled = YES;
+            if (isChecked == YES) {
+                [cancelButton setTitle:@"确认"  forState:UIControlStateNormal];//文字
+            }else{
+                [cancelButton setTitle:@"取消"  forState:UIControlStateNormal];
+            }
+            
+            
+            break;
+            
+        }
+        
+    }else
+        
+    {
+        
+        for(id cancelButton1 in [self.searchDisplayController.searchBar subviews])
+            
+        {
+            
+            if([cancelButton isKindOfClass:[UIButton class]])
+                
+            {
+                UIButton *btn = (UIButton *)cancelButton1;
+                
+                if (isChecked == YES) {
+                    [btn setTitle:@"确认"  forState:UIControlStateNormal];
+                }else{
+                    [btn setTitle:@"取消"  forState:UIControlStateNormal];
+                }
+                
+                
+            }
+            
+        }
+        
+    }
+    
+}
+
+
+
+- (void) searchDisplayControllerDidEndSearch:(UISearchDisplayController *)controller{
+    
+    _isSearching = NO;
+    [self.searchDisplayController.searchBar resignFirstResponder];
+}
+
+- (void) searchBarCancelButtonClicked:(UISearchBar *)searchBar
+{
+    [self.selectContactTableView reloadData];
+}
+
+#pragma mark Content Filtering
+
+- (void)filterContentForSearchText:(NSString*)searchText
+{
+    if (self.filteredContacts == nil) {
+        self.filteredContacts = [[[NSMutableArray alloc] init] autorelease];
+    }
+    else
+        [self.filteredContacts removeAllObjects];
+    
+    NSPredicate* predicate = [NSPredicate predicateWithFormat:@"(SELF contains[cd] %@)",searchText];
+    
+    for (int i = 1; i< [self.contacts count];i++) {
+        NSArray* section = [self.contacts objectAtIndex:i];
+        if (section == nil || [section count]==0) {
+            continue;
+        }
+        else{
+            for (Buddy* buddy in section) {
+                if ([predicate evaluateWithObject:buddy.nickName]) {
+                    [self.filteredContacts addObject:buddy];
+                }
+            }
+        }
+    }
+    
+}
+
+
+
+
+
+- (void)dealloc
+{
+    self.buddyButtons = nil;
+    self.contacts  = nil;
+    
+    self.selectedBuddys = nil;
+    
+    self.iv_blanksquare = nil;
+    self.selectContactTableView = nil;
+    self.filteredContacts = nil;
+    self.confirmButton = nil;
+    
+    self.sv_container = nil;
+    self.bottomBar = nil;
+    
+    [super dealloc];
+}
+
+@end

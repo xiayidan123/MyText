@@ -1,0 +1,37 @@
+//
+//  LocationHelper.h
+//  omim
+//
+//  Created by elvis on 2013/05/14.
+//  Copyright (c) 2014年 OneMeter Inc. All rights reserved.
+//
+
+#import <Foundation/Foundation.h>
+#import <CoreLocation/CoreLocation.h>
+#import <Mapkit/Mapkit.h>
+
+
+@class LocationHelper;
+
+@protocol LocationHelperDelegate <NSObject>
+@optional
+-(void)getCurrentLocationData:(LocationHelper*)request withResult:(BOOL)success;
+
+@end
+
+@interface LocationHelper : NSObject<MKReverseGeocoderDelegate,CLLocationManagerDelegate>
+
+@property (nonatomic,retain) CLLocationManager* cllmanager;
+@property (nonatomic,retain) CLLocation* currentLocation;
+@property (nonatomic,retain) NSString* locationName;
+@property (nonatomic,assign) id<LocationHelperDelegate> delegate;
+
++(LocationHelper*)defaultLocaltionHelper;
+
+
+
+-(void)startTraceLocation;
+-(void)stopTraceLocation;
+-(CLLocationDistance)distanceBetweenMyLocationAndPlaceWithLatitude:(double)latitude Longitude:(double)longitude;
+
+@end

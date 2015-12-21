@@ -1,0 +1,338 @@
+//
+//  SignInViewController.m
+//  dev01
+//
+//  Created by Huan on 15/4/2.
+//  Copyright (c) 2015年 wowtech. All rights reserved.
+//  请假
+
+#import "SignInViewController.h"
+#import "SignInOrLeaveCell.h"
+#import "PublicFunctions.h"
+#import "OMNetWork_MyClass.h"
+#import "ClassListViewController.h"
+#import "LessonListViewController.h"
+#import "TeacherListViewController.h"
+#import "OMClass.h"
+#import "Lesson.h"
+#import "SchoolMember.h"
+#import "ReasonCell.h"
+#import "AppDelegate.h"
+#import "MessagesVC.h"
+#import "WowTalkWebServerIF.h"
+#import "OMMessageVC.h"
+#import "OMAlertViewForNet.h"
+
+
+@interface SignInViewController ()<UITableViewDelegate,UITableViewDataSource,ClassListViewControllerDelegate,LessonListViewController,TeacherListViewController,ReasonCellDelegate,OMAlertViewForNetDelegate,UIAlertViewDelegate>
+@property (retain, nonatomic) IBOutlet UITableView *tableView;
+@property (retain, nonatomic) NSArray *NameArray;
+@property (retain, nonatomic) SignInOrLeaveCell *valueCell;
+@property (retain, nonatomic) OMClass *OMClass;
+@property (retain, nonatomic) Lesson *OMLesson;
+@property (retain, nonatomic) SchoolMember *OMTeacher;
+@property (copy, nonatomic) NSString *reasonContent;
+@property (copy, nonatomic) NSString *messageContent;
+@property (retain, nonatomic) Buddy *buddy;
+@property (retain, nonatomic) OMAlertViewForNet * alertViewForNet;
+
+@end
+
+@implementation SignInViewController
+
+- (void)dealloc {
+    [_tableView release];
+    self.NameArray = nil;
+    self.valueCell = nil;
+    self.OMClass = nil;
+    self.OMLesson = nil;
+    self.OMTeacher = nil;
+    self.reasonContent = nil;
+    self.messageContent = nil;
+    self.buddy = nil;
+    self.alertViewForNet = nil;
+    
+    self.class_model = nil;
+    
+    [super dealloc];
+}
+
+-(void)setClass_model:(OMClass *)class_model{
+    [_class_model release],_class_model = nil;
+    _class_model = [class_model retain];
+    
+    self.OMClass = _class_model;
+}
+
+
+- (void)viewWillAppear:(BOOL)animated
+{
+    self.title = @"请假";
+}
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    [self configNavigation];
+    [[IQKeyboardManager sharedManager] setEnable:NO];
+    
+}
+
+- (CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section
+{
+    if (section == 0) {
+        return 0.1;
+    }
+    return 44;
+}
+
+
+- (void)configNavigation
+{
+    self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:NSLocalizedString(@"Apply", nil) style:UIBarButtonItemStylePlain target:self action:@selector(applyAction)];
+}
+
+- (void)sure{
+    UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:@"" message:@"是否发送请假申请" delegate:self cancelButtonTitle:NSLocalizedString(@"取消", nil) otherButtonTitles:NSLocalizedString(@"确定",nil), nil];
+    alertView.tag = 202;
+    [alertView show];
+    [alertView release];
+}
+
+- (void)applyAction
+{
+    [self.view endEditing:YES];
+    if (self.OMClass && self.OMLesson && self.OMTeacher && (self.reasonContent.length > 0)) {
+        [self sure];
+    }else {
+        UIAlertView *alertView = [[[UIAlertView alloc] initWithTitle:nil message:NSLocalizedString(@"请填写完整请假信息", nil) delegate:self cancelButtonTitle:nil otherButtonTitles:NSLocalizedString(@"确定", nil), nil] autorelease];
+        [alertView show];
+    }
+    
+}
+
+
+- (void)didUploadLeave:(NSNotification *)notif{
+    NSError *error = [[notif userInfo] valueForKey:WT_ERROR];
+    if (error.code == NO_ERROR) {
+        self.alertViewForNet.title = @"请假成功";
+        self.alertViewForNet.type = OMAlertViewForNetStatus_Done;
+//        [self.navigationController popToRootViewControllerAnimated:YES];
+        
+        if (self.buddy) {
+            [((AppDelegate *)[UIApplication sharedApplication].delegate).tabBarVC.omMessageVC fComposeWowTalkMsgToUser:self.buddy withFirstChat:NO WithMessageContent:self.messageContent];
+            [((AppDelegate *)[UIApplication sharedApplication].delegate).tabBarVC jumpToOtherVCWithIndex:0];
+        }
+        else{
+            [WowTalkWebServerIF getBuddyWithUID:self.OMTeacher.userID withCallback:@selector(didGetBuddyWithUID:) withObserver:self];
+        }
+        if (![[self.navigationController.viewControllers firstObject] isKindOfClass:[OMMessageVC class]]){
+            [self.navigationController popToRootViewControllerAnimated:NO];
+        }
+        else
+        {
+            UIAlertView *alertView = [[[UIAlertView alloc] initWithTitle:nil message:NSLocalizedString(@"请填写完整请假信息", nil) delegate:self cancelButtonTitle:nil otherButtonTitles:                                             NSLocalizedString(@"确定", nil), nil] autorelease];
+            [alertView show];
+        }
+        
+    }else if (error.code == 52){
+//        self.alertViewForNet.title = @"请勿重复请假";
+//        self.alertViewForNet.type = OMAlertViewForNetStatus_Failure;
+//       [self.navigationController popToRootViewControllerAnimated:YES];
+        UIAlertView *alertView = [[[UIAlertView alloc] initWithTitle:nil message:NSLocalizedString(@"请勿重复请假", nil) delegate:self cancelButtonTitle:nil otherButtonTitles:                                             NSLocalizedString(@"确定", nil), nil] autorelease];
+        [alertView show];
+
+    }else{
+//        self.alertViewForNet.title = @"请假失败";
+//        self.alertViewForNet.type = OMAlertViewForNetStatus_Failure;
+        //[self.navigationController popToRootViewControllerAnimated:YES];
+        UIAlertView *alertView = [[[UIAlertView alloc] initWithTitle:nil message:NSLocalizedString(@"请假失败\n请您填写完整请假信息", nil) delegate:self cancelButtonTitle:nil otherButtonTitles:                                             NSLocalizedString(@"确定", nil), nil] autorelease];
+        [alertView show];
+
+    }
+    
+    self.navigationItem.rightBarButtonItem.enabled = YES;
+}
+
+
+- (void)didGetBuddyWithUID:(NSNotification *)notif{
+    NSError *error = [[notif userInfo] valueForKey:WT_ERROR];
+    if (error.code == NO_ERROR) {
+        self.buddy = [Database buddyWithUserID:self.OMTeacher.userID];
+        [((AppDelegate *)[UIApplication sharedApplication].delegate).tabBarVC.omMessageVC fComposeWowTalkMsgToUser:self.buddy withFirstChat:NO WithMessageContent:self.messageContent];
+        [((AppDelegate *)[UIApplication sharedApplication].delegate).tabBarVC jumpToOtherVCWithIndex:0];
+        if (![[self.navigationController.viewControllers firstObject] isKindOfClass:[OMMessageVC class]]){
+            [self.navigationController popToRootViewControllerAnimated:NO];
+        }
+    }
+}
+
+- (NSArray *)NameArray
+{
+    if (!_NameArray) {
+        
+        NSArray *arr = @[@"班级",@"课表",@"老师"];
+        _NameArray = [arr retain];
+    }
+    return _NameArray;
+}
+
+
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    if (indexPath.row != 3) {
+//        if (indexPath.section == 0 && indexPath.row == 0){
+//            SignInOrLeaveCell *cell = [SignInOrLeaveCell cellWithTableView:tableView];
+//            cell.title_label.text = self.NameArray[indexPath.row];
+//            cell.content_label.text = self.OMClass.groupNameOriginal;
+//            return cell;
+//        }
+        SignInOrLeaveCell *cell = [SignInOrLeaveCell cellWithTableView:tableView];
+        cell.title_label.text = self.NameArray[indexPath.row];
+        return cell;
+    }
+    else
+    {
+        ReasonCell *cell = [ReasonCell cellWithTableView:tableView];
+        cell.delegate = self;
+        return cell;
+    }
+    
+}
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
+{
+    return 4;
+}
+- (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
+{
+    return 1;
+}
+- (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    if (indexPath.row == 3) {
+        return 180;
+    }
+    else
+    {
+        return 44;
+    }
+    
+}
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    [tableView deselectRowAtIndexPath:indexPath animated:YES];
+    self.valueCell = (SignInOrLeaveCell *)[tableView cellForRowAtIndexPath:indexPath];
+    if (indexPath.row == 0) {
+        if(self.class_model != nil)return;
+        
+        ClassListViewController *classListVC = [[[ClassListViewController alloc] initWithNibName:@"ClassListViewController" bundle:nil] autorelease];
+        
+        classListVC.delegate = self;
+        [self.navigationController pushViewController:classListVC animated:YES];
+    }
+    else if (indexPath.row == 1)
+    {
+        LessonListViewController *lessonListVC = [[[LessonListViewController alloc] initWithNibName:@"LessonListViewController" bundle:nil] autorelease];
+        lessonListVC.isSingln=YES;
+        if (self.OMClass) {
+            lessonListVC.classModel = self.OMClass;
+            lessonListVC.delegate = self;
+            [self.navigationController pushViewController:lessonListVC animated:YES];
+        }
+        else
+        {
+            UIAlertView *alertView = [[[UIAlertView alloc] initWithTitle:nil message:@"请先选择班级" delegate:self cancelButtonTitle:nil otherButtonTitles:NSLocalizedString(@"确定", nil), nil] autorelease];
+            [alertView show];
+        }
+    }
+    else if (indexPath.row == 2)
+    {
+        TeacherListViewController *teacheListVC = [[[TeacherListViewController alloc] initWithNibName:@"TeacherListViewController" bundle:nil] autorelease];
+        if (self.OMClass && self.OMLesson) {
+            teacheListVC.OMClass = self.OMClass;
+            teacheListVC.delegate = self;
+            [self.navigationController pushViewController:teacheListVC animated:YES];
+        }else{
+            UIAlertView *alertView = [[[UIAlertView alloc] initWithTitle:nil message:@"请先选择班级和课表" delegate:self cancelButtonTitle:nil otherButtonTitles:NSLocalizedString(@"确定", nil), nil] autorelease];
+            [alertView show];
+        }
+        
+    }
+    else if (indexPath.row == 3)
+    {
+        
+    }
+    [tableView deselectRowAtIndexPath:indexPath animated:YES];
+}
+
+#pragma mark - UIScrollViewDelegate
+
+-(void)scrollViewDidScroll:(UIScrollView *)scrollView{
+    
+    //    [self.view endEditing:YES];
+}
+
+-(void)scrollViewWillBeginDragging:(UIScrollView *)sscrollView{
+    [self.view endEditing:YES];
+}
+
+
+#pragma mark ClassListViewControllerDelegate
+- (void)getClassName:(OMClass *)classModel
+{
+    self.OMClass = classModel;
+    self.valueCell.content_label.text = classModel.groupNameOriginal;
+    [self.tableView reloadData];
+}
+
+#pragma mark LessonListViewControllerDelegate
+- (void)getLessonList:(Lesson *)lesson
+{
+    self.OMLesson = lesson;
+    self.valueCell.content_label.text = lesson.title;
+    [self.tableView reloadData];
+}
+#pragma mark TeacherListViewControllerDetegate
+- (void)getTeacherList:(SchoolMember *)teacherModel{
+    self.OMTeacher = teacherModel;
+    self.valueCell.content_label.text = teacherModel.alias;
+    [self.tableView reloadData];
+}
+#pragma mark ReasonCellDelegate
+- (void)getNotiContent:(UITextView *)textView{
+    self.reasonContent = textView.text;
+}
+
+- (void)ReasonCell:(ReasonCell *)reasonCell textViewCoverdByKeyboardWithDistance:(CGFloat)distance{
+    
+    [self.tableView setContentOffset:CGPointMake(self.tableView.contentOffset.x, self.tableView.contentOffset.y + distance) animated:YES];
+    [self.tableView setContentSize:self.view.bounds.size];
+}
+
+#pragma mark - OMAlertViewForNetDelegate
+- (void)hiddenOMAlertViewForNet:(OMAlertViewForNet *)alertViewForNet{
+    
+    [self.navigationController popViewControllerAnimated:YES];
+    
+}
+
+#pragma mark UIAlertViewDelegate
+- (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex{
+    if (alertView.tag == 202 && buttonIndex) {
+        
+        //发送请假消息给老师
+        OMAlertViewForNet *alertView = [OMAlertViewForNet OMAlertViewForNet];
+        alertView.title = @"正在发送请假申请...";
+        alertView.type = OMAlertViewForNetStatus_Loading;
+        [alertView show];
+        alertView.delegate = self;
+        self.alertViewForNet = alertView;
+        
+        
+        self.navigationItem.rightBarButtonItem.enabled = NO;
+        self.messageContent = [NSString stringWithFormat:@"%@你好\n请假班级：%@\n请假课：%@ \n请假原因：%@",self.OMTeacher.alias,self.OMClass.groupNameOriginal,self.OMLesson.title,self.reasonContent];
+        self.buddy = [Database buddyWithUserID:self.OMTeacher.userID];
+        [OMNetWork_MyClass uploadLesson_ask_for_leaveWithLesson_id:self.OMLesson.lesson_id withCallBack:@selector(didUploadLeave:) withObserver:self];
+    }
+}
+
+
+@end

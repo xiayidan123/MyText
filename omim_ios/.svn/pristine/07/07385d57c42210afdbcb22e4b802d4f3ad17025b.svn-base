@@ -1,0 +1,70 @@
+//
+//  GalleryPhotoView.m
+//  dev01
+//
+//  Created by jianxd on 14-12-5.
+//  Copyright (c) 2014年 OneMeter Inc. All rights reserved.
+//
+
+#import "GalleryPhotoView.h"
+
+@implementation GalleryPhotoView
+@synthesize image =_image;
+@synthesize imageview = _imageview;
+
+-(id)initWithFrame:(CGRect)frame{
+    self = [super initWithFrame:frame];
+    if (self) {
+        _imageview = [[[UIImageView alloc] initWithFrame:CGRectMake(0, 0, self.bounds.size.width, self.bounds.size.height)] autorelease];
+        [self addSubview:_imageview];
+        self.maximumZoomScale = 2.0;
+        self.minimumZoomScale = 1.0;
+        self.delegate = self;
+        self.userInteractionEnabled = TRUE;
+    }
+    return self;
+}
+
+-(UIImage*)image{
+    return _image;
+}
+
+-(void)setImage:(UIImage *)image{
+    _image = image;
+    _imageview.image = _image;
+    _imageview.contentMode = UIViewContentModeScaleAspectFit;
+}
+
+
+-(UIView *)viewForZoomingInScrollView:(UIScrollView *)scrollView{
+    return _imageview;
+}
+
+-(void)scrollViewDidEndZooming:(UIScrollView *)scrollView withView:(UIView *)view atScale:(CGFloat)scale{
+    if (self.zoomScale == self.minimumZoomScale) {
+        _isZoomed = FALSE;
+    }
+    else
+        _isZoomed = TRUE;
+    
+    
+    /*
+     NSLog(@"contentsize: %f,%f",scrollView.contentSize.width,scrollView.contentSize.height);
+     NSLog(@"contentoffset: %f,%f",scrollView.contentOffset.x,scrollView.contentOffset.y);
+     NSLog(@"%@",self);
+     NSLog(@"imageview: %@",_imageview);
+     [_imageview setCenter:CGPointMake(self.frame.size.width/2, self.frame.size.height/2)];
+     */
+    
+}
+
+
+- (void)resetZoom
+{
+    if (_isZoomed) {
+        _isZoomed = NO;
+        [self setZoomScale:self.minimumZoomScale animated:NO];
+        [self zoomToRect:CGRectMake(0, 0, self.frame.size.width, self.frame.size.height ) animated:NO];
+        self.contentSize = CGSizeMake(self.frame.size.width * self.zoomScale, self.frame.size.height * self.zoomScale );
+    }
+}@end

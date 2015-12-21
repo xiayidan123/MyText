@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="9059" systemVersion="15B42" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES">
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="9049"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner"/>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" restorationIdentifier="HOMEBtnCell" reuseIdentifier="HOMEBtnCell" id="gTV-IL-0wX" customClass="HOMEButtonCell">
+            <rect key="frame" x="0.0" y="0.0" width="92" height="81"/>
+            <autoresizingMask key="autoresizingMask"/>
+            <view key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center">
+                <rect key="frame" x="0.0" y="0.0" width="92" height="81"/>
+                <subviews>
+                    <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="aCw-Ty-PkT">
+                        <rect key="frame" x="16" y="5" width="60" height="60"/>
+                        <animations/>
+                        <constraints>
+                            <constraint firstAttribute="width" constant="60" id="9WZ-gv-vBq"/>
+                            <constraint firstAttribute="height" constant="60" id="kEK-vp-qqZ"/>
+                        </constraints>
+                    </imageView>
+                    <imageView hidden="YES" userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="btn_home_classnotice.png" translatesAutoresizingMaskIntoConstraints="NO" id="Fng-Ve-x4g" userLabel="标签">
+                        <rect key="frame" x="61" y="5" width="15" height="15"/>
+                        <animations/>
+                        <constraints>
+                            <constraint firstAttribute="width" constant="15" id="Ly9-yz-mLW"/>
+                            <constraint firstAttribute="height" constant="15" id="xmc-oN-THz"/>
+                        </constraints>
+                    </imageView>
+                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" text="test" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="1rl-es-bGQ">
+                        <rect key="frame" x="36" y="75" width="21" height="15"/>
+                        <animations/>
+                        <fontDescription key="fontDescription" type="system" pointSize="12"/>
+                        <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
+                        <nil key="highlightedColor"/>
+                    </label>
+                    <label hidden="YES" opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" text="10" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="v0W-Kj-0rg" userLabel="条数">
+                        <rect key="frame" x="63" y="7" width="11" height="11"/>
+                        <animations/>
+                        <fontDescription key="fontDescription" type="boldSystem" pointSize="9"/>
+                        <color key="textColor" red="1" green="1" blue="1" alpha="1" colorSpace="calibratedRGB"/>
+                        <nil key="highlightedColor"/>
+                    </label>
+                    <imageView hidden="YES" userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="btn_home_classnotice.png" translatesAutoresizingMaskIntoConstraints="NO" id="ckY-UC-F6z" userLabel="提示">
+                        <rect key="frame" x="63" y="10" width="8" height="8"/>
+                        <animations/>
+                        <constraints>
+                            <constraint firstAttribute="height" constant="8" id="4aD-I9-xWi"/>
+                            <constraint firstAttribute="width" constant="8" id="bWX-uj-nZi"/>
+                        </constraints>
+                    </imageView>
+                </subviews>
+                <animations/>
+                <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
+            </view>
+            <animations/>
+            <constraints>
+                <constraint firstItem="aCw-Ty-PkT" firstAttribute="trailing" secondItem="Fng-Ve-x4g" secondAttribute="trailing" id="4gZ-8A-oFl"/>
+                <constraint firstItem="aCw-Ty-PkT" firstAttribute="top" secondItem="Fng-Ve-x4g" secondAttribute="top" id="4gu-qh-q7P"/>
+                <constraint firstItem="1rl-es-bGQ" firstAttribute="top" secondItem="aCw-Ty-PkT" secondAttribute="bottom" constant="10" id="7ad-02-VSE"/>
+                <constraint firstItem="ckY-UC-F6z" firstAttribute="top" secondItem="Fng-Ve-x4g" secondAttribute="bottom" constant="-10" id="DXG-lt-sdx"/>
+                <constraint firstItem="aCw-Ty-PkT" firstAttribute="top" secondItem="gTV-IL-0wX" secondAttribute="top" constant="5" id="Lvk-k8-D1M"/>
+                <constraint firstItem="v0W-Kj-0rg" firstAttribute="centerY" secondItem="Fng-Ve-x4g" secondAttribute="centerY" id="QGE-aK-dCE"/>
+                <constraint firstAttribute="centerX" secondItem="1rl-es-bGQ" secondAttribute="centerX" id="WHX-XC-zhw"/>
+                <constraint firstAttribute="centerX" secondItem="aCw-Ty-PkT" secondAttribute="centerX" id="hBo-C8-Ygj"/>
+                <constraint firstItem="v0W-Kj-0rg" firstAttribute="centerX" secondItem="Fng-Ve-x4g" secondAttribute="centerX" id="i3O-9t-iWx"/>
+                <constraint firstItem="ckY-UC-F6z" firstAttribute="trailing" secondItem="Fng-Ve-x4g" secondAttribute="leading" constant="10" id="uRQ-PE-7ql"/>
+            </constraints>
+            <size key="customSize" width="92" height="81"/>
+            <connections>
+                <outlet property="Redpoint" destination="ckY-UC-F6z" id="o4j-mp-UM3"/>
+                <outlet property="TipCount_Lab" destination="v0W-Kj-0rg" id="jTh-M6-3A0"/>
+                <outlet property="icon_ImageView" destination="aCw-Ty-PkT" id="5Vb-Qy-JLK"/>
+                <outlet property="redHeight" destination="xmc-oN-THz" id="hZO-6Z-rTp"/>
+                <outlet property="redPoint" destination="Fng-Ve-x4g" id="N80-QX-pHb"/>
+                <outlet property="redWidth" destination="Ly9-yz-mLW" id="dDf-z3-4yg"/>
+                <outlet property="tipBg_imgV" destination="Fng-Ve-x4g" id="D4x-k2-yRi"/>
+                <outlet property="title_Lab" destination="1rl-es-bGQ" id="Ii4-oR-4Zy"/>
+            </connections>
+            <point key="canvasLocation" x="355" y="355.5"/>
+        </collectionViewCell>
+    </objects>
+    <resources>
+        <image name="btn_home_classnotice.png" width="19" height="19"/>
+    </resources>
+</document>

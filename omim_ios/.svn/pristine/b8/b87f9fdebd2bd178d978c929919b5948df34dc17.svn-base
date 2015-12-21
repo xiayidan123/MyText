@@ -1,0 +1,231 @@
+//
+//  ContantPreviewCell.m
+//  omim
+//
+//  Created by Harry on 14-1-11.
+//  Copyright (c) 2014年 OneMeter Inc. All rights reserved.
+//
+
+#import "ContactPreviewCell.h"
+
+#import <QuartzCore/QuartzCore.h>
+#import "PublicFunctions.h"
+#import "Constants.h"
+#import "WTHeader.h"
+#import "AddressBookManager.h"
+
+
+@implementation ContactPreviewCell
+
+@synthesize iconImage;
+@synthesize authImage;
+@synthesize name;
+@synthesize signature;
+
+@synthesize nameLabel = _nameLabel;
+@synthesize signatureLabel = _signatureLabel;
+@synthesize authImageView = _authImageView;
+
+@synthesize group = _group;
+@synthesize btn_admin = _btn_admin;
+
+
+- (id)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier
+{
+    self = [super initWithStyle:style reuseIdentifier:reuseIdentifier];
+    if (self) {
+        // Initialization code
+        
+        
+    }
+    return self;
+}
+
+- (void)setSelected:(BOOL)selected animated:(BOOL)animated
+{
+    [super setSelected:selected animated:animated];
+    
+    // Configure the view for the selected state
+}
+
+- (void)setIconImage:(UIImage *)image
+{
+    if (![image isEqual:iconImage]) {
+        self.headImageView.buddy = nil;
+        iconImage = [image retain];
+        self.headImageView.headImage = iconImage;
+    }
+}
+
+- (void)setAuthImage:(UIImage *)image
+{
+    if (![image isEqual:authImage]) {
+        authImage = [image retain];
+        self.authImageView.image = authImage;
+    }
+    if (authImage) {
+        [self.nameLabel setFrame:CGRectMake(78.0f, 5.0f, 222.0f, 21.0f)];
+    }
+}
+
+- (void)setName:(NSString *)str
+{
+    if (![str isEqualToString:name]) {
+        name = [str copy];
+        self.nameLabel.text = name;
+    }
+}
+
+- (void)setSignature:(NSString *)str
+{
+    if (![str isEqualToString:signature]) {
+        signature = [str copy];
+        self.signatureLabel.text = signature;
+    }
+}
+
+- (Buddy *)buddy
+{
+    return _buddy;
+}
+
+- (void)setBuddy:(Buddy *)buddy
+{
+    if (_buddy != buddy) {
+        [_buddy release];
+        _buddy = [buddy retain];
+        
+        [self.nameLabel setText:_buddy.showName];
+        [self.signatureLabel setText:_buddy.status];
+        
+    }
+}
+
+-(void)loadViewForGroup
+{
+    self.signatureLabel.hidden = NO;
+    self.authImageView.hidden = YES;
+    [self.nameLabel setText:self.group.groupNameLocal];
+    [self.signatureLabel setText:self.group.groupStatus];
+    
+    NSData *data = [AvatarHelper getThumbnailForGroup:self.group.groupID];
+    self.headImageView.buddy = nil;
+    if (data)
+        self.headImageView.headImage = [UIImage imageWithData:data];
+    else
+    {
+        self.headImageView.headImage =[UIImage imageNamed:DEFAULT_GROUP_AVATAR];
+        
+        if (self.group.needToDownloadThumbnail)
+        {
+            [WowTalkWebServerIF getGroupAvatarThumbnail:self.group.groupID withCallback:@selector(didGetGroupAvatarThumbnail:) withObserver:self];
+        }
+    }
+}
+
+-(void)loadViewForTempGroup
+{
+    self.signatureLabel.hidden = NO;
+    self.authImageView.hidden = YES;
+    NSArray* array = [Database fetchAllBuddysInGroupChatRoom:self.temproom.groupID];
+    [self.nameLabel setText:self.temproom.groupNameOriginal];
+    NSString* statusstr = @"";
+    for (Buddy* buddy in array) {
+        statusstr = [statusstr stringByAppendingFormat:@"%@ ",buddy.nickName];
+    }
+    self.headImageView.buddy = nil;
+    [self.signatureLabel setText:statusstr];
+    //TODO: need a chatting room avatar
+    self.headImageView.headImage =[UIImage imageNamed:DEFAULT_GROUP_AVATAR];
+}
+
+-(void)didGetGroupAvatarThumbnail:(NSNotification*)notif
+{
+    NSData *data = [AvatarHelper getThumbnailForGroup:self.group.groupID];
+    self.headImageView.buddy = nil;
+    if (data)
+        self.headImageView.headImage = [UIImage imageWithData:data];
+    
+}
+
+- (void)loadView
+{
+    self.signatureLabel.hidden = NO;
+    [self.nameLabel setText:self.buddy.nickName];
+    [self.signatureLabel setText:self.buddy.status];
+    
+//    if ([self.buddy.buddy_flag isEqualToString:@"2"]) {
+//        
+//        ABPerson* person = [AddressBookManager personWithNumber:self.buddy.phoneNumber];
+//        if (person) {
+//           [self.nameLabel setText:person.compositeName];
+//            [self.signatureLabel setText:self.buddy.phoneNumber];
+//        } else {
+//            [self.nameLabel setText:self.buddy.phoneNumber];
+//        }
+//    }
+//    if (self.buddy.userType == 2) {
+//        self.authImageView.hidden = NO;
+//        self.authImageView.image = [UIImage imageNamed:@"family_icon.png"];
+//        self.nameLabel.frame = CGRectMake(75.0, 5.0, 219.0, 21.0);
+//    } else {
+        self.authImageView.hidden = YES;
+   // }
+    
+    
+    
+    NSData *data = [AvatarHelper getThumbnailForUser:self.buddy.userID];
+    self.headImageView.buddy = _buddy;
+    if (data)
+        self.headImageView.headImage = [UIImage imageWithData:data];
+    else
+    {
+        if (self.buddy.userType == 0) {
+            self.headImageView.headImage = [UIImage imageNamed:DEFAULT_OFFICIAL_AVARAR];
+        } else {
+//            if ([self.buddy.buddy_flag isEqualToString:@"2"]) {
+//                self.headImageView.headImage = [UIImage imageNamed:DEFAULT_AVATAR_OFFLINE_IMAGE_90];
+//
+//            } else {
+                self.headImageView.headImage = [UIImage imageNamed:DEFAULT_AVATAR];
+//            }
+        }
+        
+        
+   
+    }
+    if (self.buddy.needToDownloadThumbnail)
+        {
+            [WowTalkWebServerIF getThumbnailForUserID:self.buddy.userID withCallback:@selector(getBuddyThumbnail:) withObserver:self];
+        }
+}
+
+- (void)getBuddyThumbnail:(NSNotification *)notification
+{
+    NSData *data = [AvatarHelper getThumbnailForUser:self.buddy.userID];
+    self.headImageView.buddy = _buddy;
+    if (data)
+        self.headImageView.headImage = [UIImage imageWithData:data];
+}
+
+- (void)dealloc {
+ 
+    [_nameLabel release];
+    [_signatureLabel release];
+    [_authImageView release];
+    [iconImage release];
+    [authImage release];
+    [name release];
+    [signature release];
+
+    self.btn_admin = nil;
+    self.group = nil;
+    self.temproom = nil;
+    self.buddy = nil;
+
+    [_headImageView release];
+    [super dealloc];
+}
+
+
+@end

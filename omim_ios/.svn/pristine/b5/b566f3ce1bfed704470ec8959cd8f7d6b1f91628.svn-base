@@ -1,0 +1,42 @@
+//
+// Prefix header for all source files of the 'wowtalk' target in the 'wowtalk' project
+//
+#import <Availability.h>
+
+
+#ifdef __OBJC__
+    #import <UIKit/UIKit.h>
+    #import <Foundation/Foundation.h>
+    #import "NSString+TextSize.h"
+    #import "NSDate+FromCurrentTime.h"
+    #import "UIView+Extension.h"
+
+    #import"OMNotificationName.h"
+    #import"NSString+Format.h"
+    #import"NSString+PinYin.h"
+    #import "IQKeyboardManager.h"
+
+#endif
+
+#define IS_IOS5 ([[[UIDevice currentDevice] systemVersion] doubleValue] >= 5.0 && [[[UIDevice currentDevice] systemVersion] doubleValue] < 6.0)
+#define IS_IOS6 ([[[UIDevice currentDevice] systemVersion] doubleValue] >= 6.0 && [[[UIDevice currentDevice] systemVersion] doubleValue] < 7.0)
+#define IS_IOS7 ([[[UIDevice currentDevice] systemVersion] doubleValue] >= 7.0)
+#define IS_IOS8 ([[[UIDevice currentDevice] systemVersion] doubleValue] >= 8.0)
+
+#define OMMainSelectedColor [UIColor colorWithRed:0 green:0.67 blue:0.93 alpha:1]
+
+#define OMMainUnSelectedColor [UIColor colorWithRed:0.36 green:0.36 blue:0.37 alpha:1]
+
+#define OMScreenW [UIScreen mainScreen].bounds.size.width
+#define OMScreenH [UIScreen mainScreen].bounds.size.height
+
+
+#define radians( degrees ) ( degrees * M_PI / 180 )
+
+// NetWork
+
+#define FileName @"fileName"
+
+#define OMNotificationCenter [NSNotificationCenter defaultCenter]
+
+#define radians( degrees ) ( degrees * M_PI / 180 )

@@ -1,0 +1,98 @@
+//
+//  LessonListViewController.m
+//  dev01
+//
+//  Created by Huan on 15/4/2.
+//  Copyright (c) 2015年 wowtech. All rights reserved.
+//
+
+#import "LessonListViewController.h"
+#import "ClassLessonTeacherCell.h"
+#import "OMNetWork_MyClass.h"
+#import "OMDateBase_MyClass.h"
+#import "OMClass.h"
+#import "Lesson.h"
+#import "NSDate+ClassScheduleDate.h"
+#import "WTUserDefaults.h"
+@interface LessonListViewController ()<UITableViewDataSource,UITableViewDelegate,UIAlertViewDelegate>
+@property (retain, nonatomic) IBOutlet UITableView *tableView;
+@property (retain, nonatomic) NSMutableArray *dataArray;
+@end
+
+@implementation LessonListViewController
+- (void)dealloc {
+    [_tableView release];
+    [super dealloc];
+}
+- (void)viewWillAppear:(BOOL)animated
+{
+    [super viewWillAppear:animated];
+}
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    self.title = @"选择课表";
+    [self prepareData];
+    
+    self.tableView.tableFooterView = [[[UIView alloc] init] autorelease];
+}
+- (NSMutableArray *)dataArray{
+    if (!_dataArray) {
+        _dataArray = [[NSMutableArray alloc] init];
+    }
+    return _dataArray;
+}
+- (void)prepareData
+{
+    [OMNetWork_MyClass getLessoListWithClassID:self.classModel WithCallBack:@selector(didGetLessonList:) withObserver:self];
+}
+- (void)didGetLessonList:(NSNotification *)notif{
+    NSError *error = [[notif userInfo] valueForKey:WT_ERROR];
+    if (error.code == NO_ERROR) {
+        NSMutableArray *lessonArr = [NSMutableArray arrayWithArray:[OMDateBase_MyClass fetchLessonWithClassID:self.classModel.groupID]];
+        NSInteger count = lessonArr.count;
+        for (int i = 0; i < count; i++) {
+            if ([[WTUserDefaults getUsertype] isEqualToString:@"2"] || self.isScreen){
+                NSTimeInterval currentTimeInterval = [NSDate ZeropointWihtDate:[NSDate date]];
+                NSTimeInterval endTimeInterval = [NSDate ZeropointWihtTimeIntervalString:((Lesson *)lessonArr[i]).end_date];
+                if (currentTimeInterval>endTimeInterval)
+                {
+                    [self.dataArray addObject:lessonArr[i]];
+                }
+            }
+       }
+        if (self.dataArray.count == 0) {
+            UIAlertView *alertView = [[[UIAlertView alloc] initWithTitle:@"" message:@"无可用课程" delegate:self cancelButtonTitle:NSLocalizedString(@"确定", nil) otherButtonTitles:nil, nil] autorelease];
+            alertView.delegate = self;
+            [alertView show];
+        }
+        [self.tableView reloadData];
+    }
+}
+#pragma mark UITableViewDataSource
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section{
+    return self.dataArray.count;
+}
+
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath{
+    ClassLessonTeacherCell *cell = [ClassLessonTeacherCell cellWithTableView:tableView];
+    cell.lesson = self.dataArray[indexPath.row];
+    return cell;
+}
+
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    if ([_delegate respondsToSelector:@selector(getLessonList:)]) {
+        [_delegate getLessonList:(Lesson *)self.dataArray[indexPath.row]];
+        [self.navigationController popViewControllerAnimated:YES];
+    }
+    [tableView deselectRowAtIndexPath:indexPath animated:YES];
+}
+
+- (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath{
+    return 44;
+}
+
+- (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex{
+    [self.navigationController popViewControllerAnimated:YES];
+}
+@end

@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="6254" systemVersion="14B25" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES">
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="6247"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner"/>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <view contentMode="scaleToFill" restorationIdentifier="LogoutButtonView" id="Fhl-an-cdr" customClass="LogoutButtonView">
+            <rect key="frame" x="0.0" y="0.0" width="320" height="74"/>
+            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+            <subviews>
+                <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="G31-yu-W0w" userLabel="BGView">
+                    <rect key="frame" x="0.0" y="30" width="320" height="39"/>
+                    <subviews>
+                        <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="0PF-Nx-0CQ">
+                            <rect key="frame" x="0.0" y="0.0" width="320" height="38"/>
+                            <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                            <state key="normal" title="退出登录">
+                                <color key="titleColor" red="0.94901960780000005" green="0.2156862745" blue="0.2156862745" alpha="1" colorSpace="calibratedRGB"/>
+                                <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                            </state>
+                            <connections>
+                                <action selector="logoutAction:" destination="Fhl-an-cdr" eventType="touchUpInside" id="UNm-d4-kJa"/>
+                            </connections>
+                        </button>
+                        <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="mTD-Qi-3RZ" userLabel="TopLine">
+                            <rect key="frame" x="0.0" y="0.0" width="320" height="1"/>
+                            <color key="backgroundColor" red="0.94117647058823528" green="0.94117647058823528" blue="0.94117647058823528" alpha="1" colorSpace="calibratedRGB"/>
+                            <constraints>
+                                <constraint firstAttribute="height" constant="1" id="hSG-uJ-ZYx"/>
+                            </constraints>
+                        </view>
+                        <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="bvH-Vb-ksk" userLabel="BottomLine">
+                            <rect key="frame" x="0.0" y="38" width="320" height="1"/>
+                            <color key="backgroundColor" red="0.94117647059999998" green="0.94117647059999998" blue="0.94117647059999998" alpha="1" colorSpace="calibratedRGB"/>
+                            <constraints>
+                                <constraint firstAttribute="height" constant="1" id="5bb-fi-Krh"/>
+                            </constraints>
+                        </view>
+                    </subviews>
+                    <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                    <constraints>
+                        <constraint firstAttribute="trailing" secondItem="mTD-Qi-3RZ" secondAttribute="trailing" id="5sf-dG-Iua"/>
+                        <constraint firstAttribute="trailing" secondItem="bvH-Vb-ksk" secondAttribute="trailing" id="Ei8-2L-JvM"/>
+                        <constraint firstItem="mTD-Qi-3RZ" firstAttribute="leading" secondItem="G31-yu-W0w" secondAttribute="leading" id="OPa-Gr-sub"/>
+                        <constraint firstAttribute="bottom" secondItem="bvH-Vb-ksk" secondAttribute="bottom" id="RUt-Mv-DIO"/>
+                        <constraint firstItem="0PF-Nx-0CQ" firstAttribute="leading" secondItem="G31-yu-W0w" secondAttribute="leading" id="UMq-Bu-uN4"/>
+                        <constraint firstItem="bvH-Vb-ksk" firstAttribute="leading" secondItem="G31-yu-W0w" secondAttribute="leading" id="dye-Yt-bjC"/>
+                        <constraint firstAttribute="trailing" secondItem="0PF-Nx-0CQ" secondAttribute="trailing" id="ezq-aD-NbG"/>
+                        <constraint firstItem="bvH-Vb-ksk" firstAttribute="top" secondItem="0PF-Nx-0CQ" secondAttribute="bottom" id="hbY-Zq-1af"/>
+                        <constraint firstItem="mTD-Qi-3RZ" firstAttribute="top" secondItem="G31-yu-W0w" secondAttribute="top" id="i2i-Xe-Dgx"/>
+                        <constraint firstItem="0PF-Nx-0CQ" firstAttribute="top" secondItem="G31-yu-W0w" secondAttribute="top" id="nYb-oC-dN0"/>
+                    </constraints>
+                </view>
+            </subviews>
+            <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
+            <constraints>
+                <constraint firstAttribute="bottom" secondItem="G31-yu-W0w" secondAttribute="bottom" constant="5" id="V0V-iV-J3M"/>
+                <constraint firstAttribute="trailing" secondItem="G31-yu-W0w" secondAttribute="trailing" id="WsG-9w-q9t"/>
+                <constraint firstItem="G31-yu-W0w" firstAttribute="leading" secondItem="Fhl-an-cdr" secondAttribute="leading" id="ZfS-Ix-TBt"/>
+                <constraint firstItem="G31-yu-W0w" firstAttribute="top" secondItem="Fhl-an-cdr" secondAttribute="top" constant="30" id="lgU-MG-VoL"/>
+            </constraints>
+            <nil key="simulatedStatusBarMetrics"/>
+            <freeformSimulatedSizeMetrics key="simulatedDestinationMetrics"/>
+            <connections>
+                <outlet property="logoutButton" destination="0PF-Nx-0CQ" id="xCg-1i-2zm"/>
+            </connections>
+            <point key="canvasLocation" x="110" y="179"/>
+        </view>
+    </objects>
+</document>

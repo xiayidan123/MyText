@@ -1,0 +1,185 @@
+//
+//  PulldownView.m
+//  111
+//
+//  Created by 杨彬 on 14-10-5.
+//  Copyright (c) 2014年 macbook air. All rights reserved.
+//
+
+#import "PulldownView.h"
+#import "Constants.h"
+@interface PulldownView ()
+{
+    NSInteger _index;
+    UITableView *_tableView;
+    NSMutableArray *_selectArray;
+    NSArray *_dataArray;
+    NSMutableArray *_shareArray;
+    NSMutableArray *_classifyArray;
+}
+
+@end
+
+@implementation PulldownView
+
+-(void)dealloc{
+    
+    [_btn_share release];
+    [_btn_classify release];
+    [_dataArray release];
+    [_selectArray release];
+    [_tableView release];
+    [_CB release];
+    [_bgView release];
+    [_selectArray release];
+    [_classifyArray release];
+    [super dealloc];
+    
+}
+
+- (void)drawRect:(CGRect)rect {
+    // Drawing code
+    
+    self.userInteractionEnabled = YES;
+    
+    _btn_share.imageEdgeInsets = UIEdgeInsetsMake(21, 110, 20, 0);
+    [_btn_share setTitleColor:[UIColor colorWithRed:0 green:198.0/255 blue:48.0/255 alpha:1] forState:UIControlStateSelected];
+    [_btn_share setImage:[UIImage imageNamed:@"share_category_icon_triangle_1"] forState:UIControlStateSelected];
+    [_btn_share setTitle:NSLocalizedString(@"Publisher", nil) forState:UIControlStateNormal];
+    _btn_share.tag = 201;
+    
+
+    _btn_classify.imageEdgeInsets = UIEdgeInsetsMake(21, 80, 20, 0);
+    [_btn_classify setTitleColor:[UIColor colorWithRed:0 green:198.0/255 blue:48.0/255 alpha:1] forState:UIControlStateSelected];
+    [_btn_classify setImage:[UIImage imageNamed:@"share_category_icon_triangle_1"] forState:UIControlStateSelected];
+    [_btn_classify setTitle:NSLocalizedString(@"Category", nil) forState:UIControlStateNormal];
+    _btn_classify.tag = 202;
+    
+    
+    _classifyArray = [@[NSLocalizedString(CATEGORY_LABEL_ONE, nil), NSLocalizedString(CATEGORY_LABEL_TWO, nil),NSLocalizedString(CATEGORY_LABEL_THREE, nil),NSLocalizedString(CATEGORY_LABEL_FOUR, nil),NSLocalizedString(CATEGORY_LABEL_FIVE, nil),NSLocalizedString(CATEGORY_LABEL_SIX, nil),NSLocalizedString(CATEGORY_LABEL_SEVEN, nil)] copy];
+    _shareArray = [@[NSLocalizedString(@"All", nil),NSLocalizedString(@"Public Account", nil),NSLocalizedString(@"Teacher", nil),NSLocalizedString(@"Student", nil)] copy];
+    _selectArray = [@[@"0",@"0"] mutableCopy];
+    
+    _tableView = [[UITableView alloc]initWithFrame:CGRectMake(0, 45, 320,0)];
+    _tableView.delegate = self;
+    _tableView.dataSource = self;
+    _tableView.showsVerticalScrollIndicator = NO;
+    
+    _bgView.userInteractionEnabled = YES;
+    [_bgView addGestureRecognizer:[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(tapBgAction:)]];
+    [self addSubview:_tableView];
+    
+}
+
+- (void)tapBgAction:(UITapGestureRecognizer *)tap{
+    [self tableViewHidden];
+}
+
+- (IBAction)shareClick:(id)sender {
+    if ([sender isKindOfClass:[UIButton class]] && (((UIButton *)sender).tag - 200 == _index )&& (_tableView.frame.size.height > 10)){
+        [self tableViewHidden];
+        return;
+    }
+    _index = 1;
+    _dataArray = _shareArray;
+    [self selectAction:(id)sender];
+}
+
+
+- (IBAction)classifyClick:(id)sender {
+    if ([sender isKindOfClass:[UIButton class]] && (((UIButton *)sender).tag - 200 == _index) && (_tableView.frame.size.height > 10)){
+        [self tableViewHidden];
+        return;
+    }
+    _index = 2;
+    _dataArray = _classifyArray;
+    [self selectAction:(id)sender];
+}
+
+
+- (void)selectAction:(id)sender{
+    _btn_share.selected = NO;
+//    _btn_layout.selected = NO;
+    _btn_classify.selected = NO;
+    ((UIButton *)sender).selected = YES;
+    [UIView animateWithDuration:0.3 animations:^{
+        self.frame = CGRectMake(self.frame.origin.x, self.frame.origin.y, self.frame.size.width, 504);
+        _tableView.frame = CGRectMake(_tableView.frame.origin.x, _tableView.frame.origin.y, _tableView.frame.size.width, _index == 2 ? 307 : 175);
+    }];
+    _bgView.backgroundColor = [UIColor colorWithRed:0 green:0 blue:0 alpha:0.5];
+        [_tableView reloadData];
+}
+
+
+#pragma mark-----tableView
+-(UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath{
+    static NSString *cellid = @"cellid";
+    UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:cellid];
+    if (!cell){
+        cell = [[UITableViewCell alloc]initWithStyle:UITableViewCellStyleDefault reuseIdentifier:cellid];
+    }
+    for (UIView *subview in cell.contentView.subviews){
+        [subview removeFromSuperview];
+    }
+    cell.selectionStyle= UITableViewCellSelectionStyleNone;
+    cell.textLabel.font = [UIFont fontWithName:@"STHeitiSC-Light" size:14];
+    cell.textLabel.text = _dataArray[indexPath.row];
+    if ([_selectArray[_index - 1] isEqualToString:[NSString stringWithFormat:@"%ld",(long)indexPath.row]]){
+        UIImageView *imgv = [[UIImageView alloc]initWithFrame:CGRectMake(283, 17, 13, 11)];
+        imgv.image = [UIImage imageNamed:@"share_category_select"];
+        imgv.tag = 2000;
+        [cell.contentView addSubview:imgv];
+        [imgv release];
+    }
+    return cell;
+}
+
+
+-(void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath{
+    for (UITableViewCell *cell in [tableView visibleCells]){
+        for (UIView *view in cell.contentView.subviews){
+            if (view.tag == 2000){
+                [view removeFromSuperview];
+            }
+        }
+    }
+    UITableViewCell *cell = [[tableView cellForRowAtIndexPath:indexPath] autorelease];
+    UIImageView *imgv = [[UIImageView alloc]initWithFrame:CGRectMake(283, 17, 13, 11)];
+    imgv.image = [UIImage imageNamed:@"share_category_select"];
+    [cell.contentView addSubview:imgv];
+    [imgv release];
+    
+    _selectArray[_index - 1] = [NSString stringWithFormat:@"%ld",(long)indexPath.row];
+    NSArray *pressArray = [@[[NSNumber numberWithInt:(int)_index],[NSNumber numberWithInt:(int)(indexPath.row)]] copy];
+    _CB(pressArray);
+    [self tableViewHidden];
+}
+
+
+
+
+-(NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section{
+    return _dataArray.count;
+}
+
+-(void)tableViewHidden{
+    [UIView animateWithDuration:0.3 animations:^{
+        self.frame = CGRectMake(self.frame.origin.x, self.frame.origin.y, self.frame.size.width, 44);
+        _tableView.frame = CGRectMake(_tableView.frame.origin.x, _tableView.frame.origin.y, _tableView.frame.size.width, 0);
+    }completion:^(BOOL finished) {
+        _btn_share.selected = NO;
+//        _btn_layout.selected = NO;
+        _btn_classify.selected = NO;
+    }];
+    _bgView.backgroundColor = [UIColor clearColor];
+}
+
+- (void)pulldownViewPackup{
+    self.frame = CGRectMake(self.frame.origin.x, self.frame.origin.y, self.frame.size.width, 44);
+    _tableView.frame = CGRectMake(_tableView.frame.origin.x, _tableView.frame.origin.y, _tableView.frame.size.width, 0);
+    _btn_share.selected = NO;
+    _btn_classify.selected = NO;
+    _bgView.backgroundColor = [UIColor clearColor];
+}
+
+@end

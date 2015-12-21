@@ -1,0 +1,128 @@
+//
+//  UINavigationItem+SpaceHandler.m
+//  omimbiz
+//
+//  Created by elvis on 2013/10/17.
+//  Copyright (c) 2014年 OneMeter Inc. All rights reserved.
+//
+
+#import "UINavigationItem+SpaceHandler.h"
+
+@implementation UINavigationItem (SpaceHandler)
+
+- (void)addLeftBarButtonItem:(UIBarButtonItem *)leftBarButtonItem
+{
+    if (IS_IOS7) {
+        // Add a negative spacer on iOS >= 7.0
+        UIBarButtonItem *negativeSpacer = [[[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFixedSpace
+                                                                                        target:nil action:nil] autorelease];
+        negativeSpacer.width = -10;
+        [self setLeftBarButtonItems:[NSArray arrayWithObjects:negativeSpacer, leftBarButtonItem, nil]];
+    } else {
+        // Just set the UIBarButtonItem as you would normally
+        [self setLeftBarButtonItem:leftBarButtonItem];
+    }
+}
+
+- (void)addRightBarButtonItem:(UIBarButtonItem *)rightBarButtonItem
+{
+    if (IS_IOS7) {
+        // Add a negative spacer on iOS >= 7.0
+        UIBarButtonItem *negativeSpacer = [[[UIBarButtonItem alloc]
+                                           initWithBarButtonSystemItem:UIBarButtonSystemItemFixedSpace
+                                           target:nil action:nil] autorelease];
+        negativeSpacer.width = -10;
+        [self setRightBarButtonItems:[NSArray arrayWithObjects:negativeSpacer, rightBarButtonItem, nil]];
+    } else {
+        // Just set the UIBarButtonItem as you would normally
+        [self setRightBarButtonItem:rightBarButtonItem];
+    }
+}
+
+-(void)removeRightBarButtonItem{
+    if (IS_IOS7) {
+        // Add a negative spacer on iOS >= 7.0
+        UIBarButtonItem *negativeSpacer = [[UIBarButtonItem alloc]
+                                           initWithBarButtonSystemItem:UIBarButtonSystemItemFixedSpace
+                                           target:nil action:nil];
+        negativeSpacer.width = -10;
+        [self setRightBarButtonItems:[NSArray arrayWithObjects:negativeSpacer, nil]];
+    } else {
+        self.rightBarButtonItem = nil;
+    }
+    
+}
+
+-(void)removeLeftBarButtonItem{
+    if (IS_IOS7) {
+        // Add a negative spacer on iOS >= 7.0
+        UIBarButtonItem *negativeSpacer = [[UIBarButtonItem alloc]
+                                           initWithBarButtonSystemItem:UIBarButtonSystemItemFixedSpace
+                                           target:nil action:nil];
+        negativeSpacer.width = -10;
+        [self setLeftBarButtonItems:[NSArray arrayWithObjects:negativeSpacer, nil]];
+    } else {
+        self.leftBarButtonItem = nil;
+    }
+    
+}
+
+-(void)disableLeftBarButtonItem{
+    
+    if (IS_IOS7) {
+        if ([self.leftBarButtonItems count] < 2) {
+            return;
+        }
+        UIBarButtonItem* barbutton = [self.leftBarButtonItems objectAtIndex:1];
+        barbutton.enabled = FALSE;
+        
+    } else {
+        self.leftBarButtonItem.enabled = FALSE;
+    }
+    
+}
+
+-(void)disableRightBarButtonItem{
+    
+    if (IS_IOS7) {
+        if ([self.rightBarButtonItems count] < 2) {
+            return;
+        }
+        UIBarButtonItem* barbutton = [self.rightBarButtonItems objectAtIndex:1];
+        barbutton.enabled = FALSE;
+        
+    } else {
+        self.rightBarButtonItem.enabled = FALSE;
+    }
+}
+
+-(void)enableLeftBarButtonItem{
+    
+    if (IS_IOS7) {
+        if ([self.leftBarButtonItems count] < 2) {
+            return;
+        }
+        UIBarButtonItem* barbutton = [self.leftBarButtonItems objectAtIndex:1];
+        barbutton.enabled = TRUE;
+        
+    } else {
+        self.leftBarButtonItem.enabled = TRUE;
+    }
+    
+}
+
+-(void)enableRightBarButtonItem{
+    
+    if (IS_IOS7) {
+        if ([self.rightBarButtonItems count] < 2) {
+            return;
+        }
+        UIBarButtonItem* barbutton = [self.rightBarButtonItems objectAtIndex:1];
+        barbutton.enabled = TRUE;
+        
+    } else {
+        self.rightBarButtonItem.enabled = TRUE;
+    }
+}
+
+@end

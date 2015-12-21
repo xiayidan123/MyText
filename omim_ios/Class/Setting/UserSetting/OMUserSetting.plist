@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>domain</key>
+	<string></string>
+	<key>language</key>
+	<string></string>
+	<key>device_type</key>
+	<string></string>
+	<key>push_token</key>
+	<string></string>
+	<key>push_show_detail_flag</key>
+	<string></string>
+	<key>unknown_buddy_can_call_me</key>
+	<false/>
+	<key>unknown_buddy_can_message_me</key>
+	<true/>
+	<key>allow_school_invitation</key>
+	<true/>
+</dict>
+</plist>

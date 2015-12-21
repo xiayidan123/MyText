@@ -1,0 +1,306 @@
+//
+//  omim
+//
+//  Created by Harry on 14-1-14.
+//  Copyright (c) 2014年 OneMeter Inc. All rights reserved.
+//
+
+#import "LoginVC.h"
+#import "RegisterVC.h"
+
+#import <QuartzCore/QuartzCore.h>
+#import "Constants.h"
+
+#import "WTHeader.h"
+
+#import "AppDelegate.h"
+#import "FindPasswordVC.h"
+
+
+
+
+@implementation LoginVC
+
+@synthesize backGroudImage;
+@synthesize txtAccount;
+@synthesize txtPassword;
+@synthesize centerView;
+@synthesize btnRegister;
+@synthesize btnLogin;
+@synthesize btnForgetPassword;
+@synthesize imgAccountBG;
+@synthesize imgLogo;
+@synthesize lblLogo;
+@synthesize imgAccountBGDivider;
+@synthesize myLocationManager;
+
+
+#pragma mark - Functions
+
+- (IBAction)fRegister:(id)sender
+{
+    RegisterVC* registerVC = [[RegisterVC alloc] initWithNibName:@"RegisterVC" bundle:nil];
+    [self presentViewController:registerVC animated:YES completion:nil];
+    [registerVC release];
+}
+
+
+
+-(void)tryLoginWithLocation
+{
+    myLocationManager = [[CLLocationManager alloc] init];
+    myLocationManager.delegate = self;
+    myLocationManager.distanceFilter = kCLLocationAccuracyKilometer;
+    myLocationManager.distanceFilter = 100;
+    [myLocationManager startUpdatingLocation];
+}
+
+- (void)locationManager:(CLLocationManager *)manager didUpdateToLocation:(CLLocation *)newLocation fromLocation:(CLLocation *)oldLocation
+{
+    if (myLocationManager) {
+        [myLocationManager stopUpdatingLocation];
+    }
+    
+    CLLocationDegrees latitude=0;
+    CLLocationDegrees longitude=0;
+    if (nil != newLocation) {
+        CLLocationCoordinate2D loc = [newLocation coordinate];
+        latitude = loc.latitude;
+        longitude = loc.longitude;
+        
+        
+    }
+    
+    [self launchLoginWithLatitude:latitude longtitude:longitude];
+}
+
+-(void)launchLoginWithLatitude:(CLLocationDegrees)lati longtitude:(CLLocationDegrees)longtitude
+{
+    NSLog(@"login----latitude : %fd longitude : %fd", lati, longtitude);
+
+    [WowTalkWebServerIF loginWithUserinfo:self.txtAccount.text password:self.txtPassword.text withLatitude:lati withLongti:longtitude withCallback:@selector(fLoginFinished:) withObserver:self];
+   
+}
+
+- (void)locationManager:(CLLocationManager *)manager didFailWithError:(NSError *)error
+{
+    [self launchLoginWithLatitude:0 longtitude:0];
+}
+
+
+
+
+- (IBAction)loginFromEmail:(id)sender {
+    [self fResignFirstResponder:nil];
+    
+    BOOL rlt=YES;
+    NSString *errMsg = @"";
+    
+    
+    if (self.txtAccount.text == nil || self.txtAccount.text.length == 0){
+        rlt = NO;
+        errMsg = NSLocalizedString(@"Username can't be empty", nil);
+    }
+    else if (self.txtPassword.text == nil || self.txtPassword.text.length == 0){
+        rlt = NO;
+        errMsg = NSLocalizedString(@"Password can't be empty", nil);
+    }
+    
+    
+    if(rlt==NO){
+        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:NSLocalizedString(@"Failed to login",nil) message:errMsg delegate:self cancelButtonTitle:NSLocalizedString(@"OK", nil) otherButtonTitles:nil, nil];
+        [alert show];
+        [alert release];
+        return;
+    }
+    
+    [self launchLoginWithLatitude:0 longtitude:0];
+    //[self tryLoginWithLocation];
+    
+}
+
+
+
+
+- (void)fLoginFinished:(NSNotification *)notification
+{
+    NSDictionary *dict = [notification userInfo];
+    if ([dict objectForKey:WT_ERROR] && [[dict objectForKey:WT_ERROR] code] != NO_ERROR)
+    {
+
+        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:NSLocalizedString(@"Failed to login",nil) message:NSLocalizedString(@"Authetication failed",nil) delegate:self cancelButtonTitle:NSLocalizedString(@"OK", nil) otherButtonTitles:nil, nil];
+        [alert show];
+        [alert release];
+        
+     
+    }
+    else
+    {
+        [[AppDelegate sharedAppDelegate] setupApplicaiton:YES];
+    }
+}
+
+- (IBAction)fForgetPassword:(id)sender
+{
+        FindPasswordVC *findPasswordVC = [[FindPasswordVC alloc] initWithNibName:@"FindPasswordVC" bundle:nil];
+        [self.view addSubview:findPasswordVC.view];
+
+}
+
+
+
+- (IBAction)fResignFirstResponder:(id)sender
+{
+    [self.txtAccount resignFirstResponder];
+    [self.txtPassword resignFirstResponder];
+}
+
+
+
+
+
+#pragma mark - View Handler
+
+
+- (void)viewDidLoad
+{
+    [super viewDidLoad];
+    
+    self.oldCenterViewFrame = self.centerView.frame;
+    UITapGestureRecognizer *tapRecognizer = [[UITapGestureRecognizer alloc]
+                                             initWithTarget:self action:@selector(fResignFirstResponder:)];
+    [tapRecognizer setDelegate:self];
+    backGroudImage.userInteractionEnabled = YES;
+    [backGroudImage addGestureRecognizer:tapRecognizer];
+    
+    lblLogo.text = [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleDisplayName"];
+    
+    [imgAccountBG setImage:[[UIImage imageNamed:@"login_input.png"] stretchableImageWithLeftCapWidth:5 topCapHeight:5]];
+    [btnRegister setBackgroundImage:[[UIImage imageNamed:@"login_input.png"] stretchableImageWithLeftCapWidth:5 topCapHeight:5] forState:UIControlStateNormal];
+
+    
+    [btnLogin setBackgroundImage:[[UIImage imageNamed:@"btn_green.png"] stretchableImageWithLeftCapWidth:5 topCapHeight:5] forState:UIControlStateNormal];
+
+    [btnLogin setTitle:NSLocalizedString(@"Login", nil) forState:UIControlStateNormal];
+    [btnRegister setTitle:NSLocalizedString(@"Register", nil) forState:UIControlStateNormal];
+    
+    [btnForgetPassword setTitle:NSLocalizedString(@"Forget pwd?", nil) forState:UIControlStateNormal];
+    [btnForgetPassword sizeToFit];
+    CGRect frame = btnForgetPassword.frame;
+    frame.origin.x = self.centerView.frame.size.width - btnForgetPassword.frame.size.width;
+    btnForgetPassword.frame = frame;
+    
+    if (IS_IOS7) {
+        [self.view setAutoresizesSubviews:FALSE];
+        [self.view setAutoresizingMask:UIViewAutoresizingNone];
+        self.edgesForExtendedLayout = UIRectEdgeNone;
+        self.automaticallyAdjustsScrollViewInsets = NO;
+    }
+}
+
+
+- (void)viewWillAppear:(BOOL)animated{
+    [super viewWillAppear:animated];
+    NSString * curLang = [[NSLocale preferredLanguages] objectAtIndex:0];
+
+    [imgLogo setImage:[UIImage imageNamed:@"login_logo.png"]];
+
+    if(curLang && [curLang isEqualToString:@"zh-Hans"]){
+    }
+    else{
+        
+    }
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(keyboardWillShow:)
+                                                 name:UIKeyboardWillShowNotification
+                                               object:nil];
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(keyboardWillHide:)
+                                                 name:UIKeyboardWillHideNotification
+                                               object:nil];
+    
+}
+
+
+- (void)viewWillDisappear:(BOOL)animated{
+    [super viewWillDisappear:animated];
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:UIKeyboardWillShowNotification object:nil];
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:UIKeyboardWillHideNotification object:nil];
+}
+
+
+- (void)dealloc
+{
+    [txtAccount release];
+    [txtPassword release];
+    [centerView release];
+    [btnRegister release];
+    [btnLogin release];
+    [btnForgetPassword release];
+    [imgAccountBG release];
+    [imgAccountBGDivider release];
+    [backGroudImage release];
+    [myLocationManager release];
+    [super dealloc];
+}
+
+
+
+#pragma - mark Keyboard
+
+- (void) keyboardWillShow:(NSNotification *)note{
+    
+	CGRect keyboardBounds;
+    [[note.userInfo valueForKey:UIKeyboardFrameEndUserInfoKey] getValue: &keyboardBounds];
+    NSNumber *duration = [note.userInfo objectForKey:UIKeyboardAnimationDurationUserInfoKey];
+    NSNumber *curve = [note.userInfo objectForKey:UIKeyboardAnimationCurveUserInfoKey];
+    
+    // keyboardBounds = [self.view convertRect:keyboardBounds toView:nil];
+    
+    
+    
+	[UIView beginAnimations:nil context:NULL];
+	[UIView setAnimationBeginsFromCurrentState:YES];
+    [UIView setAnimationDuration:[duration doubleValue]];
+    [UIView setAnimationCurve:[curve intValue]];
+	
+    
+    
+    int new_y_of_centerview = SCREEN_HEIGHT -STATUS_BAR_HEIGHT- KEYBOARD_HEIGHT - self.oldCenterViewFrame.size.height;
+    
+    if (new_y_of_centerview > self.oldCenterViewFrame.origin.y){
+        //do nothing ,cuz we should not move down the center view
+    } else {
+        
+        [self.centerView setFrame:CGRectMake(self.oldCenterViewFrame.origin.x, new_y_of_centerview, self.oldCenterViewFrame.size.width,self.oldCenterViewFrame.size.height)];
+        
+    }
+    
+	[UIView commitAnimations];
+}
+
+-(void) keyboardWillHide:(NSNotification *)note{
+    
+    NSNumber *duration = [note.userInfo objectForKey:UIKeyboardAnimationDurationUserInfoKey];
+    NSNumber *curve = [note.userInfo objectForKey:UIKeyboardAnimationCurveUserInfoKey];
+	
+	[UIView beginAnimations:nil context:NULL];
+	[UIView setAnimationBeginsFromCurrentState:YES];
+    [UIView setAnimationDuration:[duration doubleValue]];
+    [UIView setAnimationCurve:[curve intValue]];
+    
+    
+    [self.centerView setFrame:self.oldCenterViewFrame];
+	[UIView commitAnimations];
+}
+
+- (void)viewDidUnload
+{
+    [self setBackGroudImage:nil];
+    [self setImgLogo:nil];
+    [super viewDidUnload];
+}
+
+@end

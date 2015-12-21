@@ -1,0 +1,852 @@
+//
+//  WTNetworkFunction.h
+//  omim
+//
+//  Created by coca on 2013/03/31.
+//  Copyright (c) 2014年 OneMeter Inc. All rights reserved.
+//
+#import <CoreLocation/CLLocation.h>
+#import <Foundation/Foundation.h>
+#import "WTNetworkTaskConstant.h"
+@class ChatMessage;
+@class WTFile;
+@class CoverImage;
+@class ClassScheduleModel;
+
+#define WT_GET_SCHOOL_MEMBER_PHOTO_THUMBNAIL @"get_school_member_photo_thumbnail"
+@interface WowTalkWebServerIF : NSObject
+
+
+#pragma mark -
+#pragma mark  Access Code and Verification
+/**
+ * Require the access code to the carrier. (Like NTT gateway?)
+ * アクセスコードをサーバに請求
+ * access code will be set when isDemoMode set to
+ * true, and can be readed by getDemoAccessCode
+ * Demo Modeの場合（さーばより設定され）、アクセスコードがローカルに保存され、getDemoAccessCodeで取得することが可能になる
+ *
+ * @param strUserName
+ * @param strCountryCode
+ * @param NetworkIFDidFinishDelegate
+ */
++(void)requireAccessCodeAfterIVRForUserName:(NSString*) strUserName andCountryCode: (NSString*) strCountryCode withCallback:(SEL)selector withObserver:(id)observer;
+
+/**
+ * Require the access code through SMS.
+ * アクセスコードをサーバに請求
+ * access code will be set when isDemoMode set to
+ * true, and can be readed by getDemoAccessCode
+ * Demo Modeの場合（さーばより設定され）、アクセスコードがローカルに保存され、getDemoAccessCodeで取得することが可能になる
+ *
+ * @param strUserName
+ * @param strCountryCode
+ * @param strCarrierName
+ * @param NetworkIFDidFinishDelegate
+ */
++(void)requireAccessCodeForUserName:(NSString*) strUserName andCountryCode: (NSString*) strCountryCode andCarrierName:(NSString*) strCarrierName withCallback:(SEL)selector withObserver:(id)observer;
+
+/**
+ *
+ * Validate the access code
+ * アクセスコードを認証
+ *
+ * @param strAccessCode
+ * @param NetworkIFDidFinishDelegate
+ */
++(void) validateAccessCode:(NSString*) strAccessCode withCallback:(SEL)selector withObserver:(id)observer;
+
+/**
+ *
+ * Validate the access code
+ * アクセスコードを認証
+ *
+ * @param strAccessCode
+ * @param strAppType : 利用中のアプリ
+ * @param NetworkIFDidFinishDelegate
+ */
++(void) validateAccessCode:(NSString*) strAccessCode withAppType:(NSString*) strAppType withCallback:(SEL)selector withObserver:(id)observer;
+
+#pragma mark -
+#pragma mark Push Token.
+/**
+ * Report push sercie token and other info to server
+ * Push Service 用のtoken をサーバに報告
+ * @param deviceToken
+ * @param NetworkIFDidFinishDelegate
+ * @param tag
+ */
++(void) reportInfoWithPushToken:(NSData *)deviceToken withCallback:(SEL)selector withObserver:(id)observer;
+
+
+#pragma mark -
+#pragma mark Application Info
+/**
+ * Tell server I become active  : use to record user activity
+ *
+ * @param NetworkIFDidFinishDelegate
+ */
++(void) getLatestVersionInfoWithCallback:(SEL)selector withObserver:(id)observer;
+
+
+
+#pragma mark - Chat Messages Info
+#pragma mark
+/**
+ * Tell server unread message count  : use to record user activity and push correct number
+ *
+ * @param NetworkIFDidFinishDelegate
+ */
++(void) reportUnreadMessageCount:(int)unreadCnt withCallback:(SEL)selector withObserver:(id)observer;
+
+
+#pragma mark - Profile
+/**
+ * Get my profile (currently nickname and status only)
+ * サーバに保存されたニックネームと最新ステータスを取得する
+ * @param NetworkIFDidFinishDelegate
+ */
++(void) getMyProfileWithCallback:(SEL)selector withObserver:(id)observer;
+
+
+/**
+ * Post nickname,status,birthday,sex,area to server
+ * ニックネームなどの情報を一括でサーバに登録
+ *
+ * @param NetworkIFDidFinishDelegate
+ */
++(void) updateMyProfileWithNickName:(NSString*)strNickname
+                         withStatus:(NSString*)strStatus
+                       withBirthday:(NSString*)strBirthday
+                            withSex:(NSString*)sexFlag
+                           withArea:(NSString*)strArea
+                       withCallback:(SEL)selector
+                       withObserver:(id)observer;
+
+
+/**
+ * Post nickname,status,birthday,sex,area, mobile,etc to server (for biz)
+ * ニックネームなどの情報を一括でサーバに登録
+ *
+ * @param NetworkIFDidFinishDelegate
+ */
++(void) updateMyProfileWithNickName:(NSString*)strNickname
+                         withStatus:(NSString*)strStatus
+                       withBirthday:(NSString*)strBirthday
+                            withSex:(NSString*)sexFlag
+                           withArea:(NSString*)strArea
+                  withMobile_number:(NSString*)strMobile
+                          withEmail:(NSString*)stremail
+                  withPronunciation:(NSString*)strpronunciation
+                          withTitle:(NSString*)strtitle
+                     withInterphone:(NSString*)strinterphone
+                       withCallback:(SEL)selector
+                       withObserver:(id)observer;
+
+
+/**
+ * Get my profile (for biz)
+ * サーバに保存されたニックネームと最新ステータスを取得する
+ * @param NetworkIFDidFinishDelegate
+ */
++(void) getMyBizProfileWithCallback:(SEL)selector withObserver:(id)observer;
+
+
+
+#pragma mark -
+#pragma mark Buddy List Handler
+
+/**
+ * Upload phone number list to allow the automatic matching
+ *
+ * 電話番号リストをサーバにアップロードする
+ *
+ * @param phoneNumberList
+ *            phone number list to be matched
+ *
+ * @param NetworkIFDidFinishDelegate
+ */
++(void) uploadContactBook:(NSArray*) phoneNumberList withCallback:(SEL)selector withObserver:(id)observer;
+
+/**
+ * Increase phone number list to allow the automatic matching
+ *
+ * 電話番号リストをサーバにアップロードする
+ *
+ * @param phoneNumberList
+ *            phone number list to be matched
+ *
+ * @param NetworkIFDidFinishDelegate
+ */
++(void) increaseContactBook:(NSArray*) phoneNumberList withCallback:(SEL)selector withObserver:(id)observer;
+
+/**
+ * Decrease phone number list to allow the automatic matching
+ *
+ * 電話番号リストをサーバにアップロードする
+ *
+ * @param phoneNumberList
+ *            phone number list to be matched
+ *
+ * @param NetworkIFDidFinishDelegate
+ */
++(void) decreaseContactBook:(NSArray*) phoneNumberList withCallback:(SEL)selector withObserver:(id)observer;
+
+
+/**
+ * scan phone number list and download the buddy info if there is any
+ *
+ * 電話番号リストをサーバにアップロードし、会員であるBuddyを結果としてゲットしてローカルに保存される
+ *
+ * @param phoneNumberList
+ *            phone number list to be matched
+ *
+ * @param NetworkIFDidFinishDelegate
+ */
++(void) scanPhoneNumber:(NSArray*)phoneNumberList ForBuddyID:(NSString*) buddyid withCallback:(SEL)selector withObserver:(id)observer;
+
+/**
+ * Fetch the buddy list from server and The result
+ * will be saved in database and can be readed by
+ * Database.fetchAllIdentities
+ *
+ * マッチされた友達リストをサーバからダウンロードし、結果をデーバベースに保存する。
+ * Database.fetchAllMatchedBuddiesにより取得できる
+ *
+ * @param NetworkIFDidFinishDelegate
+ */
++(void) getMatchedBuddyListWithCallback:(SEL)selector withObserver:(id)observer;
+
+
+/**
+ * Fetch the possible buddy list from server and The result
+ * will be saved in database and can be readed by
+ * Database.fetchAllPossibleBuddies
+ *
+ * 友達かもしれないのメンバーリストをサーバからダウンロードし、結果をデーバベースに保存する。
+ * 読み取り関数はDatabase.fetchAllPossibleBuddies
+ *
+ *
+ * @param NetworkIFDidFinishDelegate
+ */
++(void) getPossibleBuddyListWithCallback:(SEL)selector withObserver:(id)observer;
+
+/**
+ * Fetch the blocked buddy list from server and The result
+ * will be saved in database and can be readed by
+ * Database.fetchAllBlockecBuddies
+ *
+ * Blockedのメンバーリストをサーバからダウンロードし、結果をデーバベースに保存する。
+ * 読み取り関数はDatabase.fetchAllBlockecBuddies
+ *
+ *
+ * @param NetworkIFDidFinishDelegate
+ */
++(void) getBlockedBuddyListWithCallback:(SEL)selector withObserver:(id)observer;
+
+/**
+ * Add Buddy
+ *
+ * 友達を追加
+ * @param buddyID
+ * @param NetworkIFDidFinishDelegate
+ */
++(void) addBuddy:(NSString*) buddyID withMsg:(NSString*)msg withCallback:(SEL)selector withObserver:(id)observer;
+
+/**
+ * Block Buddy
+ *
+ * 友達をブロック
+ * @param buddyID
+ * @param NetworkIFDidFinishDelegate
+ */
++(void) blockBuddy:(NSString*) buddyID withCallback:(SEL)selector withObserver:(id)observer;
+
+/**
+ * Unblock Buddy
+ * 友達ブロックを解除
+ *
+ * @param buddyID
+ * @param NetworkIFDidFinishDelegate
+ */
++(void)  unlockBuddy:(NSString*) buddyID withCallback:(SEL)selector withObserver:(id)observer;
+
+/**
+ * Fetch the buddy list from server and The result
+ * will be saved in database and can be readed by
+ *
+ * マッチされた友達リスト及び友達かもリストをサーバからダウンロードし、結果をデーバベースに保存する。
+ * Database.fetchAllMatchedBuddiesとDatabase.fetchAllPossibleBuddiesにより取得できる
+ *
+ * @param NetworkIFDidFinishDelegate
+ */
++(void) getBuddyListWithCallback:(SEL)selector withObserver:(id)observer;
+
+/**
+ * Fetch the buddy info from server
+ *
+ *
+ * @param NetworkIFDidFinishDelegate
+ */
+
++(void) getBuddyWithUID:(NSString*)buddyUID withCallback:(SEL)selector withObserver:(id)observer;
++(void)getBuddyByWowTalkID:(NSString *)wowtalkid withCallback:(SEL)selector withObserver:(id)observer;
+
++(void)rejectFriendRequest:(NSString*)buddyid withCallback:(SEL)selector withObserver:(id)observer;
+
++(void)removeBuddy:(NSString*)buddyid withCallback:(SEL)selector withObserver:(id)observer;
+
+
+
++(void)searchUserByKey:(NSString*)key withType:(NSString*)account_type withCallback:(SEL)selector withObserver:(id)observer;
++ (void)searchOfficialByKey:(NSString *)key withPriority:(NSString *)priority withInfo:(NSDictionary *)info withDelegate:(id)delegate withCallBack:(SEL)selector withObserver:(id)observer;
++ (void)fuzzySearchUserByKey:(NSString *)key withType:(NSArray *)types withDelegate:(id)delegate withCallBack:(SEL)selector withObserver:(id)observer;
+
++ (void)searchUserByKey:(NSString *)key byKeyType:(BOOL)isID withType:(NSArray *)types withCallBack:(SEL)selector withObserver:(id)observer;
+
+
+#pragma mark - Buddy by yangbin
++(void) getSchoolMemberThumbnailWithUID:(NSString*)buddyUID withCallback:(SEL)selector withObserver:(id)observer;
+
+/** 获取学校头像 */
++(void) getSchoolAvatarWithFileName:(NSString*)file_name withCallback:(SEL)selector withObserver:(id)observer;
+
+#pragma mark - School and Class Members
++ (void)getSchoolMembersWithCallBack:(SEL)selector withObserver:(id)observer;
++ (void)getSchoolListWithCallBack:(SEL)selector withObserver:(id)observer;
++ (void)getClassroomListWithSchoolID:(NSString *)school_id withCallBack:(SEL)selector withObserver:(id)observer;
+
+
+
+
+
+#pragma mark -
+#pragma mark - ClassScheduleVC
++ (void)getclassScheduleListWithClassID:(NSString *)class_id WithCallBack:(SEL)selector withObserver:(id)observer;
++ (void)uploadLessonPerformanceWithLessonID:(NSString *)lesson_id withStudentID:(NSString *)student_id withPerFormanceArray:(NSMutableArray *)perFormanceArray WithCallBack:(SEL)selector withObserver:(id)observer;
++ (void)getLessonHomeworkWithLessonId:(NSString *)lesson_id withCallback:(SEL)selector withObserver:(id)observer;
++ (void)getLessonPerformanceWithLessonID:(NSString *)lesson_id withStudentID:(NSString *)student_id WithCallBack:(SEL)selector withObserver:(id)observer;
++ (void)uploadLessonHomeworkWithLessonID:(NSString *)lesson_id withTitle:(NSString *)title WithCallBack:(SEL)selector withObserver:(id)observer;
++ (void)getLessonParentFeedbackWithLessonId:(NSString *)lesson_id withStudentID:(NSString *)student_id withCallback:(SEL)selector withObserver:(id)observer;
++ (void)getMomentByMomentID:(NSString *)moment_id withCallback:(SEL)selector withObserver:(id)observer;
++ (void)uploadLessonParentFeedBackWithLessonID:(NSString *)lesson_id withStudentId:(NSString *)student_id  withMoment_id:(NSString *)moment_id WithCallBack:(SEL)selector withObserver:(id)observer;
+
+#pragma mark -
+#pragma mark Upload / download files.
+/** Post my profile photo to server
+ * 自分の画像をアップロード
+ * @param filePath
+ *            : image filepath to be post
+ * @param uploadProgressDelegate :
+ *             UIProgressView or any customed view implemented setProgress:
+ * @param NetworkIFDidFinishDelegate
+ 
+ * return ASIObjectRequest in case using S3. then you can call [id cancel]  to stop the file transfering
+ 
+ */
++(void) uploadMyPhoto:(NSString*)filePath withCallback:(SEL)selector withObserver:(id)observer;
+
+/** Post my profile photo thumbnail to server
+ * 自分の画像Thumbnailをアップロード
+ * @param filePath
+ *            : image filepath to be post
+ * @param uploadProgressDelegate :
+ *             UIProgressView or any customed view implemented setProgress:
+ * @param NetworkIFDidFinishDelegate
+ * @param tag
+ 
+ * return ASIObjectRequest in case using S3. then you can call [id cancel]  to stop the file transfering
+ 
+ */
++(void) uploadMyThumbnail:(NSString*)filePath withCallback:(SEL)selector withObserver:(id)observer;
+
+
+/** Get photo for uid from server
+ * 指定したユーザidの画像をゲット
+ *
+ * @param userID
+ *
+ * @param downloadProgressDelegate :
+ *             UIProgressView or any customed view implemented setProgress:
+ * @param NetworkIFDidFinishDelegate :
+ *              Photo data will be sent as data to following delegate
+ *      - (void) didFinishNetworkIFCommunicationWithTag:(int)tag withData:(NSObject*) data;
+ *
+ * @param tag
+ * return ASIObjectRequest in case using S3. then you can call [id cancel]  to stop the file transfering
+ 
+ */
++(void) getPhotoForUserID:(NSString*)userID withCallback:(SEL)selector withObserver:(id)observer;
+
+
+/** Get thumbnail for uid from server
+ * 指定したユーザidの画像Thumbnailをゲット
+ *
+ * @param userID
+ *
+ *
+ * @param downloadProgressDelegate :
+ *             UIProgressView or any customed view implemented setProgress:
+ * @param NetworkIFDidFinishDelegate :
+ *              Thumbnail data will be sent as data to following delegate
+ *      - (void) didFinishNetworkIFCommunicationWithTag:(int)tag withData:(NSObject*) data;
+ *
+ * @param tag
+ * return ASIObjectRequest in case using S3. then you can call [id cancel]  to stop the file transfering
+ 
+ */
++(void) getThumbnailForUserID:(NSString*)userID withCallback:(SEL)selector withObserver:(id)observer;
+
+
+
+/**
+ * ファイルをゲット
+ * @param  fileID:
+ * @param downloadProgressDelegate :
+ *             UIProgressView or any customed view implemented setProgress:
+ * @param NetworkIFDidFinishDelegate :
+ *              file data will be sent as data to following delegate
+ *      - (void) didFinishNetworkIFCommunicationWithTag:(int)tag withData:(NSObject*) data;
+ * @param userData  (added 2012/10)
+ * @param tag
+ 
+ * return ASIObjectRequest in case using S3. then you can call [id cancel]  to stop the file transfering
+ 
+ */
++(void) getFileFromServer:(NSString*) fileID withCallback:(SEL)selector withObserver:(id)observer;
+
+/**
+ * ファイルをサーバにアップロード
+ * @param filePath
+ *            : file filepath to be post
+ * @param uploadProgressDelegate :
+ *             UIProgressView or any customed view implemented setProgress:
+ * @param NetworkIFDidFinishDelegate
+ * @param tag
+ * @param userData  (added 2012/10)
+ * return ASIObjectRequest in case using S3. then you can call [id cancel]  to stop the file transfering
+ */
+
++(void) uploadFilelToServer:(NSString*)filePath withCallback:(SEL)selector withObserver:(id)observer;
+
+/**
+ * ショップファイルをゲット  Get file from shop
+ * @param  fileID:
+ * @param downloadProgressDelegate :
+ *             UIProgressView or any customed view implemented setProgress:
+ * @param NetworkIFDidFinishDelegate :
+ *              file data will be sent as data to following delegate
+ *      - (void) didFinishNetworkIFCommunicationWithTag:(int)tag withData:(NSObject*) data;
+ * @param userData  (added 2012/10)
+ * @param tag
+ 
+ * return ASIObjectRequest in case using S3. then you can call [id cancel]  to stop the file transfering
+ 
+ */
++(void) getFileFromShop:(NSString*) fileID withCallback:(SEL)selector withObserver:(id)observer;
+
+#pragma mark -
+#pragma mark GroupChat
+
+
+/**
+ * Create a group chat room
+ * 新規グループを作る
+ *
+ * @param  strGroupName:
+ * @param NetworkIFDidFinishDelegate
+ * @param tag
+ */
++(void) createTemporaryChatRoom:(NSString*) strGroupName withCallback:(SEL)selector withObserver:(id)observer;
+
+
+
+/**
+ * join a group chat room
+ * グループへ参加
+ *
+ * @param  groupID:
+ * @param NetworkIFDidFinishDelegate
+ * @param tag
+ */
++(void)  groupChat_JoinGroup:(NSString*) groupID withCallback:(SEL)selector withObserver:(id)observer;
+
+
+
+/**
+ * leave a group chat room
+ * グループから退出
+ *
+ * @param  groupID:
+ * @param NetworkIFDidFinishDelegate
+ * @param tag
+ */
++(void)  groupChat_LeaveGroup:(NSString*) groupID withCallback:(SEL)selector withObserver:(id)observer;
+
+
+/**
+ * add the list of userID to the group chat room
+ * Temporaryグループへメンバーを強制的に参加させ、グループの基本情報（メンバーリストを除き）をDBに保存する
+ *
+ * @param  groupID:
+ * @param   buddyList
+ * @param NetworkIFDidFinishDelegate
+ * @param tag
+ *
+ */
++(void)  groupChat_AddMembers:(NSString*) groupID withMembers:(NSArray*) buddyList withCallback:(SEL)selector withObserver:(id)observer;
+
+
+
+/**
+ * get the list of userID who has joined the group chat room
+ * グループへ参加されている人のuserIDリストを取得
+ *
+ * @param  groupID:
+ * @param NetworkIFDidFinishDelegate
+ * @param tag
+ *
+ */
++(void)  groupChat_GetGroupMembers:(NSString*) groupID withCallback:(SEL)selector withObserver:(id)observer;
+
+/**
+ * get the info of the group chat room
+ * グループの情報を取得
+ *
+ * @param  groupID:
+ * @param NetworkIFDidFinishDelegate
+ * @param tag
+ *
+ */
+
++(void)  groupChat_GetGroupDetail:(NSString*) groupID withCallback:(SEL)selector withObserver:(id)observer;
+
+/**
+ * send a message a group chat room
+ * グループルームにメッセージを送る
+ *
+ * @param  msg:
+ * @param groupID
+ * @param NetworkIFDidFinishDelegate
+ * @param tag
+ */
+
++(void) groupChat_SendMessage:(ChatMessage*) msg toGroup:(NSString*)groupID withCallback:(SEL)selector withObserver:(id)observer;
+
+
+#pragma mark -
+#pragma mark - Class group
+
++(void) editClassGroup:(NSString*)groupid withBreifIntroduction:(NSString*)briefintro withCallback:(SEL)selector withObserver:(id)observer;
+
+#pragma mark - Fixed group
+// work for biz
++ (void)getAllGroupsInCompanyWithCallback:(SEL)selector withObserver:(id)observer;
+
+
++(void) createGroup:(NSString*)groupname withStatus:(NSString*)status withPlacename:(NSString*)name withLongitude:(double)longitude withLatitude:(double)latitude withBreifIntroduction:(NSString*)briefintro withGroupType:(NSString*)type withCallback:(SEL)selector withObserver:(id)observer;
+
++(void) getUserGroupDetail:(NSString*) groupID isCreator:(BOOL)isCreator withCallback:(SEL)selector withObserver:(id)observer;
+
++(void) uploadGroupAvatarThumbnail:(NSString*)filepath forGroup:(NSString*)groupid withCallback:(SEL)selector withObserver:(id)observer;
+
++(void) uploadGroupAvatar:(NSString*)filepath forGroup:(NSString*)groupid withCallback:(SEL)selector withObserver:(id)observer;
+
++(void) setLevel:(NSString*) level forUser:(NSString*)userid forGroup:(NSString*)groupid withCallback:(SEL)selector withObserver:(id)observer;
+
++(void) editGroup:(NSString*)groupid withName:(NSString*)groupname withStatus:(NSString*)status withPlacename:(NSString*)name withLongitude:(double)longitude withLatitude:(double)latitude withBreifIntroduction:(NSString*)briefintro withGroupType:(NSString*) type NeedUpdateTimeStamp:(BOOL)flag withCallback:(SEL)selector withObserver:(id)observer;
+
++(void)dismissGroup:(NSString*)groupid withCallback:(SEL)selector withObserver:(id)observer;
+
++(void)askToJoinThegroup:(NSString*)groupid  withMessage:(NSString*)msg withCallback:(SEL)selector withObserver:(id)observer;
+
++(void)getPendingMembers:(NSString*)groupid withCallback:(SEL)selector withObserver:(id)observer;
+
++(void)getGroupByKey:(NSString*) searchKey withCallback:(SEL)selector withObserver:(id)observer;
+
++(void)getGroupByGroupID:(NSString*) groupid withCallback:(SEL)selector withObserver:(id)observer;
+
++(void)updateThumbnailTimestamp:(NSString*)groupid withCallback:(SEL)selector withObserver:(id)observer;
+
++(void)removeMemeber:(NSArray*)memberlist fromGroup:(NSString*)groupid withCallback:(SEL)selector withObserver:(id)observer;
+
++(void)rejectCandidate:(NSString*)buddyid toJoinGroup:(NSString*)groupid withCallback:(SEL)selector withObserver:(id)observer;
+
++(void)getGroupAvatar:(NSString*)groupid withCallback:(SEL)selector withObserver:(id)observer;
+
++(void)getGroupAvatarThumbnail:(NSString*)groupid withCallback:(SEL)selector withObserver:(id)observer;
+
++(void)leaveGroup:(NSString*)groupid withCallback:(SEL)selector withObserver:(id)observer;
+
++(void)getMyGroupsWithCallback:(SEL)selector withObserver:(id)observer;
+
++(void)getAllPendingRequest:(SEL)selector withObserver:(id)observer;
+
++(void)acceptJoinApplicationFor:(NSString*)groupid FromUser:(NSString*)userid withCallback:(SEL)selector withObserver:(id)observer;
+
+
+// reserved for future.
++(void)acceptGroupInvitation:(NSString*)groupid withCallback:(SEL)selector withObserver:(id)observer;
+
++(void)refuseJoinTheGroup:(NSString*)groupid withCallback:(SEL)selector withObserver:(id)observer;
+
+#pragma mark - emergency message
++(void)sendEmergencyMessage:(NSString*)status withMessage:(NSString*)message withLatitude:(NSString*)latitude withLongitude:(NSString*)longitude withCallback:(SEL)selector withObserver:(id)observer;
+
+#pragma mark - Biz Group
+
++(void)getCompanyStructure:(NSString*)companyid withCallback:(SEL)selector withObserver:(id)observer;
++(void)getMembersInDepartment:(NSString*)groupid withCallback:(SEL)selector withObserver:(id)observer;
+
+
+#pragma mark - favorite related
++(void)favoriteBuddy:(NSString*)buddyid withCallback:(SEL)selector withObserver:(id)observer;
++(void)favoriteBuddies:(NSArray*)buddylist withCallback:(SEL)selector withObserver:(id)observer;
++(void)favoriteGroup:(NSString*)groupid withCallback:(SEL)selector withObserver:(id)observer;
++(void)favoriteGroups:(NSArray*)grouplist withCallback:(SEL)selector withObserver:(id)observer;
+
++(void)defavoriteBuddy:(NSString*)buddyid withCallback:(SEL)selector withObserver:(id)observer;
++(void)defavoriteGroup:(NSString *)groupid withCallback:(SEL)selector withObserver:(id)observer;
+
++(void)getFavoritedItemsWithCallback:(SEL)selector withObserver:(id)observer;
+
+
+#pragma mark - Privacy Setting
+/**
+ * Set privacy
+ * Privacyの設定
+ *
+ * @param  peopleCanAddMe:
+ *            true to allow people to add me to their friend list
+ * @param  addBuddyAutomatically:
+ *            true to allow buddy matching
+ * @param  unknowPeopleCanCallMe:
+ *            true to allow  unknown people to call me
+ * @param  unknowPeopleCanMessageMe:
+ *            true to allow unknown people to message me
+ * @param  shouldShowMsgDetailInPush:
+ *            true to show message detail in push service
+ * @param NetworkIFDidFinishDelegate
+ */
+
+// -1 means no update.
++(void)  setPrivacy_peopleCanAddMe:(int) peopleCanAddMe
+                    unknowPeopleCanCallMe:(int) unknowPeopleCanCallMe
+                 unknowPeopleCanMessageMe:(int) unknowPeopleCanMessageMe
+                shouldShowMsgDetailInPush:(int) shouldShowMsgDetailInPush
+                      ListMeNearBy:  (int)listMeNearby
+                             withCallback:(SEL)selector
+                             withObserver:(id)observer;
+
+
+
+/**
+ * Get privacy
+ * Privacyの設定を取得
+ *
+ * @param NetworkIFDidFinishDelegate
+ * @param tag
+ */
++(void)  getPrivacySettingWithCallback:(SEL)selector withObserver:(id)observer;
+
+
+
+#pragma mark -
+#pragma mark account deactive
+
+/**
+ * Remove all the information related to current account from local
+ * アカウント削除処理。（通話履歴、チャット履歴及びローカル設定は全部消される。
+ * @param NetworkIFDidFinishDelegate
+ */
++(void) accountDeactiveWithCallback:(SEL)selector withObserver:(id)observer;
+
+
+
+#pragma mark - Device compatibility
++(void)  getUnsupportedDeviceListWithCallback:(SEL)selector withObserver:(id)observer;
+
+
+#pragma mark - Time compatibility
++(void)  adjustUTCTimeWithCallback:(SEL)selector withObserver:(id)observer;
+
++(void)  setActiveAppType:(NSString*) strAppType withCallback:(SEL)selector withObserver:(id)observer;
++(void)  getActiveAppTypeWithCallback:(SEL)selector withObserver:(id)observer;
+
+#pragma mark - Register and login
++ (void)autoRegisterWithCallback:(SEL)selector withObserver:(id)observer;
++ (void)registerWithMail:(NSString *)mailAddress password:(NSString *)password withCallback:(SEL)selector withObserver:(id)observer;
++ (void)registerWithUserid:(NSString *)userid password:(NSString *)password withCallback:(SEL)selector withObserver:(id)observer;
++ (void)registerWithUserid:(NSString *)userid password:(NSString *)password withUserType:(NSString*)user_type withCallback:(SEL)selector withObserver:(id)observer;
++ (void)loginWithUserinfo:(NSString *)userinfo password:(NSString *)password withLatitude:(CLLocationDegrees)lati withLongti:(CLLocationDegrees)longtitude withCallback:(SEL)selector withObserver:(id)observer;
++ (void)loginWithEmail:(NSString *)email password:(NSString *)password withLatitude:(CLLocationDegrees)lati withLongti:(CLLocationDegrees)longtitude withCallBack:(SEL)selector withObserver:(id)observer;
++ (void)logoutWithCallback:(SEL)selector withObserver:(id)observer;
+
+
++ (void)changeWowtalkID:(NSString *)wowtalkid withCallback:(SEL)selector withObserver:(id)observer;
++ (void)changePassword:(NSString *)password withOldPassword:(NSString*)oldpassword withCallback:(SEL)selector withObserver:(id)observer;
+
+
+
++ (void)bindPhoneNumber:(NSString *)phoneNumber withCallback:(SEL)selector withObserver:(id)observer;
++ (void)bindEmail:(NSString *)email withCallback:(SEL)selector withObserver:(id)observer;
++ (void)verifyPhoneNumber:(NSString *)accessCode withCallback:(SEL)selector withObserver:(id)observer;
++ (void)verifyEmail:(NSString *)accessCode withCallback:(SEL)selector withObserver:(id)observer;
+
++(void)unLinkEmail:(NSString*)password withCallback:(SEL)selector withObserver:(id)observer;
++(void)unLinkMobile:(NSString*)password withCallback:(SEL)selector withObserver:(id)observer;
+
++ (void)sendAccessCodeForUid:(NSString *)userid toDes:(NSString *)des withCallback:(SEL)selector withObserver:(id)observer;
++ (void)resetPasswordForID:(NSString *)userid pwd:(NSString *)password accessCode:(NSString *)accessCode withCallback:(SEL)selector withObserver:(id)observer;
++ (void)BlidingEmail:(NSString *)Email WithCallback:(SEL)selector withObserver:(id)observer;
++ (void)GetBindEmailStatusWithCallback:(SEL)selector withObserver:(id)observer;
++ (void)GetVerifyCodeWithAccessCode:(NSString *)accessCode andEmail:(NSString *)email Callback:(SEL)selector withObserver:(id)observer;
++ (void)unBindEmail:(SEL)selector withObserver:(id)observer;
++ (void)retrievePasswordWithWowtalkID:(NSString *)wowtalkID andEmail:(NSString *)email Callback:(SEL)selector withObserver:(id)observer;
++ (void)checkCodeForRetrievePassword:(NSString *)wowtalk_id andAccessCode:(NSString *)accessCode Callback:(SEL)selector withObserver:(id)observer;
++ (void)retrievePasswordWithWowtalkID:(NSString *)wowtalkID andNewPassword:(NSString *)Password Callback:(SEL)selector withObserver:(id)observer;
+#pragma mark - Event
++ (void)getEventInfoWithEventId:(NSString *)event_id WihtCallBack:(SEL)selector withObserver:(id)observer;
+
++ (void)applyEventWithEventId:(NSString *)event_id withApplyMessage:(NSString *)apply_message withMemberInfo:(NSMutableDictionary *)member_info withCallBack:(SEL)selector withObserver:(id)observer;
++ (void)cancelEventWithEventId:(NSString *)event_id withCallBack:(SEL)selector withObserver:(id)observer;
+
++ (void)uploadEventWithCallBack:(SEL)selector withType:(NSString *)type withTextTitle:(NSString *)textTitle withTextContent:(NSString *)textContent andClassifition:(NSString *)classifition withDateInfo:(NSString *)dateInfo withArea:(NSString *)area withMaxMember:(NSString *)maxMember withCoin:(NSString *)coin withIsGetMemberInfo:(NSString *)isGetMemberInfo withIsOpen:(NSString *)isOpen withStartDate:(NSString *)startDate withEndDate:(NSString * )endDate withObserver:(id)observer;
+
++ (void)getAllEventswithMaxStartTime:(NSString *)MaxStartTime withFinishedState:(NSString *)finishedState withCallback:(SEL)selector withObserver:(id)observer;
++ (void)getLatestEventswithNumber:(int)number withStartTime:(NSString *)startTime withInsertTime:(NSString *)insertTime withCallback:(SEL)selector withObserver:(id)observer;
++ (void)getLatestEvents:(int)num withCallback:(SEL)selector withObserver:(id)observer;
++ (void)getPreviousEventsWithTimestamp:(int)timestamp WithNumber:(int)num withCallback:(SEL)selector withObserver:(id)observer;
++ (void)joinEvent:(NSString *)eventId eventDate:(NSString *)date withCallback:(SEL)selector withObserver:(id)observer;
++ (void)joinEvent:(NSString *)eventId eventDate:(NSString *)date detail:(NSString *)detail withCallbacl:(SEL)selector withObserver:(id)observer;
++ (void)cancelJoinTheEvent:(NSString *)eventid withCallback:(SEL)selector withObserver:(id)observer;
+
++ (void)getJoinedEventsWithNumber:(int)number withInsertTime:(NSString *)insertTime withCallback:(SEL)selector withObserver:(id)observer;
++ (void)uploadEventMedia:(WTFile *)file withIndex:(NSInteger)index withCallback:(SEL)selector withObserver:(id)observer;
++ (void)uploadEventThumbnail:(WTFile *)file withIndex:(NSInteger)index withCallback:(SEL)selector withObserver:(id)observer;
++ (void)uploadEventFileId:(WTFile *)file withEventId:(NSString *)eventid withCallback:(SEL)selector withObserver:(id)observer;
++ (void)getEventMedia:(WTFile *)file isThumb:(BOOL)thumb showingOrder:(int)order withCallback:(SEL)selector withObserver:(id)observer;
++ (void)getEventMediaWithID:(NSString *)fileId fileExt:(NSString *)fileExt showingOrder:(int)order withCallbacl:(SEL)selector withObserver:(id)observer;
++ (void)getEventMembersListWithEventID:(NSString *)event_id withCallBack:(SEL)selector withObserver:(id)observer;
+
+
+// Below is not used.
+//+ (void)getEventDetail:(NSString *)eventID withCallback:(SEL)selector withObserver:(id)observer;
+//+ (void)getJoinableEventsWithCallback:(SEL)selector withObserver:(id)observer;
+//+ (void)getJoinedEventsWithCallback:(SEL)selector withObserver:(id)observer;
+
+
+#pragma mark - Moment
+
+
++ (void)addMoment:(NSString *)content isPublic:(BOOL)ispublic allowReview:(BOOL)allowReview Latitude:(NSString*)latitude Longitutde:(NSString*)longitude withPlace:(NSString*)place withMomentType:(NSString*)type withSharerange:(NSArray*)groups withCallback:(SEL)selector withObserver:(id)observer;
+
+
++ (void)addMomentToUploadParentsOpinion:(NSString *)content isPublic:(BOOL)ispublic allowReview:(BOOL)allowReview Latitude:(NSString*)latitude Longitutde:(NSString*)longitude withPlace:(NSString*)place withMomentType:(NSString*)type  withSharerange:(NSArray*)groups  withCallback:(SEL)selector withObserver:(id)observer;
+
++ (void)addSurveyMoment:(NSString *)content isPublic:(BOOL)ispublic allowReview:(BOOL)allowReview Latitude:(NSString*)latitude Longitutde:(NSString*)longitude withPlace:(NSString*)place withDeadline:(NSString*)deadline isMultiSelection:(BOOL)multi_selection withOptions:(NSArray*)options  withSharerange:(NSArray*)groups withCallback:(SEL)selector withObserver:(id)observer;
+
++(void)voteSurveryMoment:(NSString*)moment_id withOptions:(NSArray*)optionids withCallback:(SEL)selector withObserver:(id)observer;
+
+
++ (void)uploadMomentMultimedia:(WTFile*)file ForMoment:(NSString*)momentid withCallback:(SEL)selector withObserver:(id)observer;
+
+
++ (void)deleteMoment:(NSString *)momentid withCallback:(SEL)selector withObserver:(id)observer;
+
++ (void)reviewMoment:(NSString *)momentid withType:(NSString *)type content:(NSString *)reviewContent withCallback:(SEL)selector withObserver:(id)observer;
+
++ (void)replyToReview:(NSString *)reviewid inMoment:(NSString*)momentid withType:(NSString *)type content:(NSString *)reviewContent withCallback:(SEL)selector withObserver:(id)observer;
+
++ (void)deleteMomentReview:(NSString *)momentid reviewid:(NSString *)reviewid withCallback:(SEL)selector withObserver:(id)observer;
+
++ (void)getMomentsOfAll:(NSInteger)maxTimeStamp withTags:(NSArray*)tags withReview:(BOOL)needReview withCallback:(SEL)selector withObserver:(id)observer;
+
++ (void)getMomentsOfGroup:(NSString*)groupid withMaxTimeStamp:(NSInteger)maxTimeStamp withTags:(NSArray*)tags withReview:(BOOL)needReview withCallback:(SEL)selector withObserver:(id)observer;
+
+
++ (void)getMomentForBuddy:(NSString *)buddyid withTags:(NSArray*)tags isWithReview:(BOOL)withReview beforeTimeStamp:(NSInteger)maxTimeStamp withCallback:(SEL)selector withObserver:(id)observer;
+
++ (void)getMomentForBuddy:(NSString *)buddyid withTags:(NSArray*)tags isWithReview:(BOOL)withReview withCallback:(SEL)selector withObserver:(id)observer;
+
++ (void)getMomentMedia:(WTFile*)file isThumb:(BOOL)flag  inShowingOrder:(int)order forMoment:(NSString*)momentid withCallback:(SEL)selector withObserver:(id)observer;
+
+
++ (void)getReviewForMoment:(NSString *)momentid withCallback:(SEL)selector withObserver:(id)observer;
++ (void)getReviewForMoment:(NSString *)momentid beforeReview:(NSString *)reviewid withCallback:(SEL)selector withObserver:(id)observer;
++ (void)getLatestReplyForMeWithCallback:(SEL)selector withObserver:(id)observer;
+
++ (void)setReviewAsRead:(NSArray*)reviewidarray withCallback:(SEL)selector withObserver:(id)observer;
+
++ (void)uploadMomentMedia:(WTFile *)file withCallback:(SEL)selector withObserver:(id)observer withExt:(BOOL)withExt;
++ (void)uploadMomentMediaThumbnail:(WTFile *)file withCallback:(SEL)selector withObserver:(id)observer;
+
+
++(void)uploadCoverImage:(CoverImage *)file withCallback:(SEL)selector withObserver:(id)observer;
++(void)getCoverImage:(NSString *)buddyid withCallback:(SEL)selector withObserver:(id)observer;
++(void)removeCoverImage:(CoverImage *)image withCallback:(SEL)selector withObserver:(id)observer;
+
++(void)uploadCoverToServer:(CoverImage*)cover withCallback:(SEL)selector withObserver:(id)observer;
+
++(void)getCoverFromServer:(CoverImage*)cover withCallback:(SEL)selector withObserver:(id)observer;
+
+
+#pragma mark - Nearby function
++(void)getNearbyBuddysWithOffset:(int)offset withLatitude:(double)latitude withLongitude:(double)longitude withCallback:(SEL)selector withObserver:(id)observer;
++(void)getNearbyGroupsWithOffset:(int)offset withCallback:(SEL)selector withObserver:(id)observer;
+
+#pragma mark - GPS
+/**
+ * Tell server I become active  : use to record user activity
+ *
+ * @param NetworkIFDidFinishDelegate
+ */
++(void) userBecomeActiveWithLastLongitude:(float)lastLongitude withLastLatitude:(float)lastLatitude withCallback:(SEL)selector withObserver:(id)observer;
+
+
+#pragma mark - versioning
+
+//+(void)getVersionWithCallback:(SEL)selector withObserver:(id)observer;
+
+
+#pragma mark - Official Account Message
++(NSString*)translateMsgTypeForOfficialUserReadable:(NSString*)input;
++(void) sendMsgToOfficialAccount:(ChatMessage*)msg withCallback:(SEL)selector withObserver:(id)observer;
+
++(BOOL)sendBuddyMessage:(ChatMessage*)msg;
+
+#pragma mark - Message related
++(void) uploadMediaFile:(NSString*)pathOfFile withCallback:(SEL)selector withObserver:(id)observer;
++(void) uploadMediaMessageOriginalFile:(ChatMessage*)msg withCallback:(SEL)selector withObserver:(id)observer;
++(void) uploadMediaMessageThumbnail:(ChatMessage*)msg withCallback:(SEL)selector withObserver:(id)observer;
+
++(void) downloadMediaMessageOriginalFile:(ChatMessage*)msg withCallback:(SEL)selector withObserver:(id)observer;
++(void) downloadMediaMessageThumbnail:(ChatMessage*)msg withCallback:(SEL)selector withObserver:(id)observer;
+
+#pragma mark - Opt Buddy
++ (void)optBuddy:(NSString *)userId withInfo:(NSDictionary *)dic withCallback:(SEL)selector withObserver:(id)observer;
+
+
+#pragma mark -
+#pragma mark Chat related
++ (void)getChatHistoryWithBuddyStore:(NSString *)userId  offset:(NSInteger)offset limit:(NSInteger)limit observer:(id)observer selector:(SEL)selector;
++ (void)getChatHistoryCountWithBuddy:(NSString *)userId observer:(id)observer selector:(SEL)selector;
++ (void)getChatHistoryWithBuddy:(NSString *)userId offset:(NSInteger)offset limit:(NSInteger)limit observer:(id)observer selector:(SEL)selector;
+
+
++ (void)getLatestContactListWithOffset:(NSInteger)offset limit:(NSInteger)limit observer:(id)observer selector:(SEL)selector;
++ (void)getLatestContactList:(id)observer selector:(SEL)selector;
++ (void)getOfflineMessageFromTimestamp:(NSString*)timestamp withObserver:(id)observer selector:(SEL)selector;
+
+//+(void)getAccountsUnreadCount:(NSArray *)uuidArray withCallback:(SEL)selector withObserver:(id)observer;
+
+#pragma mark - new
++(void)getSingleMoment:(NSString *)momentId withCallback:(SEL)selector withObserver:(id)observer;
+
++(void) bindInvitationCode:(NSString *)invitationCode withCallback:(SEL)selector withObserver:(id)observer;
++ (void)loginWithInvitaionCode:(NSString *)invitationCode withCallback:(SEL)selector withObserver:(id)observer;
+
++(void) getSchoolStructurWithCallback:(SEL)selector withObserver:(id)observer;
++ (void)uploadMsgFile:(WTFile *)file withCallback:(SEL)selector withObserver:(id)observer;
++(void) downloadPicVoiceFile:(ChatMessage*)msg withCallback:(SEL)selector withObserver:(id)observer;
+@end

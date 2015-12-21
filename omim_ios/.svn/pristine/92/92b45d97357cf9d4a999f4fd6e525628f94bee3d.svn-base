@@ -1,0 +1,181 @@
+//
+//  OMChangeBindingTelephoneViewController.m
+//  dev01
+//
+//  Created by Starmoon on 15/7/28.
+//  Copyright (c) 2015年 wowtech. All rights reserved.
+//
+
+#import "OMChangeBindingTelephoneViewController.h"
+
+#import "OMNetwork_Login.h"
+
+#import "OMCodeCountdownButton.h"
+#import "OMTelephoneTextField.h"
+#import "YBAttrbutedLabel.h"
+
+#import "WTUserDefaults.h"
+
+#import "BindingTelephoneViewController.h"
+
+@interface OMChangeBindingTelephoneViewController ()
+
+@property (retain, nonatomic) IBOutlet UITextField *code_textField;
+
+@property (retain, nonatomic) IBOutlet OMCodeCountdownButton *code_button;
+
+@property (retain, nonatomic) IBOutlet YBAttrbutedLabel *error_label;
+
+@property (retain, nonatomic) IBOutlet UIButton *enter_button;
+
+@property (copy, nonatomic) NSString * telephone_number;
+
+@property(nonatomic,assign)BOOL isClickCodeBtn;
+
+@property (retain,nonatomic) NSError *error;
+@end
+
+@implementation OMChangeBindingTelephoneViewController
+
+- (void)dealloc {
+    [_code_textField release];
+    [_code_button release];
+    [_enter_button release];
+    [_error_label release];
+    [super dealloc];
+}
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    self.isClickCodeBtn=NO;
+    self.title = @"修改手机号码";
+    
+    self.code_textField.leftView = [[[UIView alloc]initWithFrame:CGRectMake(0, 0, 14, 5)] autorelease];
+    self.code_textField.leftViewMode = UITextFieldViewModeAlways;
+    self.code_textField.placeholder = NSLocalizedString(@"验证码",nil);
+    [self.code_textField addTarget:self action:@selector(code_editing:) forControlEvents:UIControlEventEditingChanged];
+    
+    [self.code_button setTitle:@"获取验证码" forState:UIControlStateNormal];
+    [self.enter_button setBackgroundImage:[[UIImage imageNamed:@"btn_blue"] stretchableImageWithLeftCapWidth:10 topCapHeight:10] forState:UIControlStateNormal];
+    self.enter_button.enabled = NO;
+    [self.enter_button setTitle:@"确定" forState:UIControlStateNormal];
+    self.navigation_back_button_title=@"返回";
+
+}
+
+
+
+#pragma mark - Action
+
+- (void)code_editing:(UITextField *)code_textfield{
+    if (self.code_textField.text.length > 0){
+        self.enter_button.enabled = YES;
+    }else{
+        self.enter_button.enabled = NO;
+    }
+}
+
+
+- (IBAction)code_button_action:(OMCodeCountdownButton *)sender {
+    self.isClickCodeBtn=YES;
+    sender.duration = 60;
+    [sender fire];
+    [OMNetwork_Login sms_sendSMS:self.telephone_number withType:@"bindingTelephone" smstemplateid:SmstemplateID withCallback:@selector(didSendSMS:) withObserver:self];
+}
+
+- (IBAction)enter_button_action:(id)sender {
+    // 验证码不能为空
+    if (self.code_textField.text.length == 0){// 验证码为空
+        self.error_label.text = @"验证码不能为空";
+        self.error_label.hidden = NO;
+        return;
+    }
+    
+    self.omAlertViewForNet.type = OMAlertViewForNetStatus_Loading;
+    self.omAlertViewForNet.title = @"验证中...";
+    [self.omAlertViewForNet showInView:self.view];
+    
+    [OMNetwork_Login sms_checkCodeWithTelephone_number:self.telephone_number withCode:self.code_textField.text withCallback:@selector(didCheckCode:) withObserver:self];
+}
+
+-(void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event{
+    [self.view endEditing:YES];
+}
+
+
+#pragma mark---
+#pragma mark---点击获取验证码，返回时警告框提示
+-(void)baseVCBackAction:(UIButton *)back_button{
+   if(self.isClickCodeBtn==YES)
+    {
+        UIAlertView *alertView = [[UIAlertView alloc]initWithTitle:NSLocalizedString(@"Tips",nil) message:@"发送验证码可能需要一些时间请稍等片刻是否确定返回" delegate:self cancelButtonTitle:@"停留当前页面" otherButtonTitles:NSLocalizedString(@"OK",nil), nil];
+        [alertView show];
+        [alertView release];
+    }
+    else
+    {
+        [self.navigationController popViewControllerAnimated:YES];
+    }
+}
+
+-(void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex{
+    if (buttonIndex == 1){
+        [self.navigationController popViewControllerAnimated:YES];
+    }
+}
+
+#pragma mark - Network Callback
+
+- (void)didSendSMS:(NSNotification *)notif{
+    NSError *error = [[notif userInfo] valueForKey:WT_ERROR];
+    if (error.code == NO_ERROR) {
+        self.omAlertViewForNet.type = OMAlertViewForNetStatus_Done1;
+        self.omAlertViewForNet.title = @"验证码发送成功";
+        [self.omAlertViewForNet showInView:self.view];
+    }else if (error.code == 56){
+        self.omAlertViewForNet.type = OMAlertViewForNetStatus_Failure;
+        self.omAlertViewForNet.title = @"验证发送超过5次!请明天再试!";
+        [self.omAlertViewForNet showInView:self.view];
+//        self.error_label.text = @"验证发送超过5次!请明天再试!";
+//        self.error_label.hidden = NO;
+        [self.code_button stop];
+    }
+}
+
+
+- (void)didCheckCode:(NSNotification *)notif{
+    NSError *error = [[notif userInfo] valueForKey:WT_ERROR];
+    if (error.code == NO_ERROR) {
+        self.omAlertViewForNet.type = OMAlertViewForNetStatus_Done;
+        self.omAlertViewForNet.title = @"验证成功,正在绑定手机号码...";
+        
+        //验证成功，跳转到绑定手机号页面
+        BindingTelephoneViewController *bindingTelephoneVC = [[BindingTelephoneViewController alloc]initWithNibName:@"BindingTelephoneViewController" bundle:nil];
+        bindingTelephoneVC.isChangeBindingTelephone = YES;
+        [self.navigationController pushViewController:bindingTelephoneVC animated:YES];
+        [bindingTelephoneVC release];
+    }else if (error.code ==57){
+        //超过3分钟，验证码失效
+        self.omAlertViewForNet.type = OMAlertViewForNetStatus_Failure;
+        self.error_label.text = @"验证码失效";
+        self.error_label.hidden = NO;
+    }
+    
+    else{
+        self.omAlertViewForNet.type = OMAlertViewForNetStatus_Failure;
+//        self.omAlertViewForNet.title = @"验证失败,请输入正确验证码";
+        self.error_label.text = @"验证码错误，请重新填写";
+        self.error_label.hidden = NO;
+    }
+}
+
+#pragma mark - Set and Get
+//获取手机号码
+-(NSString *)telephone_number{
+    if (!_telephone_number.isTelephone){
+        _telephone_number = [WTUserDefaults getPhoneNumber];
+    }
+    return _telephone_number;
+}
+
+@end

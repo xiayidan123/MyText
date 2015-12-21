@@ -1,0 +1,68 @@
+//
+//  Communicator_SearchBuddywithType.m
+//  dev01
+//
+//  Created by 杨彬 on 15-1-5.
+//  Copyright (c) 2015年 wowtech. All rights reserved.
+//
+
+#import "Communicator_SearchBuddywithType.h"
+#import "Buddy.h"
+@implementation Communicator_SearchBuddywithType
+
+
+- (void)wowtalkXMLParseFinished:(NSMutableDictionary *)result
+{
+    int errNo;
+    if ([result objectForKey:ERR_NODE_NAME] == nil) {
+        errNo = ERROR_CODE_NOT_RETURNED;
+    } else {
+        errNo = [[result objectForKey:ERR_NODE_NAME] intValue];
+    }
+    NSDictionary *dictionary = nil;
+    if (errNo == NO_ERROR )
+    {
+        NSMutableArray *buddyArray = nil;
+        id buddyObject = [[result objectForKey:XML_BODY_NAME] objectForKey:@"search_buddy"][@"buddy"];
+        if (buddyObject){
+            if ([buddyObject isKindOfClass:[NSArray class]]){
+                buddyArray = [[NSMutableArray alloc]initWithArray:buddyObject];
+            }else{
+                buddyArray = [[NSMutableArray alloc]init];
+                [buddyArray addObject:buddyObject];
+            }
+            NSMutableArray *resultArray = [[NSMutableArray alloc]init];
+            for (int i=0; i< buddyArray.count; i++){
+                NSDictionary *dic = buddyArray[i];
+                Buddy *buddy = [[Buddy alloc]initWithUID:dic[@"uid"]
+                                          andPhoneNumber:nil
+                                             andNickname:dic[@"nickname"]
+                                               andStatus:dic[@"status"]
+                                         andDeviceNumber:nil
+                                               andAppVer:nil
+                                             andUserType:dic[@"user_type"]
+                                            andBuddyFlag:dic[@"buddy_flag"]
+                                            andIsBlocked:nil
+                                                  andSex:dic[@"sex"]
+                                 andPhotoUploadTimeStamp:dic[@"upload_photo_timestamp"]
+                                            andWowTalkID:dic[@"wowtalk_id"]
+                                        andLastLongitude:dic[@"last_longitude"]
+                                         andLastLatitude:dic[@"last_latitude"]
+                                   andLastLoginTimestamp:dic[@"last_login_timestamp"]
+                                       withAddFriendRule:nil
+                                                andAlias:nil];
+                buddy.addFriendRule =[dic objectForKey:XML_PEOPLE_CAN_ADD_ME]
+                ? [[dic objectForKey:XML_PEOPLE_CAN_ADD_ME] intValue]
+                :1;
+                [resultArray addObject:buddy];
+            }
+            dictionary = [[NSDictionary alloc]initWithObjects:@[resultArray] forKeys:@[@"buddyArray"]];
+            [resultArray release];
+            [buddyArray release];
+        }
+    }
+    [self networkTaskDidFinishWithReturningData:nil error:[NSError errorWithDomain:ERROR_DOMAIN code:errNo userInfo:dictionary]];
+    [dictionary release];
+}
+
+@end

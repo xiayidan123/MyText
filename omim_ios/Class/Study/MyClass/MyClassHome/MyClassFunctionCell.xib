@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="9046" systemVersion="15A2301" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES">
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="9035"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner"/>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <tableViewCell contentMode="scaleToFill" restorationIdentifier="MyClassFunctionCell" selectionStyle="default" indentationWidth="10" reuseIdentifier="MyClassFunctionCell" rowHeight="163" id="KGk-i7-Jjw" customClass="MyClassFunctionCell">
+            <rect key="frame" x="0.0" y="0.0" width="320" height="175"/>
+            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+            <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="KGk-i7-Jjw" id="H2p-sc-9uM">
+                <rect key="frame" x="0.0" y="0.0" width="320" height="174"/>
+                <autoresizingMask key="autoresizingMask"/>
+                <subviews>
+                    <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" dataMode="none" translatesAutoresizingMaskIntoConstraints="NO" id="9ac-No-pCL">
+                        <rect key="frame" x="0.0" y="0.0" width="320" height="120"/>
+                        <animations/>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                        <constraints>
+                            <constraint firstAttribute="height" constant="120" id="WSV-C6-csZ"/>
+                        </constraints>
+                        <collectionViewFlowLayout key="collectionViewLayout" minimumLineSpacing="10" minimumInteritemSpacing="10" id="YZC-S4-4VW">
+                            <size key="itemSize" width="50" height="50"/>
+                            <size key="headerReferenceSize" width="0.0" height="0.0"/>
+                            <size key="footerReferenceSize" width="0.0" height="0.0"/>
+                            <inset key="sectionInset" minX="0.0" minY="0.0" maxX="0.0" maxY="0.0"/>
+                        </collectionViewFlowLayout>
+                        <connections>
+                            <outlet property="dataSource" destination="KGk-i7-Jjw" id="w9b-gF-402"/>
+                            <outlet property="delegate" destination="KGk-i7-Jjw" id="DGG-n1-8dP"/>
+                        </connections>
+                    </collectionView>
+                    <button opaque="NO" clearsContextBeforeDrawing="NO" multipleTouchEnabled="YES" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="toC-Sn-KwL">
+                        <rect key="frame" x="85" y="125" width="150" height="34"/>
+                        <animations/>
+                        <constraints>
+                            <constraint firstAttribute="width" constant="150" id="dIQ-7G-nAf"/>
+                            <constraint firstAttribute="height" constant="34" id="e5e-E1-wVL"/>
+                        </constraints>
+                        <state key="normal" title="班级圈" backgroundImage="btn_myclass_class.png">
+                            <color key="titleColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                            <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                        </state>
+                        <connections>
+                            <action selector="classCircleAction" destination="KGk-i7-Jjw" eventType="touchUpInside" id="ajv-Zq-QJh"/>
+                        </connections>
+                    </button>
+                </subviews>
+                <animations/>
+                <constraints>
+                    <constraint firstAttribute="centerX" secondItem="toC-Sn-KwL" secondAttribute="centerX" id="2Ka-uL-iAa"/>
+                    <constraint firstItem="9ac-No-pCL" firstAttribute="top" secondItem="H2p-sc-9uM" secondAttribute="top" id="FRy-UF-eht"/>
+                    <constraint firstItem="toC-Sn-KwL" firstAttribute="top" secondItem="9ac-No-pCL" secondAttribute="bottom" constant="5" id="Gpr-14-BiQ"/>
+                    <constraint firstItem="9ac-No-pCL" firstAttribute="leading" secondItem="H2p-sc-9uM" secondAttribute="leading" id="OtR-xX-AV3"/>
+                    <constraint firstAttribute="trailing" secondItem="9ac-No-pCL" secondAttribute="trailing" id="axj-p3-GIa"/>
+                </constraints>
+            </tableViewCellContentView>
+            <animations/>
+            <connections>
+                <outlet property="classCircle_btn" destination="toC-Sn-KwL" id="RX5-mQ-p4A"/>
+                <outlet property="function_collectionView" destination="9ac-No-pCL" id="Xcb-lx-htC"/>
+            </connections>
+            <point key="canvasLocation" x="242" y="-7.5"/>
+        </tableViewCell>
+    </objects>
+    <resources>
+        <image name="btn_myclass_class.png" width="150" height="34"/>
+    </resources>
+</document>

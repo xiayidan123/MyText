@@ -1,0 +1,677 @@
+//
+//  LocalPeopleListViewController.m
+//  omim
+//
+//  Created by Harry on 14-1-11.
+//  Copyright (c) 2014年 OneMeter Inc. All rights reserved.
+//
+
+#import "LocalPeopleListViewController.h"
+#import "PublicFunctions.h"
+#import "UIGridView.h"
+#import "LocalPeopleHCell.h"
+#import "LocalPeopleVCell.h"
+#import "LocalGroupCell.h"
+#import "Constants.h"
+
+#import "WTHeader.h"
+
+#import "ContactInfoViewController.h"
+#import "GroupContactViewController.h"
+#import "LocationHelper.h"
+
+
+@interface LocalPeopleListViewController ()
+{
+    UILabel* leftLabel;
+    UILabel* rightLabel;
+    BOOL isGroupMode;
+    UIBarButtonItem *barButtonRight;
+    
+     UIView* footerview;
+    UIActivityIndicatorView* indicator;
+    UILabel* lbl_loading;
+    
+    int offset;
+    
+    BOOL isLoadingMore;
+    
+}
+@property (nonatomic,retain) CLLocation* currentLocation;
+@property (nonatomic,retain) UIButton* btn_nearbyUser;
+@property (nonatomic,retain) UIButton* btn_nearbyGroup;
+
+- (void)initTableViews;
+
+@end
+
+@implementation LocalPeopleListViewController
+
+@synthesize nearGroupTable;
+
+@synthesize nearPersonHTable;
+@synthesize nearPersonVTable;
+
+@synthesize nearGroupArray;
+@synthesize nearPersonArray;
+@synthesize isHTable;
+@synthesize myLocationManager;
+
+- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
+{
+    self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
+    if (self) {
+        // Custom initialization
+    }
+    return self;
+}
+
+- (void)viewDidLoad
+{
+    [super viewDidLoad];
+    
+    [self configNav];
+    
+    self.nearPersonArray = [[[NSMutableArray alloc] init] autorelease];
+    self.nearGroupArray = [[[NSMutableArray alloc] init] autorelease];
+    
+    [LocationHelper defaultLocaltionHelper].delegate = self;
+    [[LocationHelper defaultLocaltionHelper] startTraceLocation];
+    
+    //   [self generateDummyData];
+    isGroupMode = FALSE;
+    offset=20;
+    
+    self.nearPersonArray = [Database getNearbyBuddyWithOffset:0];
+    
+    [self initTableViews];
+    
+    
+    if (IS_IOS7) {
+        [self.view setAutoresizesSubviews:false];
+        [self setAutomaticallyAdjustsScrollViewInsets:false];
+        [self setEdgesForExtendedLayout:UIRectEdgeNone];
+    }
+}
+
+-(void)generateDummyData
+{
+    self.nearPersonArray = [Database getContactListWithoutOfficialAccounts];
+    self.nearGroupArray = [Database getAllFixedGroup];
+}
+
+- (void)goBack
+{
+    [self.navigationController popViewControllerAnimated:YES];
+}
+
+-(void)configNav
+{
+    UIBarButtonItem *backBarButton = [PublicFunctions getCustomNavButtonOnLeftSide:YES target:self image:[UIImage imageNamed:@"icon_back_white"] selector:@selector(goBack)];
+          [self.navigationItem addLeftBarButtonItem:backBarButton];
+    [backBarButton release];
+    
+    self.isHTable = ![[NSUserDefaults standardUserDefaults] boolForKey:VERTICAL_VIEWPOINT];
+    
+    if (self.isHTable) {
+        
+//        barButtonRight = [PublicFunctions getCustomNavButtonOnLeftSide:NO target:self image:[UIImage imageNamed:NAV_LISTVIEW_IMAGE] selector:@selector(changeViewStyle:)];
+//        [self.navigationItem addRightBarButtonItem:barButtonRight];
+    }
+    else {
+//        barButtonRight = [PublicFunctions getCustomNavButtonOnLeftSide:NO target:self image:[UIImage imageNamed:NAV_IMAGEVIEW_IMAGE] selector:@selector(changeViewStyle:)];
+//        [self.navigationItem addRightBarButtonItem:barButtonRight];
+        
+    }
+    
+    
+    UILabel* label = [[[UILabel alloc] init] autorelease];
+    label.text =   NSLocalizedString(@"Nearby user", nil);
+    label.font = [UIFont fontWithName:@"STHeitiSC-Light" size:20];
+    label.textAlignment = NSTextAlignmentCenter;
+    label.textColor = [UIColor whiteColor];
+    label.backgroundColor = [UIColor clearColor];
+    [label sizeToFit];
+    self.navigationItem.titleView = label;
+    
+}
+
+-(void)getCurrentLocationData:(LocationHelper *)request withResult:(BOOL)success
+{
+    self.currentLocation = request.currentLocation;
+    
+    // we fetch nearby users
+    if (isGroupMode) {
+        [WowTalkWebServerIF getNearbyGroupsWithOffset:0 withCallback:@selector(didGetNearbyGroup:) withObserver:self];
+    }
+    else {
+        [self getNearbyBuddyWithLocation];
+//        [WowTalkWebServerIF getNearbyBuddysWithOffset:20 withCallback:@selector(didGetNearbyBuddy:) withObserver:self];
+    }
+    
+}
+
+-(void)getNearbyBuddyWithLocation
+{
+    myLocationManager = [[CLLocationManager alloc] init];
+    myLocationManager.delegate = self;
+    myLocationManager.distanceFilter = kCLLocationAccuracyKilometer;
+    myLocationManager.distanceFilter = 100;
+    [myLocationManager startUpdatingLocation];
+}
+
+- (void)locationManager:(CLLocationManager *)manager didUpdateToLocation:(CLLocation *)newLocation fromLocation:(CLLocation *)oldLocation
+{
+    if (myLocationManager) {
+        [myLocationManager stopUpdatingLocation];
+    }
+    
+    CLLocationDegrees latitude=0;
+    CLLocationDegrees longitude=0;
+    if (nil != newLocation) {
+        CLLocationCoordinate2D loc = [newLocation coordinate];
+        latitude = loc.latitude;
+        longitude = loc.longitude;
+        
+        //        NSString *urlString = [NSString stringWithFormat:@"http://www.honey-style.com/default/app-comm/launch/?device=ios&lat=%fd&lon=%fd", latitude, longitude];
+        //        [[UIApplication sharedApplication] openURL:[NSURL URLWithString:urlString]];
+    }
+    
+    [self doGetNearbyBuddyWithLatitude:latitude Longittude:longitude];
+}
+
+- (void)locationManager:(CLLocationManager *)manager didFailWithError:(NSError *)error
+{
+    [self doGetNearbyBuddyWithLatitude:0 Longittude:0];
+}
+
+-(void)doGetNearbyBuddyWithLatitude:(double)lati Longittude:(double)longtitude
+{
+    [WowTalkWebServerIF getNearbyBuddysWithOffset:offset withLatitude:lati withLongitude:longtitude withCallback:@selector(didGetNearbyBuddy:) withObserver:self];
+}
+
+-(void)didGetNearbyBuddy:(NSNotification*)notif
+{
+    NSError* error = [[notif userInfo] valueForKey:WT_ERROR];
+    if (error.code == NO_ERROR) {
+        
+        self.nearPersonArray = [Database getNearbyBuddyWithOffset:0];
+        
+        offset = [self.nearPersonArray count];
+        
+        if (isHTable) {
+            [self.nearPersonHTable reloadData];
+        }
+        
+        else
+            [self.nearPersonVTable reloadData];
+    }
+    
+   // if (isLoadingMore) {
+          [self performSelector:@selector(doneLoadingMore) withObject:nil afterDelay:0.5];
+   // }
+}
+
+-(void)doneLoadingMore
+{
+    if (!self.isHTable) {
+        if (isLoadingMore) {
+            isLoadingMore = FALSE;
+                [indicator stopAnimating];
+            [indicator setHidden:TRUE];
+            [lbl_loading setHidden:TRUE];
+        }
+        
+    
+    }
+    else{
+        if ([((UIGridView*)self.nearPersonHTable) isLoadingMore]) {
+               [(UIGridView*)self.nearPersonHTable stopLoading];
+        }
+    
+    }
+}
+
+
+-(void)didGetNearbyGroup:(NSNotification*)notif
+{
+    
+}
+
+#pragma mark - button action
+-(void)becomeUserMode:(id)sender
+{
+    [self.navigationItem addRightBarButtonItem:barButtonRight];
+    
+    self.btn_nearbyUser.enabled = FALSE;
+    self.btn_nearbyGroup.enabled = TRUE;
+    
+    isGroupMode = FALSE;
+    
+    [self.btn_nearbyUser setBackgroundImage:[UIImage imageNamed:@"tab_button_left_a.png"] forState:UIControlStateNormal];
+    [self.btn_nearbyGroup setBackgroundImage:[UIImage imageNamed:@"tab_button_right.png"] forState:UIControlStateNormal];
+    
+    leftLabel.textColor = [UIColor whiteColor];
+    rightLabel.textColor = [UIColor grayColor];
+    if (self.isHTable) {
+        [self.nearPersonHTable setHidden:FALSE];
+        [self.nearPersonVTable setHidden:TRUE];
+    }
+    else{
+        [self.nearPersonHTable setHidden:TRUE];
+        [self.nearPersonVTable setHidden:FALSE];
+    }
+    [self.nearGroupTable setHidden:TRUE];
+    
+}
+
+-(void)becomeGroupMode:(id)sender
+{
+    [self.navigationItem removeRightBarButtonItem];
+    self.btn_nearbyUser.enabled = TRUE;
+    self.btn_nearbyGroup.enabled = FALSE;
+    
+    isGroupMode = TRUE;
+    
+    [self.btn_nearbyUser setBackgroundImage:[UIImage imageNamed:@"tab_button_left.png"] forState:UIControlStateNormal];
+    [self.btn_nearbyGroup setBackgroundImage:[UIImage imageNamed:@"tab_button_right_a.png"] forState:UIControlStateNormal];
+    
+    [self.nearPersonHTable setHidden:TRUE];
+    [self.nearPersonVTable setHidden:TRUE];
+    
+    [self.nearGroupTable setHidden:FALSE];
+    
+    rightLabel.textColor = [UIColor whiteColor];
+    leftLabel.textColor = [UIColor grayColor];
+}
+
+- (void)changeViewStyle:(UIButton *)button
+{
+    if (self.isHTable)
+    {
+        [self.nearPersonVTable setHidden:NO];
+        [self.nearPersonHTable setHidden:YES];
+        [self.nearPersonVTable reloadData];
+        
+        [self.navigationItem addRightBarButtonItem:[PublicFunctions getCustomNavButtonOnLeftSide:NO target:self image:[UIImage imageNamed:NAV_IMAGEVIEW_IMAGE] selector:@selector(changeViewStyle:)]];
+        
+        self.isHTable = NO;
+        [[NSUserDefaults standardUserDefaults] setBool:TRUE forKey:VERTICAL_VIEWPOINT];
+        
+    }
+    else
+    {
+        [self.nearPersonVTable setHidden:YES];
+        [self.nearPersonHTable setHidden:NO];
+        [self.nearPersonHTable reloadData];
+        
+        [self.navigationItem addRightBarButtonItem:[PublicFunctions getCustomNavButtonOnLeftSide:NO target:self image:[UIImage imageNamed:NAV_LISTVIEW_IMAGE] selector:@selector(changeViewStyle:)]];
+        
+        //    [barButtonRight setImage:[UIImage imageNamed:NAV_LISTVIEW_IMAGE] forState:UIControlStateNormal];
+        
+        self.isHTable = YES;
+        [[NSUserDefaults standardUserDefaults] setBool:FALSE forKey:VERTICAL_VIEWPOINT];
+    }
+    
+    [[NSUserDefaults standardUserDefaults] synchronize];
+}
+
+- (void)initTableViews
+{
+    self.nearPersonVTable = [[[UITableView alloc] initWithFrame:CGRectMake(0, 0, [UISize screenWidth], [UISize screenHeightNotIncludingStatusBarAndNavBar]) style:UITableViewStylePlain] autorelease];
+    self.nearPersonVTable.tableFooterView = [self customFootView];
+    [self.nearPersonVTable setBackgroundView:nil];
+    [self.nearPersonVTable setBackgroundColor:[UIColor colorWithHexString:SETTING_BACKGROUND_COLOR]];
+    [self.nearPersonVTable setDelegate:self];
+    [self.nearPersonVTable setDataSource:self];
+    [self.nearPersonVTable setSeparatorStyle:UITableViewCellSeparatorStyleNone];
+    
+    self.nearPersonHTable = [[[UIGridView alloc] initWithFrame:CGRectMake(0,0, [UISize screenWidth], [UISize screenHeightNotIncludingStatusBarAndNavBar])] autorelease];
+    [self.nearPersonHTable setBackgroundColor:[UIColor colorWithHexString:SETTING_BACKGROUND_COLOR]];
+    [self.nearPersonHTable setSeparatorStyle:UITableViewCellSeparatorStyleNone];
+    
+    [self.nearPersonHTable setUiGridViewDelegate:self];
+    
+    self.nearPersonHTable.hasFootview = TRUE;
+    
+    
+    self.nearGroupTable = [[[UITableView alloc] initWithFrame:CGRectMake(0, 0, [UISize screenWidth], [UISize screenHeightNotIncludingStatusBarAndNavBar]) style:UITableViewStylePlain] autorelease];
+    
+    [self.nearGroupTable setDelegate:self];
+    [self.nearGroupTable setDataSource:self];
+    
+    [self.nearGroupTable setBackgroundView:nil];
+    [self.nearGroupTable setBackgroundColor:[UIColor colorWithHexString:SETTING_BACKGROUND_COLOR]];
+    [self.nearGroupTable setSeparatorStyle:UITableViewCellSeparatorStyleNone];
+    
+    [self.view addSubview:self.nearGroupTable];
+    [self.view addSubview:self.nearPersonVTable];
+    [self.view addSubview:self.nearPersonHTable];
+    
+    BOOL isVertical = [[[NSUserDefaults standardUserDefaults] valueForKey:VERTICAL_VIEWPOINT] boolValue];
+    
+    if (isVertical) {
+        [self.nearPersonHTable setHidden:YES];
+        self.isHTable = FALSE;
+    }
+    else{
+        [self.nearPersonVTable setHidden:YES];
+        self.isHTable = TRUE;
+    }
+    
+    [self.nearGroupTable setHidden:YES];
+}
+
+- (void)didReceiveMemoryWarning
+{
+    [super didReceiveMemoryWarning];
+    // Dispose of any resources that can be recreated.
+}
+
+#pragma - mark UITableViewDataSourse
+
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
+{
+    if (tableView == self.nearPersonVTable) {
+        return [self.nearPersonArray count];
+    }
+    else {
+        return [self.nearGroupArray count];
+    }
+}
+
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    if (tableView == self.nearPersonVTable) {
+        LocalPeopleVCell *cellV = [tableView dequeueReusableCellWithIdentifier:@"LocalPeopleVCell"];
+        
+        if(!cellV) {
+            cellV = [[[NSBundle mainBundle] loadNibNamed:@"LocalPeopleVCell" owner:self options:nil] lastObject];
+        }
+        Buddy *aBuddy = [self.nearPersonArray objectAtIndex:indexPath.row];
+        cellV.buddy = aBuddy;
+        
+        [cellV loadView];
+        return cellV;
+    }
+    else {
+        
+        LocalGroupCell *cellGroup = [tableView dequeueReusableCellWithIdentifier:@"LocalGroupCell"];
+        if(!cellGroup) {
+            cellGroup = [[[NSBundle mainBundle] loadNibNamed:@"LocalGroupCell" owner:self options:nil] lastObject];
+        }
+        
+        UserGroup *group = [self.nearGroupArray objectAtIndex:indexPath.row];
+        cellGroup.group = group;
+        
+        [cellGroup loadView];
+        
+        return cellGroup;
+    }
+}
+
+#pragma - mark UITableViewDelegate
+
+- (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    if (tableView == self.nearPersonVTable) {
+        return 85;
+    } else {
+        return 85;
+    }
+}
+
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    [tableView deselectRowAtIndexPath:indexPath animated:YES];
+    if (tableView == self.nearPersonVTable) {
+        
+        ContactInfoViewController *contactInfoViewController = [[ContactInfoViewController alloc] initWithNibName:@"ContactInfoViewController" bundle:nil];
+        
+        Buddy *aBuddy = [self.nearPersonArray objectAtIndex:indexPath.row];
+        contactInfoViewController.buddy = aBuddy;
+        if ([aBuddy.buddy_flag isEqualToString:@"1"]) {
+            contactInfoViewController.contact_type = CONTACT_FRIEND;
+        }
+        else
+            contactInfoViewController.contact_type = CONTACT_STRANGER;
+        
+        [self.navigationController pushViewController:contactInfoViewController animated:YES];
+        [contactInfoViewController release];
+        
+    } else if (tableView == self.nearGroupTable) {
+        
+        UserGroup* group = [self.nearGroupArray objectAtIndex:indexPath.row];
+        GroupContactViewController* gcvc = [[GroupContactViewController alloc] init];
+        gcvc.group = group;
+        gcvc.group.memberList = nil;
+        gcvc.isStanger = TRUE;
+        gcvc.NoNeedToInitGroup = TRUE;
+        
+        [self.navigationController pushViewController:gcvc animated:YES];
+        [gcvc release];
+    }
+}
+
+-(UIView*)customFootView
+{
+    footerview = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 320,  70)];
+    [footerview setBackgroundColor:[UIColor clearColor]];
+    
+  //  [footerview setBackgroundColor:[UIColor blueColor]];
+    
+    lbl_loading = [[UILabel alloc] initWithFrame:CGRectMake(0, 30, 320, 30)];
+    lbl_loading.text = NSLocalizedString(@"Loading more", nil);
+    lbl_loading.font = [UIFont systemFontOfSize:15];
+    lbl_loading.textAlignment = NSTextAlignmentCenter;
+    lbl_loading.textColor = [UIColor blackColor];
+    lbl_loading.backgroundColor =[UIColor clearColor];
+    
+    [footerview addSubview:lbl_loading];
+    [lbl_loading release];
+    
+    indicator = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleGray];
+    [indicator setFrame:CGRectMake((320-indicator.frame.size.width)/2, 15, indicator.frame.size.width, indicator.frame.size.height)];
+    
+    [footerview addSubview:indicator];
+    [indicator release];
+    
+    [indicator setHidden:TRUE];
+    lbl_loading.hidden = TRUE;
+    
+    return footerview;
+}
+
+#pragma mark UIScrollViewDelegate Methods
+
+- (void)scrollViewDidScroll:(UIScrollView *)scrollView
+{
+    // check whether it is go to the bottom.
+    NSArray *visibleRows = [self.nearPersonVTable visibleCells];
+    UITableViewCell *lastVisibleCell = [visibleRows lastObject];
+    NSIndexPath *path = [self.nearPersonVTable indexPathForCell:lastVisibleCell];
+    if(path.section == 0 && path.row == [self.nearPersonArray count] -1 )
+    {
+        // Do something here
+     //   NSLog(@"last row");
+        CGSize size = scrollView.contentSize;
+        CGPoint point = scrollView.contentOffset;
+        
+        //  NSLog(@"size %f,%f", size.width,size.height);
+        int resdue = 0;
+        
+        if (size.height > [UISize screenHeightNotIncludingStatusBarAndNavBar]) {
+            resdue = point.y - (size.height - [UISize screenHeightNotIncludingStatusBarAndNavBar]);
+        }
+        else{
+            resdue = point.y;
+        }
+        
+        if ( resdue > 50) {
+            
+            if (!scrollView.isDragging && !isLoadingMore) {
+                
+                isLoadingMore = TRUE;
+                
+                [lbl_loading setHidden:FALSE];
+                
+                [indicator setHidden:FALSE];
+                [indicator startAnimating];
+                
+                [self loadMorePersons];
+            }
+            
+            
+        }
+    }
+}
+
+-(void)didScrollGridView:(UIGridView *)grid isLoading:(BOOL)isLoading
+{
+    // check whether it is go to the bottom.
+    NSArray *visibleRows = [grid visibleCells];
+    UITableViewCell *lastVisibleCell = [visibleRows lastObject];
+    NSIndexPath *path = [grid indexPathForCell:lastVisibleCell];
+    int resdue = [self.nearPersonArray count] % 4;
+    int rowcount = ([self.nearPersonArray count] - resdue)/4;
+    if (resdue > 0) {
+        resdue = 1;
+    }
+    else
+        resdue = 0;
+    
+    if(path.section == 0 && path.row == rowcount -1 + resdue)
+        
+    {
+        // Do something here
+    //    NSLog(@"last row");
+        CGSize size = grid.contentSize;
+        CGPoint point = grid.contentOffset;
+        
+      //  NSLog(@"size %f,%f", size.width,size.height);
+        int resdue = 0;
+        
+        if (size.height > [UISize screenHeightNotIncludingStatusBarAndNavBar]) {
+            resdue = point.y - (size.height - [UISize screenHeightNotIncludingStatusBarAndNavBar]);
+        }
+        else{
+                resdue = point.y;           
+        }
+        
+       // NSLog(@"point %f,%f", point.x,point.y);
+        
+      //  int resdue = (int)point.y % (int)size.height;
+        
+        //TODO: possible bug. current we ask for a
+        if ( resdue > 50) {
+            
+            if (!grid.isDragging && !isLoading) {
+                
+                grid.isLoadingMore = TRUE;
+                
+                [grid.lbl_loading setHidden:FALSE];
+                
+                [grid.indicator setHidden:FALSE];
+                [grid.indicator startAnimating];
+                
+                [self loadMorePersonsInGrid];
+            }
+            
+            
+        }
+    }
+
+    
+ //   NSLog(@"h ");
+}
+
+-(void)loadMorePersonsInGrid
+{
+    offset += 20;
+    [self getNearbyBuddyWithLocation];
+//    [WowTalkWebServerIF getNearbyBuddysWithOffset:offset withCallback:@selector(didGetNearbyBuddy:) withObserver:self];
+}
+
+-(void)loadMorePersons
+{
+   
+    isLoadingMore = TRUE;
+    offset += 20;
+    [self getNearbyBuddyWithLocation];
+//   [WowTalkWebServerIF getNearbyBuddysWithOffset:offset withCallback:@selector(didGetNearbyBuddy:) withObserver:self];
+    
+}
+
+
+
+
+
+#pragma mark UIGridViewDelegate
+
+- (CGFloat) gridView:(UIGridView *)grid widthForColumnAt:(int)columnIndex
+{
+    return 80;
+}
+
+- (CGFloat) gridView:(UIGridView *)grid heightForRowAt:(int)rowIndex
+{
+    return 105;
+}
+
+- (NSInteger) numberOfColumnsOfGridView:(UIGridView *) grid
+{
+    return 4;
+}
+
+- (NSInteger) numberOfCellsOfGridView:(UIGridView *) grid
+{
+    return [self.nearPersonArray count];
+}
+
+- (UIGridViewCell *) gridView:(UIGridView *)grid cellForRowAt:(int)rowIndex AndColumnAt:(int)columnIndex
+{
+    LocalPeopleHCell *cell = (LocalPeopleHCell *)[grid dequeueReusableCell];
+	
+	if (cell == nil) {
+		cell = [[[LocalPeopleHCell alloc] init] autorelease];
+	}
+    
+    Buddy *aBuddy = [self.nearPersonArray objectAtIndex:rowIndex * 4 + columnIndex];
+	cell.buddy = aBuddy;
+    
+    [cell loadView];
+    
+    //TODO: calculate the position.
+ //   cell.distance.text = [NSString stringWithFormat:@"%d.%dkm",rowIndex,columnIndex];
+	return cell;
+}
+
+- (void) gridView:(UIGridView *)grid didSelectRowAt:(int)rowIndex AndColumnAt:(int)columnIndex
+{
+    ContactInfoViewController *contactInfoViewController = [[ContactInfoViewController alloc] initWithNibName:@"ContactInfoViewController" bundle:nil];
+    Buddy *aBuddy = [self.nearPersonArray objectAtIndex:rowIndex * 4 + columnIndex];
+    contactInfoViewController.buddy = aBuddy;
+    if ([aBuddy.buddy_flag isEqualToString:@"1"]) {
+        contactInfoViewController.contact_type = CONTACT_FRIEND;
+    }
+    else
+        contactInfoViewController.contact_type = CONTACT_STRANGER;
+    
+    [self.navigationController pushViewController:contactInfoViewController animated:YES];
+    [contactInfoViewController release];
+}
+
+
+- (void)dealloc
+{
+    self.nearGroupArray = nil;
+    self.nearPersonArray = nil;
+    
+    self.nearPersonVTable = nil;
+    self.nearPersonHTable =nil;
+    self.nearGroupTable =nil;
+    
+    [super dealloc];
+}
+
+@end

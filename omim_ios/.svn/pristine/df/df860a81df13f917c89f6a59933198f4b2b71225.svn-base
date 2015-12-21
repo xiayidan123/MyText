@@ -1,0 +1,937 @@
+//
+//  AppDelegate.m
+//
+
+#import "AppDelegate.h"
+
+/**
+ *
+ *
+ *  @param retain    nlan
+ *  @param nonatomic nkdn
+ *
+ *  @return knn
+ */
+#import "TabBarViewController.h"
+#import "ContactsViewController.h"
+#import "ContactListViewController.h"
+#import "TimelineContainerVC.h"
+#import "HomeViewController.h"
+#import "LoginVC.h"
+#import "LoginEmailViewController.h"
+#import "WTUserDefaults.h"
+#import "Database.h"
+#import "WowTalkVoipIF.h"
+#import "Constants.h"
+#import "WTHeader.h"
+
+#import "MessagesVC.h"
+#import "CallProcessVC.h"
+#import "MsgComposerVC.h"
+#import "GlobalSetting.h"
+#import "PublicFunctions.h"
+
+#import "MessageCenter.h"
+
+#import "StatusBar.h"
+#import "Scheduler.h"
+
+#import "ABAddressBook.h"
+
+#import "LocationHelper.h"
+
+#import "CustomNavigationBar.h"
+
+
+#import "MediaUploader.h"
+#import "SetupProfileViewController.h"
+#import "NSString+Compare.h"
+#import "NewLoginEmailVC.h"
+
+#import "GuideViewController.h"
+#import "OMSettingVC.h"
+
+#import "OMNetWork_MyClass.h"
+#import "OMNetWork_Setting.h"
+
+@interface AppDelegate ()<GuideViewControllerDelegate>
+
+@property (retain, nonatomic)GuideViewController *guideVC;
+
+@property (assign, nonatomic)BOOL loadingGuideView;
+
+@property (assign, nonatomic)BOOL isLoginingStatus;
+
+@end
+
+
+@implementation AppDelegate
+
+@synthesize window;
+
+//@synthesize unread_message_count;
+@synthesize isCallFromMsgComposer;
+@synthesize isMyCallProcessVCShown;
+@synthesize myCallProcessVC;
+@synthesize needRefreshMsgComposer;
+@synthesize appDidEnterBackground;
+@synthesize navColor;
+
+#define ALERT_NEW_VERSION 100
+#define ALERT_REGISTER_AUTH_FAILED 101
+#define ALERT_NETWORK_AUTH_FAILED 102
+
+
+#pragma mark -
+#pragma mark Fuctions
+
++(AppDelegate*)sharedAppDelegate{
+    return (AppDelegate *) [UIApplication sharedApplication].delegate;
+}
+
+-(void)initWelcomeVC{
+    NSArray* views = [window subviews];
+    for (int i=0; i<[views count]; i++) {
+        [[views objectAtIndex:i] removeFromSuperview];
+    }
+    
+    self.isLoginingStatus = YES;
+    
+    NewLoginEmailVC *myLoginVC = [[NewLoginEmailVC alloc] initWithNibName:@"NewLoginEmailVC" bundle:nil];
+    UINavigationController *navi = [[UINavigationController alloc]initWithRootViewController:myLoginVC];
+    
+    navi.navigationBarHidden = YES;
+    
+    self.window.rootViewController = navi;
+    [navi release];
+    [myLoginVC release];
+    
+    [self.window makeKeyAndVisible];
+}
+
+- (void)initViews
+{
+    NSArray* views = [window subviews];
+    for (int i=0; i<[views count]; i++) {
+        [[views objectAtIndex:i] removeFromSuperview];
+    }
+    
+    self.isLoginingStatus = NO;
+    
+    
+    OMTabBarVC *tabBarVC = [[OMTabBarVC alloc]init];
+    self.window.rootViewController = tabBarVC;
+    self.tabBarVC = tabBarVC;
+    [tabBarVC release];
+    
+    self.myCallProcessVC = [[[CallProcessVC alloc] initWithNibName:@"CallProcessVC" bundle:nil] autorelease];
+    self.messagesViewController = self.tabBarVC.messageVC;
+    
+    [UIApplication sharedApplication].statusBarStyle = UIStatusBarStyleLightContent;
+
+    [self.window makeKeyAndVisible];
+}
+
+-(void)setStatusColor:(UIColor*)color{
+    [self.statusView setBackgroundColor:color];
+}
+
+
+
+- (void)initProfileSetVC
+{
+    NSArray *views = [window subviews];
+    for (UIView *view in views) {
+        [view removeFromSuperview];
+    }
+    SetupProfileViewController *setViewController = [[SetupProfileViewController alloc] init];
+    [window addSubview:setViewController.view];
+    self.window.rootViewController = setViewController;
+    [setViewController release];
+    [self.window makeKeyAndVisible];
+}
+
+- (void)startWTEngine:(BOOL)needToRegister
+{
+    [WowTalkVoipIF fSetMakeCallDelegate:self];
+    [WowTalkVoipIF fSetCallProcessDelegate:self.myCallProcessVC];
+    
+
+    
+    NSUserDefaults* defaults = [NSUserDefaults standardUserDefaults];
+    [defaults setBool:NO forKey:@"backgroundmode_preference"];
+    [defaults setBool:TRUE forKey:@"edge_opt_preference"];
+    [defaults synchronize];
+    [WowTalkVoipIF fStartWowTalkService];
+    
+    if(needToRegister){
+        [WowTalkVoipIF fRegister];
+    }
+}
+
+
+-(void)setupApplicaiton:(BOOL)rightAfterLogin
+{
+    if (![WowTalkVoipIF fIsSetupCompleted]) {
+        return;
+    }
+    alertShown = NO;
+    NSString* version =[[[NSBundle mainBundle] infoDictionary] objectForKey:(NSString *)kCFBundleVersionKey];
+    
+    [WTUserDefaults setClientVersion:version];
+    
+    
+    
+    
+    [self initViews];
+    // 判断是否绑定了手机号码
+    if([WTUserDefaults getPhoneNumber].length == 0){// 没有绑定手机
+        [OMNotificationCenter postNotificationName:OM_NO_BINDING_MOBILE_PHONE object:nil];
+    }
+    [self startWTEngine:rightAfterLogin];
+    
+    /* set phone code*/
+    
+    NSLocale *locale = [NSLocale currentLocale];
+    NSString *countryCode = [locale objectForKey:NSLocaleCountryCode];
+    NSBundle* bundle = [NSBundle mainBundle];
+    NSString* plistpath = [bundle pathForResource:@"PhoneCodes" ofType:@"plist"];
+    NSDictionary* plistData = [NSDictionary dictionaryWithContentsOfFile:plistpath];
+    NSString* code = [plistData valueForKey:countryCode];
+    [WTUserDefaults setCountryCode:code];
+    
+    //coca: fix for ios 8
+    if ([[UIApplication sharedApplication] respondsToSelector:@selector(registerUserNotificationSettings:)]) {
+        [[UIApplication sharedApplication] registerUserNotificationSettings:[UIUserNotificationSettings settingsForTypes:(UIUserNotificationTypeSound | UIUserNotificationTypeAlert | UIUserNotificationTypeBadge) categories:nil]];
+        [[UIApplication sharedApplication] registerForRemoteNotifications];
+    } else {
+        [[UIApplication sharedApplication] registerForRemoteNotificationTypes:
+         (UIRemoteNotificationTypeAlert |
+          UIRemoteNotificationTypeBadge |
+          UIRemoteNotificationTypeSound)];
+        
+    }
+    
+    
+    if (rightAfterLogin && !self.loadingGuideView) {
+        [[LocationHelper defaultLocaltionHelper] startTraceLocation];
+    }
+    
+    
+    
+    
+    
+    //[WowTalkWebServerIF adjustUTCTimeWithCallback:nil withObserver:nil];
+    [WowTalkWebServerIF getMyGroupsWithCallback:nil withObserver:nil];
+    [WowTalkWebServerIF getMatchedBuddyListWithCallback:nil withObserver:nil];
+    [WowTalkWebServerIF getMyProfileWithCallback:nil withObserver:nil];
+    [WowTalkWebServerIF getLatestVersionInfoWithCallback:nil withObserver:nil];
+    
+    [WowTalkWebServerIF getSchoolListWithCallBack:nil withObserver:nil];
+    [WowTalkWebServerIF getSchoolMembersWithCallBack:nil withObserver:nil];
+    
+    [OMNetWork_MyClass getClassListWithCallBack:nil withObserver:nil];
+    [OMNetWork_Setting GetUserSettingsWithCallback:nil withObserver:nil];
+    
+    // init some array
+    self.newMoments = [[[NSMutableSet alloc] init] autorelease];
+    self.deletedMoments = [[[NSMutableSet alloc] init] autorelease];
+    self.refreshedMoments = [[[NSMutableSet alloc] init] autorelease];
+    
+}
+
+
+
+
+
+- (void)logout{
+    
+    // To make it faster, we'd better change the order here. though may crash.
+    
+    [WowTalkWebServerIF logoutWithCallback:nil withObserver:nil];
+    
+#warning by yangbin temporary
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+        [PublicFunctions logout];
+    });
+    
+    self.unread_message_count =0;
+    [[WTNetworkTaskManager defaultManager] cleanQueue];
+    
+    
+    [self initWelcomeVC];
+    
+}
+
+-(void)didGetLatestReplyForMe:(NSNotification*)notif
+{
+    NSError* error = [[notif userInfo] valueForKey:WT_ERROR];
+    if (error.code == NO_ERROR) {
+        [self.tabbarVC refreshCustomBarUnreadNum];
+        
+    }
+}
+- (void)didGetPendingRequest:(NSNotification *)notif
+{
+    NSError *error = [[notif userInfo] valueForKey:WT_ERROR];
+    if (error.code == NO_ERROR) {
+        [self.tabbarVC refreshCustomBarUnreadNum];
+    }
+}
+#pragma mark - Remote Notification delegate
+
+- (void)application:(UIApplication *)app didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)deviceToken {
+    
+    [WowTalkWebServerIF reportInfoWithPushToken:deviceToken withCallback:nil withObserver:nil];
+}
+
+- (void)application:(UIApplication *)app didFailToRegisterForRemoteNotificationsWithError:(NSError *)err {
+    
+//     [WowTalkWebServerIF reportInfoWithPushToken:nil withCallback:nil withObserver:nil];
+}
+
+- (void)application:(UIApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo {
+    
+    if (!appDidEnterBackground) {
+        return;
+    }
+    
+    //NSLog(@"didReceiveRemoteNotification called");
+    
+    [self fHandleRemoteNotification:userInfo];
+    appDidEnterBackground = NO;
+}
+
+
+-(void)fHandleRemoteNotification:(NSDictionary *)userInfo{
+    if (userInfo==nil) {
+        return;
+    }
+    
+    NSDictionary* apsDict = [userInfo objectForKey:@"aps"];
+    if (!apsDict) {
+        //	NSLog(@"apsDict is null. sth is wrong. ");
+        return;
+    }
+    NSDictionary* alertDict = [apsDict objectForKey:@"alert"];
+    if (!alertDict) {
+        //		NSLog(@"alertDict is null. sth is wrong. ");
+        return;
+    }
+    //NSLog(@"%@",alertDict);
+    
+    NSString* strType =(NSString*) [alertDict objectForKey:@"loc-key"];
+    
+    if ([strType isEqualToString:@"apns_call"] ) {
+        if ([[alertDict objectForKey:@"loc-args"] count]==0) {
+            return;
+        }
+        NSString* strCallerUID=@"";
+        NSString* strCallerDisplayName=@"";
+        if ([[alertDict objectForKey:@"loc-args"] count]==1){
+            strCallerUID=[[alertDict objectForKey:@"loc-args"] objectAtIndex:0];
+            strCallerDisplayName = strCallerUID;
+        }
+        else  {
+            strCallerDisplayName=[[alertDict objectForKey:@"loc-args"] objectAtIndex:0];
+            strCallerUID=[[alertDict objectForKey:@"loc-args"] objectAtIndex:1];
+        }
+        
+        
+        [self displayIncomeCallWaitForCallerCallAgain:strCallerUID withDisplayName:strCallerDisplayName];
+        [self performSelector:@selector(fInformWhoJustCallMe:) withObject:strCallerUID afterDelay:0.5];
+    }
+    else if ([strType isEqualToString:@"apns_newmoment"] ) {
+        [self.tabbarVC selectTabAtIndex:TAB_TIMELINE];
+        //[self.timelineVC coverViewDidTriggerRefresh:nil];
+    }
+    else{
+        [self.tabbarVC selectTabAtIndex:TAB_HOME];
+    }
+}
+
+-(void) fInformWhoJustCallMe:(NSString*)strToUser{
+    if(![WowTalkVoipIF fIsConnectedToServer]){
+        [self performSelector:@selector(fInformWhoJustCallMe:) withObject:strToUser afterDelay:0.3];
+        return;
+    }
+    [WowTalkVoipIF fNotifyCallerIGetOnline:strToUser];
+}
+
+#pragma mark -
+#pragma mark Application Life Circle
+
+
+- (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
+{
+    
+    self.window = [[[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]] autorelease];
+    self.window.backgroundColor = [UIColor whiteColor];
+    [UIApplication sharedApplication].statusBarHidden = NO;
+    
+    
+    [[IQKeyboardManager sharedManager] setToolbarManageBehaviour:IQAutoToolbarByPosition];
+    [[IQKeyboardManager sharedManager] setEnableAutoToolbar:NO];
+    [Database initializeDatabase];
+    
+    [NSFileManager createDirectoryInDocumentsFolderWithName:SDK_MOMENT_MEDIA_DIR];
+    
+    
+    NSString* version =[[[NSBundle mainBundle] infoDictionary] objectForKey:(NSString *)kCFBundleVersionKey];
+    NSString * dbVersion = [WTUserDefaults getClientVersion];
+    if (![version isEqualToString:dbVersion]) {
+        self.loadingGuideView = YES;
+    }
+    
+    if (![WowTalkVoipIF fIsSetupCompleted]){
+        
+        [self initWelcomeVC];
+    }else{
+        
+        [self setupApplicaiton:NO];
+        if (launchOptions) {
+            [self fHandleRemoteNotification:[launchOptions objectForKey:UIApplicationLaunchOptionsRemoteNotificationKey]];
+        }
+    }
+    
+    if (self.loadingGuideView) {
+        [WTUserDefaults setClientVersion:version];
+        [self loadGuidePage];
+    }else {
+        UIImageView *welcome_view = [[UIImageView alloc]initWithFrame:CGRectMake(0, 0, self.window.bounds.size.width, self.window.bounds.size.height)];
+        welcome_view.image = [UIImage imageWithContentsOfFile:[[NSBundle mainBundle] pathForResource:@"splashscreen_s_1920" ofType:@"png"]];
+
+        [self.window addSubview:welcome_view];
+        
+        dispatch_time_t time = dispatch_time(DISPATCH_TIME_NOW, 2ull * NSEC_PER_SEC);
+        dispatch_after(time, dispatch_get_main_queue(), ^{
+            [UIView animateWithDuration:0.5 animations:^{
+                welcome_view.alpha = 0;
+            }completion:^(BOOL finished) {
+                [welcome_view removeFromSuperview];
+                
+            }];
+        });
+        [welcome_view release];
+        
+//        [self.window addSubview:guideVC.view];
+    }
+    
+    
+    
+    return YES;
+}
+
+
+
+
+- (void)applicationWillTerminate:(UIApplication *)application {
+    [Database teardown];
+}
+
+////程序将要从后台进入
+//- (void)applicationWillResignActive:(UIApplication *)application {
+//    
+//    NSInteger number = [[NSUserDefaults standardUserDefaults] integerForKey:NEW_REQUEST_NUM];
+//    
+//    [self.tabBarVC badgeValue:(int)number withIndex:1];
+//    
+//    [self.tabbarVC refreshCustomBarUnreadNum];
+//}
+//
+////程序将要进入前台(被激活)
+//- (void)applicationWillEnterForeground:(UIApplication *)application {
+//    NSInteger number = [[NSUserDefaults standardUserDefaults] integerForKey:NEW_REQUEST_NUM];
+//    [[NSUserDefaults standardUserDefaults] setInteger:number forKey:NEW_REQUEST_NUM];
+//    [[NSUserDefaults standardUserDefaults] synchronize];
+//}
+
+- (void)applicationDidEnterBackground:(UIApplication *)application
+{
+    appDidEnterBackground = YES;
+    
+    NSUserDefaults* defaults = [NSUserDefaults standardUserDefaults];
+    NSInteger number= [defaults integerForKey:UNREAD_MESSAGE_NUMBER];
+    if (number<0){
+        number=0;
+        [[NSUserDefaults standardUserDefaults] setInteger:0 forKey:UNREAD_MESSAGE_NUMBER];
+    }
+    
+    number += [defaults integerForKey:NEW_REQUEST_NUM];
+    
+    // we also have to count the new request, reviews are not counted yet.
+    [[UIApplication sharedApplication] setApplicationIconBadgeNumber:number];
+    
+    
+    if(![WowTalkVoipIF fIsSetupCompleted])return;
+    
+    
+    if (![NSString isEmptyString:[WTUserDefaults getUid]]) {
+        [WowTalkWebServerIF reportUnreadMessageCount:(int)number  withCallback:nil withObserver:nil];
+    }
+    
+    
+    
+    // Remove observer
+    [[NSNotificationCenter defaultCenter] removeObserver:self
+                                                    name:notif_WTRegistrationUpdate
+                                                  object:nil];
+    
+    /*
+     [[NSNotificationCenter defaultCenter] removeObserver:self.messagesViewController
+     name:notif_WTChatMessageReceived
+     object:nil];
+     
+     */
+    
+    [[NSNotificationCenter defaultCenter] removeObserver:self
+                                                    name:notif_WTNetworkConnectivityUpdate
+                                                  object:nil];
+    
+    [[NSNotificationCenter defaultCenter] removeObserver:self
+                                                    name:notif_WTNewMoment
+                                                  object:nil];
+    
+    
+    [[NSNotificationCenter defaultCenter] removeObserver:[MediaUploader sharedUploader] name:WT_UPLOAD_MOMENT_MEDIA_THUMBNAIL object:nil];
+    [[NSNotificationCenter defaultCenter] removeObserver:[MediaUploader sharedUploader] name:WT_UPLOAD_MOMENT_MEDIA_ORIGINAL object:nil];
+    
+    
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:WT_GET_LATEST_REVIEWS_FOR_ME object:nil];
+    
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:NEW_VERSION_ALERT_NOTIFICATION object:nil];
+    
+    
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:WT_NOTIFICATION_AUTH_FAILED object:nil];
+    
+    
+    
+    
+    
+    [WowTalkVoipIF fWowTalkServiceEnterBackgroundMode];
+    
+    
+    
+}
+
+- (void)applicationDidBecomeActive:(UIApplication *)application
+{
+    appDidEnterBackground = NO;
+    
+    if(![WowTalkVoipIF fIsSetupCompleted])return;
+    
+    //    // to to set profile first
+    //    NSString *photoUploadTime = [WTUserDefaults getUploadPhotoTime];
+    //    if ([NSString isEmptyString:photoUploadTime] || [photoUploadTime intValue] == 0) {
+    //        return;
+    //    }
+    
+    NSUserDefaults* defaults = [NSUserDefaults standardUserDefaults];
+    NSString* method = [defaults objectForKey:@"transport_preference"];
+    if(method && [method isEqualToString:@"tcp"]){
+        [defaults setObject:@"udp" forKey:@"transport_preference"];
+        [WowTalkVoipIF fRegister];
+    }
+    else{
+        [WowTalkVoipIF fWowTalkServiceEnterActiveMode];
+    }
+    
+    // Set observer
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(registrationUpdateEvent:)
+                                                 name:notif_WTRegistrationUpdate
+                                               object:nil];
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(networkConnectivityUpdateEvent:)
+                                                 name:notif_WTNetworkConnectivityUpdate
+                                               object:nil];
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(newVersionAvailableEvent:)
+                                                 name:NEW_VERSION_ALERT_NOTIFICATION
+                                               object:nil];
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(didGetVersionInfo:)
+                                                 name:NEW_VERSION_NOTIFICATION
+                                               object:nil];
+    
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(newMomentEvent:)
+                                                 name:notif_WTNewMoment
+                                               object:nil];
+    
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(networkAuthFailedEvent:)
+                                                 name:WT_NOTIFICATION_AUTH_FAILED
+                                               object:nil];
+    
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(didGetLatestReplyForMe:)
+                                                 name:WT_GET_LATEST_REVIEWS_FOR_ME
+                                               object:nil];
+    
+    // logged in in
+    if (![NSString isEmptyString:[WTUserDefaults getUid]]) {
+        [[LocationHelper defaultLocaltionHelper] startTraceLocation];
+        
+        
+        [WowTalkWebServerIF getLatestReplyForMeWithCallback:@selector(didGetLatestReplyForMe:) withObserver:nil];
+        
+        [WowTalkWebServerIF getAllPendingRequest:@selector(didGetPendingRequest:) withObserver:self];
+        
+        [[NSNotificationCenter defaultCenter] addObserver:[MediaUploader sharedUploader] selector:@selector(didUpload:) name:WT_UPLOAD_MOMENT_MEDIA_THUMBNAIL object:nil];
+        [[NSNotificationCenter defaultCenter] addObserver:[MediaUploader sharedUploader] selector:@selector(didUpload:) name:WT_UPLOAD_MOMENT_MEDIA_ORIGINAL object:nil];
+        
+        [[MediaUploader sharedUploader] upload];
+        
+    }
+    
+    self.unread_message_count = (int)[defaults integerForKey:UNREAD_MESSAGE_NUMBER];
+    if (self.unread_message_count<0)
+    {
+        self.unread_message_count =0;
+        [defaults setValue:0 forKey:UNREAD_MESSAGE_NUMBER];
+        [defaults synchronize];
+    }
+#pragma BL 2015.12.7
+    self.unread_moment_notice_count = (int)[defaults integerForKey:NEW_REQUEST_NUM];
+    if (self.unread_moment_notice_count < 0) {
+        self.unread_moment_notice_count = 0;
+        [defaults setValue:0 forKey:NEW_REQUEST_NUM];
+        [defaults synchronize];
+    }
+    
+//    NSInteger number = [[NSUserDefaults standardUserDefaults] integerForKey:NEW_REQUEST_NUM];
+//    if (self.unread_moment_notice_count > 0) {
+//        [self.tabBarVC badgeValue:_unread_moment_notice_count withIndex:1];
+//        [self.tabbarVC refreshCustomBarUnreadNum];
+//    }else{
+//        self.unread_moment_notice_count = 0;
+//        [self.tabBarVC badgeValue:_unread_moment_notice_count withIndex:1];
+//        [self.tabbarVC refreshCustomBarUnreadNum];
+//    }
+    
+    [self.tabBarVC badgeValue:_unread_moment_notice_count withIndex:1];
+    
+    [self.tabbarVC refreshCustomBarUnreadNum];
+}
+
+- (void)dealloc
+{
+    [window release];
+    self.newMoments = nil;
+    self.deletedMoments = nil;
+    self.refreshedMoments = nil;
+    [super dealloc];
+}
+
+#pragma mark -
+#pragma mark Network Connectivity Update Notification Received
+- (void)networkConnectivityUpdateEvent:(NSNotification*)notif{
+    NSString* state = [notif.userInfo objectForKey: @"state"];
+    
+    //   NSLog(@"networkConnectivityUpdate:%@",state);
+    
+    if(![state isEqualToString:@"none"]){
+        // resend all unsent msgs
+        NSArray* unsentList = [Database fetchAllUnsentReceipt];
+        for(ChatMessage* msg in unsentList){
+            
+            [WowTalkVoipIF fResendUnsentReceipt:msg.messageContent forUser:msg.chatUserName];
+            
+        }
+        
+    }
+    else{
+        //Notice: no need to add the status bar , once you set the window level, it will automatically added.
+        
+        [[StatusBar sharedStatusBar] showMsgInStatusBar:NSLocalizedString(@"Slow network", nil)];
+        
+    }
+    
+}
+#pragma mark -  Alert Notification Received
+- (void)newMomentEvent:(NSNotification*)notif {
+    if (TAB_TIMELINE != self.tabbarVC.selectedIndex) {
+        self.unread_moment_notice_count = 1;
+        [self.tabbarVC refreshCustomBarUnreadNum];
+    }
+}
+
+- (void)newVersionAvailableEvent:(NSNotification*)notif {
+    NSString* strTitle= [notif.userInfo objectForKey: @"title"];
+    NSString* strMsg = [notif.userInfo objectForKey: @"message"];
+    
+    UIAlertView* alertview = [[UIAlertView alloc] initWithTitle:strTitle message:strMsg delegate:self cancelButtonTitle:NSLocalizedString(@"Not now", nil) otherButtonTitles:NSLocalizedString(@"Upgrade now", nil), nil];
+    alertview.tag = ALERT_NEW_VERSION;
+    [alertview show];
+    [alertview release];
+    
+}
+
+- (void)didGetVersionInfo:(NSNotification *)notification
+{
+    [[NSUserDefaults standardUserDefaults] setObject:[NSNumber numberWithBool:YES] forKey:@"new_version"];
+    [self.tabbarVC refreshCustomBarUnreadNum];
+}
+
+
+- (void)networkAuthFailedEvent:(NSNotification*)notif {
+    
+    if (alertShown) {
+        return;
+    }
+    
+    
+    UIAlertView* myAlertView = [[UIAlertView alloc] initWithTitle:NSLocalizedString(@"Authetication failed", nil) message:NSLocalizedString(@"Account authentication failed.",nil) delegate:nil cancelButtonTitle:NSLocalizedString(@"OK", nil) otherButtonTitles:nil];
+    myAlertView.tag = ALERT_NETWORK_AUTH_FAILED;
+    [myAlertView show];
+    alertShown = YES;
+    [myAlertView release];
+    
+    
+    
+    [self logout];
+}
+
+
+- (void) fForceToLoginAgain{
+    
+    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+    NSDictionary * dict = [defaults dictionaryRepresentation];
+    for (id key in dict) {
+        [defaults removeObjectForKey:key];
+    }
+    
+    [defaults setObject:[WTUserDefaults getUid] forKey:@"last_login_uid"];
+    [defaults synchronize];
+    
+    
+    [self initWelcomeVC];
+    
+    [Database dropAllTables:NO];
+    [Database teardown];
+    [Database initializeDatabase];
+}
+
+#pragma mark -  Registration Update Notification Received
+- (void)registrationUpdateEvent:(NSNotification*)notif {
+    
+    NSString* strMsg = [notif.userInfo objectForKey: @"message"];
+    int state = [[notif.userInfo objectForKey: @"state"] intValue] ;
+    
+    //  NSLog(@"Registration state: (int:%d)(message: '%@')", state, strMsg);
+    
+    if(state==WTRegistrationFailed || state==WTRegistrationSuccess){
+        NSUserDefaults* defaults = [NSUserDefaults standardUserDefaults];
+        
+        if (state==WTRegistrationFailed) {
+            //in case password is changed
+            if([strMsg isEqualToString:@"Authentication failure"]){
+                
+                UIAlertView* alertview = [[UIAlertView alloc] initWithTitle:NSLocalizedString(@"Authetication failed", nil) message:NSLocalizedString(@"Your account has been login in other place",nil) delegate:nil cancelButtonTitle:NSLocalizedString(@"OK", nil) otherButtonTitles:nil];
+                alertview.tag = ALERT_REGISTER_AUTH_FAILED;
+                [alertview show];
+                [alertview release];
+                
+                [self fForceToLoginAgain];
+                
+            }
+            // in case we have some network problem
+            else{
+                NSInteger registration_failed_count = [defaults integerForKey:@"registration_failed_count"];
+                registration_failed_count++;
+                
+                if (registration_failed_count>1) {
+                    [defaults setInteger:registration_failed_count forKey:@"registration_failed_count"];
+                    
+                    
+                    //      NSLog(@"registration_failed_count >1  ,re-register with tcp now!");
+                    
+                    //register with TCP now
+                    [defaults setObject:@"tcp" forKey:@"transport_preference"];
+                    [WowTalkVoipIF fRegister];
+                }
+            }
+        }
+        else if (state ==WTRegistrationSuccess){
+            [defaults setInteger:0 forKey:@"registration_failed_count"];
+        }
+        [defaults synchronize];
+    }
+}
+
+// for versioning alert
+-(void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex
+{
+    switch (alertView.tag) {
+        case ALERT_NEW_VERSION:
+            if (buttonIndex != alertView.cancelButtonIndex) {
+                [WTHelper WTLog:@"go to store to update"];
+                NSString* strUrl = @"http://www.onemeter.co/dl";
+                [[UIApplication sharedApplication] openURL:[NSURL URLWithString:strUrl]];
+            }
+            else{
+                NSInteger currenttime = [[NSDate date] timeIntervalSince1970];
+                [[NSUserDefaults standardUserDefaults] setInteger:currenttime forKey:@"lasttimepopup"];
+                [[NSUserDefaults standardUserDefaults] synchronize];
+                
+            }
+            break;
+            
+            
+            
+        default:
+            break;
+    }
+    
+    
+}
+
+#pragma mark -
+#pragma mark WowTalkUIMakeCallDelegate
+-(void)displayIncomeCallWaitForCallerCallAgain:(NSString*) username withDisplayName:(NSString*)displayname{
+    if (isMyCallProcessVCShown) {
+        return;
+    }
+    if(username==nil)return;
+    
+    NSString* strDisplayName = displayname;
+    if(strDisplayName == nil || [strDisplayName isEqualToString:username] || [strDisplayName isEqualToString:@""]){
+        Buddy* caller = [Database buddyWithUserID:username];
+        strDisplayName = caller.nickName;
+    }
+    
+    [self.window findAndResignFirstResponder];
+    
+//    [self.tabBarVC presentModalViewController:self.myCallProcessVC animated:NO];
+    [self.tabBarVC presentViewController:self.myCallProcessVC animated:NO completion:nil];
+    [myCallProcessVC fdisplayIncomeCallWaitForCallerCallAgain:username WithDisplayname:strDisplayName];
+}
+
+
+-(void) displayOutgoingCallForUser:(NSString *)username withDisplayName:(NSString *)displayname withVideo:(BOOL)videoFlag
+{
+    if (isMyCallProcessVCShown) {
+        return;
+    }
+    
+    if(username==nil)return;
+    
+    
+    NSString* strDisplayName = displayname;
+    if(strDisplayName == nil || [strDisplayName isEqualToString:username] || [strDisplayName isEqualToString:@""]){
+        Buddy* caller = [Database buddyWithUserID:username];
+        strDisplayName = caller.nickName;
+    }
+    
+    
+    [self.window findAndResignFirstResponder];
+    [self.tabBarVC presentViewController:self.myCallProcessVC animated:NO completion:nil];
+//    [self.tabbarVC presentModalViewController:self.myCallProcessVC animated:NO];
+    [self.myCallProcessVC fDisplayCallOutgoingViewforUser:username WithDisplayname:strDisplayName withVideo:videoFlag];
+    
+    
+}
+-(void) displayIncomingCallForUser:(NSString *)username withDisplayName:(NSString *)displayname withVideo:(BOOL)videoFlag{
+    
+    if(username==nil)return;
+    if (isMyCallProcessVCShown)
+    {
+        if(![self.myCallProcessVC fIsWaitingForCallerCallAgain]) {
+            return;
+        }
+    }
+    else{
+        // current in the msg composer
+        if (self.isCallFromMsgComposer)
+        {
+            //  [[[self.messagesViewController msgComposer] uv_barcontainer] setHidden:YES];
+            
+            // remove the recordvc if not nil;
+            if ([[self.messagesViewController msgComposer]recordVC] != nil && [[[[self.messagesViewController msgComposer] recordVC] view] superview] != nil)
+            {
+                [[[[self.messagesViewController  msgComposer] recordVC] view] removeFromSuperview];
+            }
+        }
+        [self.window findAndResignFirstResponder];
+        [self.tabBarVC presentViewController:self.myCallProcessVC animated:YES completion:nil];
+//        [self.tabbarVC presentModalViewController:self.myCallProcessVC animated:NO];
+    }
+    
+    
+    NSString* strDisplayName = displayname;
+    if(strDisplayName == nil || [strDisplayName isEqualToString:username] || [strDisplayName isEqualToString:@""]){
+        Buddy* caller = [Database buddyWithUserID:username];
+        strDisplayName = caller.nickName;
+    }
+    
+    [self.myCallProcessVC fDisplayCallIncomingViewforUser:username WithDisplayname:strDisplayName withVideo:videoFlag];
+    
+}
+
+
+
+#pragma mark - GuidePage by yangbin
+
+- (void)loadGuidePage{
+    GuideViewController *guideVC = [[GuideViewController alloc]initWithNibName:@"GuideViewController" bundle:nil];
+    guideVC.delegate = self;
+    self.guideVC = guideVC;
+    [self.window addSubview:guideVC.view];
+    [guideVC release];
+}
+
+
+
+#pragma mark - GuideViewControllerDelegate
+-(void)releaseGuideViewController:(GuideViewController *)guideViewController{
+    [guideViewController.view removeFromSuperview];
+    
+    [guideViewController release];
+    self.loadingGuideView = NO;
+    if (!self.isLoginingStatus){
+        [[LocationHelper defaultLocaltionHelper] startTraceLocation];
+    }
+    
+}
+
+//-(int)unread_message_count{
+//    return _unread_moment_notice_count;
+//}
+//
+//-(void)setUnread_message_count:(int)unread_message_count{
+//    _unread_moment_notice_count = unread_message_count;
+//    
+//    [self.tabBarVC badgeValue:_unread_moment_notice_count withIndex:0];
+//}
+
+- (void)setUnread_message_count:(int)unread_message_count {
+    _unread_message_count = unread_message_count;
+    [self.tabBarVC badgeValue:_unread_message_count withIndex:0];
+}
+
+- (void)setUnread_moment_notice_count:(int)unread_moment_notice_count {
+    _unread_moment_notice_count = unread_moment_notice_count;
+    [self.tabBarVC badgeValue:_unread_moment_notice_count withIndex:1];
+}
+
+
+- (NSUInteger)application:(UIApplication *)application supportedInterfaceOrientationsForWindow:(UIWindow *)window {
+    
+    if(_isFull) {
+        return UIInterfaceOrientationMaskAll;
+    }
+    
+    return UIInterfaceOrientationMaskPortrait;
+    
+}
+
+
+
+@end

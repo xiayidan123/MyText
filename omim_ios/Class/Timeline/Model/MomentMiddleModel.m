@@ -1,0 +1,218 @@
+//
+//  MomentMiddleModel.m
+//  dev01
+//
+//  Created by 杨彬 on 15/4/17.
+//  Copyright (c) 2015年 wowtech. All rights reserved.
+//
+
+#import "MomentMiddleModel.h"
+
+#import "MomentCellDenfine.h"
+
+#import "Moment.h"
+#import "WTFile.h"
+#import "Option.h"
+#import "MomentLocationCellModel.h"
+#import "MomentVoteCellModel.h"
+#import "MomentRecordModel.h"
+
+
+@interface MomentMiddleModel ()
+
+
+@end
+
+
+
+
+@implementation MomentMiddleModel
+
+
+- (void)dealloc{
+    self.moment = nil;
+    self.photo_array = nil;
+    self.vote_option_array = nil;
+    self.record_model = nil;
+    self.location_model = nil;
+    
+    [super dealloc];
+}
+
+
+-(void)setMoment:(Moment *)moment{
+    [_moment release],_moment = nil;
+    _moment = [moment retain];
+    if (_moment == nil){
+        self.photo_array = nil;
+        self.video_array = nil;
+        self.vote_option_array = nil;
+        self.record_model = nil;
+        self.location_model = nil;
+        
+        self.content_height = 0;
+        
+        return;
+    }
+    
+    // 正文 frame确定
+    CGFloat textLableX = MomentMiddle_borderW;
+    CGFloat textLableY = MomentMiddle_borderH;
+    CGSize textLableSize = [_moment.text sizeWithFont:TextLableFont maxW:TextLableMaxW];
+    self.textLableF = (CGRect){{textLableX,textLableY},textLableSize};
+    
+    
+    // 获取 图片、视频、音频相关部分高度
+    NSMutableArray *photo_array = [[NSMutableArray alloc]init];
+    NSMutableArray *video_array = [[NSMutableArray alloc]init];
+//#warning 视频未加入
+    int count = _moment.multimedias.count;
+    for (int i=0; i<count; i++){
+        WTFile *file = _moment.multimedias[i];
+        if ([file.ext isEqualToString:@"jpg"] || [file.ext isEqualToString:@"png"]){
+            [photo_array addObject:file];
+        }else if([file.ext isEqualToString:@"aac"] ||[file.ext isEqualToString:@"m4a"] ){
+            MomentRecordModel *record_model = [[MomentRecordModel alloc]init];
+            record_model.isPlaying = NO;
+            record_model.record_file = file;
+            self.record_model = record_model;
+            [record_model release];
+        }
+        else if ([file.ext isEqualToString:@"mp4"]|| [file.ext isEqualToString:@"3gp"] ){
+            [video_array addObject:file];
+        }
+    }
+    
+    count = photo_array.count;
+    CGFloat album_collectionviewH = 0;
+    CGFloat album_collectionviewW = count < 3 ? (count * PhotoWH + (count - 1) * PhotoGap): (PhotoWH * 3 + PhotoGap* 2 );
+    if (count == 0){
+        album_collectionviewH = 0;
+    }else if (count/3.0 <= 1){
+        album_collectionviewH = PhotoWH + PhotoGap;
+    }else if (count/3.0 <= 2){
+        album_collectionviewH = PhotoWH* 2 + PhotoGap;
+    }else {
+        album_collectionviewH = PhotoWH*3 + PhotoGap * 2;
+    }
+    
+    self.photo_array = photo_array;
+    [photo_array release];
+    
+    if (_moment.momentType == 6){
+        count = video_array.count;
+        if (count == 0 ){
+            album_collectionviewH = 0;
+        }else{
+            album_collectionviewH = PhotoWH + PhotoGap;
+            album_collectionviewW = PhotoWH + PhotoGap;
+        }
+        
+        self.video_array = video_array;
+        [video_array release];
+        if (self.video_array.count != 0){
+            self.photo_array = nil;
+        }
+    }
+    
+    // 相册or视频 frame确定
+    CGFloat album_collectionviewX = MomentMiddle_borderW;
+    CGFloat album_collectionviewY = CGRectGetMaxY(self.textLableF) + MomentMiddle_borderH;
+    CGSize album_collectionviewSize = CGSizeMake(album_collectionviewW + PhotoMargin, album_collectionviewH + PhotoMargin);
+    self.album_collectionviewF = (CGRect){{album_collectionviewX,album_collectionviewY},album_collectionviewSize};
+    
+    CGFloat record_view_height = 0;
+    if (self.record_model == nil){
+        record_view_height = 0;
+    }else{
+        record_view_height = recordViewH;
+    }
+    
+    // 音频 frame确定
+    CGFloat record_viewX = MomentMiddle_borderW;
+    CGFloat record_viewY = CGRectGetMaxY(self.album_collectionviewF) + MomentMiddle_borderH;;
+    CGSize record_viewSize = CGSizeMake(recordViewW, record_view_height);
+    self.record_viewF = (CGRect){{record_viewX, record_viewY},record_viewSize};
+    
+    
+    /**
+     *  投票相关
+     */
+    self.vote_option_array = _moment.options;
+    
+    count = _moment.options.count;
+    
+    CGFloat vote_view_height = 0;
+    
+    
+    if(_moment.deadline > 0) vote_view_height = 15;
+    
+    if (count == 0){
+        vote_view_height = 0;
+        self.vote_option_array = nil;
+    }else{
+        NSMutableArray *vote_option_array = [[NSMutableArray alloc]init];
+        
+        self.is_voted = NO;
+        self.voted_count = 0;
+        for (int i=0; i<count; i++){
+            Option *option = _moment.options[i];
+            if (option.is_voted == YES ){
+                _is_voted = YES;
+            }
+            self.voted_count += option.vote_count;
+            
+            MomentVoteCellModel *momentVoteCellmodel = [[MomentVoteCellModel alloc]init];
+            momentVoteCellmodel.option = option;
+            vote_view_height = momentVoteCellmodel.cellHeight + vote_view_height;
+            [vote_option_array addObject:momentVoteCellmodel];
+            [momentVoteCellmodel release];
+        }
+        
+        vote_view_height = vote_view_height + VoteButtonHeight;
+        
+        if(self.is_voted){
+            vote_view_height = vote_view_height + 10*count - VoteButtonHeight;;
+        }
+        self.vote_option_array = vote_option_array;
+        [vote_option_array release];
+    }
+    
+    
+    // 投票 frame确定
+    CGFloat vote_viewX = MomentMiddle_borderW;
+    CGFloat vote_viewY = CGRectGetMaxY(self.record_viewF) + MomentMiddle_borderH;
+    CGSize vote_viewSize = CGSizeMake(voteViewW, vote_view_height);
+    self.vote_viewF = (CGRect){{vote_viewX,vote_viewY},vote_viewSize};
+    
+    
+    /**
+     *  位置相关
+     */
+    MomentLocationCellModel *location_view_model = [[MomentLocationCellModel alloc]init];
+    location_view_model.maxW = LocationViewW;
+    location_view_model.place_text = _moment.placename;
+    location_view_model.latitude = _moment.latitude;
+    location_view_model.longitude = _moment.longitude;
+    
+    CGFloat location_view_height = location_view_model.cellHeight;
+    if (_moment.placename.length == 0){
+        location_view_height = 0;
+    }
+    self.location_model = location_view_model;
+    [location_view_model release];
+    
+    // 确定 位置信息控件 frame
+    CGFloat location_viewX = MomentMiddle_borderW;
+    CGFloat location_viewY = CGRectGetMaxY(self.vote_viewF) + MomentMiddle_borderH;
+    CGSize location_viewSize = CGSizeMake(LocationViewW, location_view_height);
+    self.location_viewF = (CGRect){{location_viewX, location_viewY},location_viewSize};
+    
+    self.content_height = CGRectGetMaxY(self.location_viewF) + MomentMiddle_borderH;
+    
+}
+
+
+
+
+@end

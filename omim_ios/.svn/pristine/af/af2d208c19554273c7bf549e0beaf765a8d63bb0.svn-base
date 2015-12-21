@@ -1,0 +1,25 @@
+{
+  "DVTSourceControlWorkspaceBlueprintPrimaryRemoteRepositoryKey" : "fce3f136-8a20-d946-9d5b-ef65a5021566++5111",
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyRepositoryLocationsKey" : {
+    "fce3f136-8a20-d946-9d5b-ef65a5021566++5111" : {
+
+    }
+  },
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyStatesKey" : {
+    "fce3f136-8a20-d946-9d5b-ef65a5021566++5111" : 0
+  },
+  "DVTSourceControlWorkspaceBlueprintIdentifierKey" : "8A5B47D8-406A-4732-81EF-2D1248E52ABF",
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyPathsKey" : {
+    "fce3f136-8a20-d946-9d5b-ef65a5021566++5111" : "omim_ios\/"
+  },
+  "DVTSourceControlWorkspaceBlueprintNameKey" : "product",
+  "DVTSourceControlWorkspaceBlueprintVersion" : 204,
+  "DVTSourceControlWorkspaceBlueprintRelativePathToProjectKey" : "product.xcodeproj",
+  "DVTSourceControlWorkspaceBlueprintRemoteRepositoriesKey" : [
+    {
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryURLKey" : "https:\/\/192.168.1.233\/svn\/ZSB",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositorySystemKey" : "com.apple.dt.Xcode.sourcecontrol.Subversion",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryIdentifierKey" : "fce3f136-8a20-d946-9d5b-ef65a5021566++5111"
+    }
+  ]
+}

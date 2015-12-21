@@ -1,0 +1,287 @@
+
+#import "OMCamPlayVC.h"
+#import "PlayerObject.h"
+#import "MBProgressHUD.h"
+#import "camheader.h"
+#import "AppDelegate.h"
+@interface OMCamPlayVC ()<PlayerObjectDelegate>
+{
+    UIImageView *videoImageV;
+    UIButton *playBtn;
+    PlayerObject *player;
+    NSString *urlRTMP;
+    UILabel *networkL;
+    MBProgressHUD *_loadingView;
+
+}
+@end
+
+@implementation OMCamPlayVC
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    self.view.backgroundColor = [UIColor whiteColor];
+    player = [PlayerObject shareJoyshowPlayer];
+    
+    UIBarButtonItem *backItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemReply target:self action:@selector(backAction:)];
+    backItem.title = @"返回";
+    self.navigationItem.leftBarButtonItem = backItem;
+    
+    [self createPlayUI];
+}
+
+- (void)viewWillAppear:(BOOL)animated
+{
+    [super viewWillAppear:animated];
+    [self refreshURL];
+    AppDelegate *delegate = (AppDelegate *)[UIApplication sharedApplication].delegate;
+    delegate.isFull = YES;
+}
+
+- (void)viewWillDisappear:(BOOL)animated
+{
+    [super viewWillDisappear:animated];
+    AppDelegate *delegate = (AppDelegate *)[UIApplication sharedApplication].delegate;
+    delegate.isFull = NO;
+    
+    
+    if ([[UIDevice currentDevice] respondsToSelector:@selector(setOrientation:)]) {
+        
+        SEL selector = NSSelectorFromString(@"setOrientation:");
+        
+        NSInvocation *invocation = [NSInvocation invocationWithMethodSignature:[UIDevice instanceMethodSignatureForSelector:selector]];
+        
+        [invocation setSelector:selector];
+        
+        [invocation setTarget:[UIDevice currentDevice]];
+        
+        int val = UIInterfaceOrientationPortrait;
+        
+        [invocation setArgument:&val atIndex:2];
+        
+        [invocation invoke];
+        
+    }
+}
+
+- (void)createPlayUI
+{
+    videoImageV = [[UIImageView alloc] initWithFrame:CGRectMake(5, 64, kWidth-10, 180)];
+    videoImageV.backgroundColor = [UIColor grayColor];
+    videoImageV.userInteractionEnabled = YES;
+    [self.view addSubview:videoImageV];
+    player = [PlayerObject shareJoyshowPlayer];
+    UIView *playerV = [player createView:CGRectMake(0, 0, videoImageV.bounds.size.width, videoImageV.bounds.size.height)];
+    //    player.url = urlRTMP;
+    player.delegate = self;
+    [videoImageV addSubview:playerV];
+
+    
+    playBtn = [UIButton buttonWithType:UIButtonTypeCustom];
+    playBtn.frame = CGRectMake(10, videoImageV.frame.size.height-30, 40, 30);
+    playBtn.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin|UIViewAutoresizingFlexibleBottomMargin;
+    [playBtn addTarget:self action:@selector(playAction) forControlEvents:UIControlEventTouchUpInside];
+    playBtn.backgroundColor = [UIColor blueColor];
+    playBtn.titleLabel.font = [UIFont systemFontOfSize:9];
+    [playBtn setTitle:@"播放" forState:UIControlStateNormal];
+    [videoImageV addSubview:playBtn];
+    
+    networkL = [[UILabel alloc] initWithFrame:CGRectMake(videoImageV.bounds.size.width-60, videoImageV.bounds.size.height-60, 60, 24)];
+    networkL.font = [UIFont systemFontOfSize:10];
+    networkL.textColor = [UIColor whiteColor];
+    networkL.textAlignment = NSTextAlignmentRight;
+    [videoImageV addSubview:networkL];
+    //横竖屏的通知
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(TransFormWindow:) name:UIDeviceOrientationDidChangeNotification object:nil];
+}
+
+- (void)backAction:(id)sender
+{
+    [player stopPlay];
+    [self.navigationController popViewControllerAnimated:YES];
+}
+
+
+
+#pragma mark - playerDelegate
+//监听网速
+- (void)listenNetworkSpeed:(int)speed
+{
+    dispatch_async(dispatch_get_main_queue(), ^{
+        networkL.text = [NSString stringWithFormat:@"%dkb/s",speed/1024];
+    });
+}
+//播放状态改变通知
+- (void)playerStateDidChange:(LivePlayerPlaybackState)playbackState
+{
+    switch (playbackState) {
+        case LivePlayerPlaybackStatePaused:
+        {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                NSLog(@"暂停");
+                [playBtn setTitle:@"暂停中" forState:UIControlStateNormal];
+            });
+        }
+            break;
+        case LivePlayerPlaybackStatePlaying:
+        {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                NSLog(@"播放中");
+                [playBtn setTitle:@"播放中" forState:UIControlStateNormal];
+            });
+        }
+            break;
+        default:
+            break;
+    }
+}
+//初始化完成
+- (void)playerOnpreparedListener
+{
+    NSLog(@"playerOnpreparedListener");
+    //初始化完成才会开始播放
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [player startPlay];
+        _loadingView.hidden = YES;
+    });
+}
+
+//缓冲过程的进度
+- (void)playerGotCachePercent:(int)percent
+{
+    NSLog(@"playerGotCachePercent:%d",percent);
+    
+}
+//播放失败
+- (void)playerBackError
+{
+    NSLog(@"playerBackError");
+    
+}
+//播放完成
+- (void)playerFinish
+{
+    NSLog(@"playerFinish");
+}
+
+
+//播放暂停
+- (void)playAction
+{
+    NSLog(@"播放--%@",[NSThread isMainThread]?@"isMainThread":@"Not mainThread");
+    switch (player.playbackState) {
+        case LivePlayerPlaybackStateStopped:
+        case LivePlayerPlaybackStateInterrupted:
+        case LivePlayerPlaybackStatePaused:
+        {
+            //暂停或停止之后都重新取实时RTMP流
+            NSLog(@"重新播放");
+            [self refreshURL];
+        }
+            break;
+        case LivePlayerPlaybackStatePlaying:
+            [player pausePlay];
+            NSLog(@"暂停");
+            break;
+            //        case MyCBPMoviePlaybackStatePaused:
+            //            [player play];
+            //            NSLog(@"继续播放");
+            //            break;
+        default:
+            break;
+    }
+}
+
+//刷新URL得到rtmp流
+- (void)refreshURL
+{
+    [self isLoadingView];
+    NSString *urlString = self.url;
+    [[AFHTTPRequestOperationManager manager] GET:urlString parameters:nil success:^(AFHTTPRequestOperation *operation, id responseObject) {
+        NSDictionary *dict = (NSDictionary *)responseObject;
+        int status = [[dict objectForKey:@"status"] intValue];
+        if (status) {
+            urlRTMP = [dict objectForKey:@"url"];
+            NSLog(@"refresh--%@",[NSThread isMainThread]?@"isMainThread":@"Not mainThread");
+            
+            //            dispatch_async(dispatch_get_main_queue(), ^{
+            player.url = urlRTMP;
+            //                [player prepareToPlay];
+            //            });
+        }else
+        {
+            NSLog(@"设备离线");
+            //            refreshBtn.hidden = NO;
+            //            _loadingView.hidden = YES;
+        }
+    } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
+        _loadingView.hidden = YES;
+    }];
+}
+
+//横竖屏状态更新
+- (void)TransFormWindow:(NSNotification *)notification
+{
+//    return;
+    UIDevice *devie = notification.object;
+    if (devie.orientation == UIDeviceOrientationLandscapeLeft||devie.orientation == UIDeviceOrientationLandscapeRight) {
+        [[UIApplication sharedApplication] setStatusBarHidden:YES];
+        [UIView animateWithDuration:0.5 animations:^{
+            if (iOS8) {
+                videoImageV.frame = CGRectMake(0, 0, kWidth, kHeight);
+                playBtn.frame = CGRectMake(10, kHeight-30, 40, 30);
+
+            }else
+            {
+                videoImageV.frame = CGRectMake(0, 0, kHeight, kWidth);
+                playBtn.frame = CGRectMake(10, kWidth-30, 40, 30);
+
+            }
+            player.frame = CGRectMake(videoImageV.bounds.origin.x, videoImageV.bounds.origin.y, videoImageV.bounds.size.width, videoImageV.bounds.size.height);
+
+        }];
+    }
+    else if (devie.orientation == UIDeviceOrientationPortrait) {
+        [[UIApplication sharedApplication] setStatusBarHidden:NO];
+        [UIView animateWithDuration:0.5 animations:^{
+
+            videoImageV.frame = CGRectMake(5, 64, kWidth-10, 180);
+            playBtn.frame = CGRectMake(10, videoImageV.frame.size.height-30, 40, 30);
+            player.frame = CGRectMake(videoImageV.bounds.origin.x, videoImageV.bounds.origin.y, videoImageV.bounds.size.width, videoImageV.bounds.size.height);
+        }];
+    }
+}
+
+- (void)isLoadingView
+{
+    if (_loadingView) {
+        _loadingView.hidden = NO;
+        return;
+    }
+    _loadingView = [[MBProgressHUD alloc] initWithView:self.view];
+    //    _loadingView.delegate = self;
+    _loadingView.labelText = @"loading";
+    _loadingView.detailsLabelText = @"视频加载中，请稍后……";
+    //    _loadingView.square = YES;
+    [_loadingView show:YES];
+    _loadingView.color = [UIColor blackColor];
+    [videoImageV addSubview:_loadingView];
+}
+
+- (BOOL)shouldAutorotate
+{
+    return NO;
+}
+
+-(NSUInteger)supportedInterfaceOrientations{
+    return UIInterfaceOrientationMaskPortrait|UIInterfaceOrientationMaskLandscapeLeft|UIInterfaceOrientationMaskLandscapeRight;
+}
+
+-(UIInterfaceOrientation)preferredInterfaceOrientationForPresentation
+{
+    return UIInterfaceOrientationMaskPortrait|UIInterfaceOrientationMaskLandscapeLeft|UIInterfaceOrientationMaskLandscapeRight;
+}
+
+
+
+@end

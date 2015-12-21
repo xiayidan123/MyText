@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="6254" systemVersion="14B25" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES">
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="6247"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner"/>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <tableViewCell contentMode="scaleToFill" selectionStyle="default" indentationWidth="10" id="KGk-i7-Jjw" customClass="MomentReviewLikeCell">
+            <rect key="frame" x="0.0" y="0.0" width="320" height="44"/>
+            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+            <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="KGk-i7-Jjw" id="H2p-sc-9uM">
+                <rect key="frame" x="0.0" y="0.0" width="320" height="43"/>
+                <autoresizingMask key="autoresizingMask"/>
+                <subviews>
+                    <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="icon_share_list_like_list.png" translatesAutoresizingMaskIntoConstraints="NO" id="Wwv-f5-XRm">
+                        <rect key="frame" x="0.0" y="6" width="14" height="12"/>
+                        <constraints>
+                            <constraint firstAttribute="width" constant="14" id="Ne4-Ds-2NV"/>
+                            <constraint firstAttribute="height" constant="12" id="dXn-Vc-jeP"/>
+                        </constraints>
+                    </imageView>
+                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="mo7-wp-iEh" customClass="YBAttrbutedLabel">
+                        <rect key="frame" x="29" y="4" width="266" height="15"/>
+                        <fontDescription key="fontDescription" type="system" pointSize="12"/>
+                        <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
+                        <nil key="highlightedColor"/>
+                    </label>
+                </subviews>
+                <constraints>
+                    <constraint firstItem="mo7-wp-iEh" firstAttribute="leading" secondItem="H2p-sc-9uM" secondAttribute="leading" constant="29" id="1Ng-PG-PhH"/>
+                    <constraint firstAttribute="trailing" secondItem="mo7-wp-iEh" secondAttribute="trailing" constant="25" id="6Kz-gh-83a"/>
+                    <constraint firstItem="Wwv-f5-XRm" firstAttribute="leading" secondItem="H2p-sc-9uM" secondAttribute="leading" id="D7J-we-9Lm"/>
+                    <constraint firstItem="Wwv-f5-XRm" firstAttribute="top" secondItem="H2p-sc-9uM" secondAttribute="top" constant="6" id="S67-9N-mjo"/>
+                    <constraint firstItem="mo7-wp-iEh" firstAttribute="top" secondItem="H2p-sc-9uM" secondAttribute="top" constant="4" id="hIa-K6-hIQ"/>
+                </constraints>
+            </tableViewCellContentView>
+            <connections>
+                <outlet property="like_name_label" destination="mo7-wp-iEh" id="6Nd-rT-xjI"/>
+            </connections>
+            <point key="canvasLocation" x="236" y="275"/>
+        </tableViewCell>
+    </objects>
+    <resources>
+        <image name="icon_share_list_like_list.png" width="14" height="12"/>
+    </resources>
+</document>

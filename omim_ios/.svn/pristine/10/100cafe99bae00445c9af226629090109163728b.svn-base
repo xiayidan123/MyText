@@ -1,0 +1,183 @@
+//
+//  ChangeStatusViewController.m
+//  omim
+//
+//  Created by elvis on 2013/05/25.
+//  Copyright (c) 2014年 OneMeter Inc. All rights reserved.
+//
+
+#import "ChangeStatusViewController.h"
+#import "WTHeader.h"
+#import "Constants.h"
+#import "PublicFunctions.h"
+#import "UIPlaceHolderTextView.h"
+#import <QuartzCore/QuartzCore.h>
+
+
+@interface ChangeStatusViewController ()<UITableViewDelegate,UITableViewDataSource,UITextFieldDelegate>
+{
+    UIPlaceHolderTextView* textview;
+    UILabel* lbl_count;
+}
+@property (nonatomic,retain) IBOutlet UITableView* tb_change;
+
+@property (nonatomic,retain) NSString* oldstatus;
+@property (nonatomic,retain)  NSString* newstatus;
+
+@end
+
+@implementation ChangeStatusViewController
+
+-(void)dealloc{
+    [_tb_change release];
+    [_oldstatus release];
+    [_newstatus release];
+    
+    [super dealloc];
+}
+
+- (void)viewDidLoad
+{
+    [super viewDidLoad];
+
+    [self configNav];
+    
+    [self.tb_change setBackgroundView:nil];
+    [self.tb_change setBackgroundColor:[UIColor colorWithHexString:SETTING_BACKGROUND_COLOR]];
+    
+    self.oldstatus = [WTUserDefaults getStatus];
+    
+    if (IS_IOS7) {
+        [self.view setAutoresizesSubviews:FALSE];
+        [self.view setAutoresizingMask:UIViewAutoresizingNone];
+        self.edgesForExtendedLayout = UIRectEdgeNone;
+        self.automaticallyAdjustsScrollViewInsets = NO;
+        [self.tb_change setFrame:CGRectMake(0, 0, self.tb_change.frame.size.width, [UISize screenHeight] - 20 - 44)];
+    }
+}
+
+
+-(void)viewDidAppear:(BOOL)animated
+{
+    [textview becomeFirstResponder];
+}
+
+
+-(void)goBack
+{
+    [self.navigationController popViewControllerAnimated:YES];
+}
+
+-(void)confirm
+{
+    if ([NSString isEmptyString: textview.text])
+    {
+        UIAlertView* alert = [[UIAlertView alloc] initWithTitle:nil message:NSLocalizedString(@"Status can't be empty.", nil) delegate:self cancelButtonTitle:NSLocalizedString(@"OK", nil) otherButtonTitles: nil];
+        [alert show];
+        [alert release];
+        return;
+    }
+    if ([textview.text length] > 140) {
+        UIAlertView* alert = [[UIAlertView alloc] initWithTitle:nil message:NSLocalizedString(@"The status is too long", nil) delegate:self cancelButtonTitle:NSLocalizedString(@"OK", nil) otherButtonTitles: nil];
+        [alert show];
+        [alert release];
+        return;
+    }
+    
+    [WowTalkWebServerIF updateMyProfileWithNickName:nil withStatus:textview.text withBirthday:nil withSex:nil withArea:nil withCallback:@selector(statusChanged:) withObserver:self];
+}
+
+-(void)configNav
+{
+    self.title = NSLocalizedString(@"签名",nil);
+    
+    self.navigationItem.leftBarButtonItem = [[[UIBarButtonItem alloc]initWithTitle:NSLocalizedString(@"取消",nil) style:UIBarButtonItemStylePlain target:self action:@selector(goBack)] autorelease];
+    self.navigationItem.rightBarButtonItem = [[[UIBarButtonItem alloc]initWithTitle:NSLocalizedString(@"保存",nil) style:UIBarButtonItemStylePlain target:self action:@selector(confirm)] autorelease];
+}
+
+-(void)textFieldDidEndEditing:(UITextField *)textField
+{
+    [textField resignFirstResponder];
+}
+
+-(BOOL)textFieldShouldReturn:(UITextField *)textField{
+    return FALSE;
+}
+
+- (void)statusChanged:(NSNotification *)notification
+{
+    
+    NSError *err = [[notification userInfo] valueForKey:WT_ERROR];
+    
+    if (err.code== NO_ERROR) {
+        if ([self.delegate respondsToSelector:@selector(changeStatusViewController:didChangeStatus:)]){
+            [self.delegate changeStatusViewController:self didChangeStatus:self.newstatus];
+        }
+        
+        [self goBack];
+    }
+    else{
+
+        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:NSLocalizedString(@"Failed to change status",nil) message:nil delegate:nil cancelButtonTitle:NSLocalizedString(@"OK",nil) otherButtonTitles:nil, nil];
+        [alert show];
+        [alert release];
+    }
+}
+
+-(void)shouldChangeTextCount:(NSNotification*)notif
+{
+      lbl_count.text = [NSString stringWithFormat:@"%zi / 140",[textview.text length]];
+}
+ 
+
+
+#pragma mark - UITableViewDataSource
+-(UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    UITableViewCell* cell = [tableView dequeueReusableCellWithIdentifier:@"editcell"];
+    if (cell == nil) {
+        cell = [[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"editcell"] autorelease];
+        
+        textview = [[UIPlaceHolderTextView alloc] initWithFrame:CGRectMake(10, 0, cell.frame.size.width - 20, 150)];
+        textview.tag = 1;
+//        textview.backgroundColor = [UIColor clearColor];
+        textview.textAlignment = NSTextAlignmentLeft;
+        textview.font = [UIFont systemFontOfSize:17];
+        
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(shouldChangeTextCount:) name:UITextViewTextDidChangeNotification object:nil];
+  //      textview add
+        [cell.contentView addSubview:textview];
+        
+        lbl_count = [[UILabel alloc] initWithFrame:CGRectMake(180, 120, 100, 30)];
+        lbl_count.textAlignment = NSTextAlignmentRight;
+        lbl_count.font = [UIFont systemFontOfSize:13];
+        lbl_count.backgroundColor = [UIColor clearColor];
+        lbl_count.textColor = [UIColor blackColor];
+//        [cell.contentView addSubview:lbl_count];
+        
+    }
+  
+    textview.placeholder = self.oldstatus;
+    textview.showClearButton = YES;
+    lbl_count.text = [NSString stringWithFormat:@"%zi / 140",[textview.text length]];
+    
+    return cell;
+}
+
+-(NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
+{
+    return 1;
+}
+
+-(CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    return 150;
+}
+
+-(CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section{
+    return 10;
+}
+
+
+
+@end

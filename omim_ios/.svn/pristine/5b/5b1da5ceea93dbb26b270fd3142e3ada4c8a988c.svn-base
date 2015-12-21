@@ -1,0 +1,403 @@
+//
+//  AssignmentVC.m
+//  dev01
+//
+//  Created by Huan on 15/5/14.
+//  Copyright (c) 2015年 wowtech. All rights reserved.
+//  老师端作业列表页
+
+#import "AssignmentVC.h"
+#import "OMClass.h"
+#import "Lesson.h"
+#import "WTUserDefaults.h"
+#import "SettingHomeworkVC.h"
+#import "OMNetWork_MyClass.h"
+#import "OMDateBase_MyClass.h"
+#import "HomeworkState.h"
+#import "HomeworkStudentListCell.h"
+#import "TableViewHeaderView.h"
+#import "GradeViewController.h"
+#import "NewhomeWorkModel.h"
+#import "HomeworkDetailVC.h"
+#import "SettingHomeworkCell.h"
+#import "StudentUploadHomeworkVC.h"
+#import "SchoolMember.h"
+#import "Database.h"
+#import "Buddy.h"
+#import "AppDelegate.h"
+#import "OMMessageVC.h"
+#import "WowTalkWebServerIF.h"
+#import "WTUserDefaults.h"
+#import "SchoolMember.h"
+#import "OMMessageHelper.h"
+#import "StuCheckHomeworkVC.h"
+#import "TeacherCheckHomeworkVC.h"
+#import "TcherSettingHomeworkVC.h"
+#import "StuSettingHomeworkVC.h"
+@interface AssignmentVC ()<UITableViewDataSource,UITableViewDelegate,HomeworkDetailVCDelegate,StudentUploadHomeworkVCDelegate,HomeworkStudentListCellDelegate>
+
+@property (retain, nonatomic) IBOutlet UILabel *class_label;
+@property (retain, nonatomic) IBOutlet UILabel *lesson_label;
+@property (retain, nonatomic) IBOutlet UITableView *tableView;
+@property (retain, nonatomic) NSMutableArray * students;
+@property (retain, nonatomic) NewhomeWorkModel *homeworkModel;
+@property (retain, nonatomic) HomeworkState * homeworkState;
+@property (assign, nonatomic) BOOL isSettingHomework;
+@property (copy, nonatomic) NSString * messageContent;
+@property (retain, nonatomic) Buddy * buddy;
+@property (retain, nonatomic) SchoolMember *studentMember;
+@property (copy, nonatomic) NSString * schoolName;
+@end
+
+@implementation AssignmentVC
+- (void)dealloc {
+    [_class_label release];
+    [_lesson_label release];
+    [_tableView release];
+    self.buddy = nil;
+    self.students = nil;
+    self.homeworkModel = nil;
+    self.homeworkState = nil;
+    self.classModel = nil;
+    self.lessonModel = nil;
+    
+    [super dealloc];
+}
+
+- (void)viewWillAppear:(BOOL)animated{
+    [self prepareData];
+}
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+#warning 没做国际化;
+    self.title = NSLocalizedString(@"作业列表", nil);
+    self.view.backgroundColor = [UIColor whiteColor];
+    [self uiConfig];
+//    [self prepareData];
+    self.tableView.tableFooterView = [[[UIView alloc] init] autorelease];
+    
+}
+- (void)uiConfig{
+    TableViewHeaderView *headerView = [[[NSBundle mainBundle] loadNibNamed:@"TableViewHeaderView" owner:self options:nil] firstObject];
+    headerView.lessonModel = self.lessonModel;
+    headerView.classModel = self.classModel;
+    headerView.frame = CGRectMake(0, 0, self.view.bounds.size.width, 60);
+    self.tableView.tableHeaderView = headerView;
+}
+
+
+- (void)prepareData{
+    self.omAlertViewForNet = [OMAlertViewForNet OMAlertViewForNet];
+    self.omAlertViewForNet.type = OMAlertViewForNetStatus_Loading;
+    self.omAlertViewForNet.title = @"正在加载";
+    [self.omAlertViewForNet showInView:self.view];
+//    if ([[WTUserDefaults getUsertype] isEqualToString:@"2"]) {
+        [OMNetWork_MyClass getHomeWorkStateWithLessonID:self.lessonModel.lesson_id withCallBack:@selector(didGetHomeworkState:) withObserver:self];
+//    }
+//    else{
+        NSString *uid = [WTUserDefaults getUid];
+        [OMNetWork_MyClass getLessonHomeWorkWithLessonID:self.lessonModel.lesson_id withStudent_id:uid withCallBack:@selector(didGetLessonHomework:) withObserver:self];
+//    }
+}
+
+
+- (NSMutableArray *)students{
+    if (!_students) {
+        _students = [[NSMutableArray alloc] init];
+    }
+    return _students;
+}
+
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    
+    if (indexPath.section == 0) {
+        if ([[WTUserDefaults getUsertype] isEqualToString:@"2"]) {
+            static NSString *ID = @"homework";
+            SettingHomeworkCell *cell = [tableView dequeueReusableCellWithIdentifier:ID];
+            if (!cell) {
+                cell = [[[NSBundle mainBundle] loadNibNamed:@"SettingHomeworkCell" owner:self options:nil] firstObject];
+            }
+            if (self.students.count == 0 && self.homeworkState.homework_id.length == 0) {
+                cell.state_lbl.text = @"未布置";
+                self.isSettingHomework = NO;
+            }else{
+                cell.state_lbl.text = @"已布置";
+                self.isSettingHomework = YES;
+            }
+            
+            return cell;
+        }
+        else{
+            static NSString *ID = @"homework";
+            SettingHomeworkCell *cell = [tableView dequeueReusableCellWithIdentifier:ID];
+            if (!cell) {
+                cell = [[[NSBundle mainBundle] loadNibNamed:@"SettingHomeworkCell" owner:self options:nil] firstObject];
+            }
+            if (!self.homeworkModel.homework_moment.homework_id) {
+                cell.state_lbl.text = @"未布置";
+                self.isSettingHomework = NO;
+            }else{
+                cell.state_lbl.text = @"已布置";
+                self.isSettingHomework = YES;
+            }
+            
+            return cell;
+        }
+    }else{
+        if ([[WTUserDefaults getUsertype] isEqualToString:@"2"]) {
+            static NSString *ID = @"studentList";
+            HomeworkStudentListCell *cell = [tableView dequeueReusableCellWithIdentifier:ID];
+            
+            if (!cell) {
+                cell = [[[NSBundle mainBundle] loadNibNamed:@"HomeworkStudentListCell" owner:self options:nil] firstObject];
+                cell.delegate = self;
+                cell.schoolMember = self.students[indexPath.row];
+            }
+            
+            return cell;
+        }
+        else{
+            static NSString *ID = @"homework";
+            SettingHomeworkCell *cell = [tableView dequeueReusableCellWithIdentifier:ID];
+            if (!cell) {
+                cell = [[[NSBundle mainBundle] loadNibNamed:@"SettingHomeworkCell" owner:self options:nil] firstObject];
+                cell.settingHomework_lbl.text = @"提交作业";
+            }
+            id obj = [self.homeworkModel.results_moments lastObject];
+            if (!self.homeworkModel.homework_moment.homework_id) {
+                cell.state_lbl.text = @"";
+            }else{
+                if (self.homeworkModel.results_moments.count == 0){
+                    cell.state_lbl.text = @"未提交";
+                }else if ([obj isKindOfClass:[Homework_Moment class]]){// 学生提交的作业
+                    cell.state_lbl.text = @"已提交";
+                }else if ([obj isKindOfClass:[HomeworkReviewModel class]]){// 老师的评价
+                    cell.state_lbl.text = @"已评分";
+                }else{
+                    cell.state_lbl.text = @"未提交";
+                }
+            }
+            return cell;
+        }
+       
+    }
+}
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section{
+    if (section == 0) {
+        return 1;
+    }else if (section == 1){
+        if ([[WTUserDefaults getUsertype] isEqualToString:@"2"]) {
+            return self.students.count;
+        }
+        else{
+            return 1;
+        }
+    }
+    return 0;
+}
+
+
+- (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView{
+    return 2;
+}
+
+- (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath{
+    return 44;
+}
+
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath{
+    [tableView deselectRowAtIndexPath:indexPath animated:YES];
+    if (indexPath.section == 0) {
+        if ([[WTUserDefaults getUsertype] isEqualToString:@"2"]) {
+//            SettingHomeworkVC *setHomeVC = [[[SettingHomeworkVC alloc] init] autorelease];
+//            setHomeVC.lessonModel = self.lessonModel;
+//            setHomeVC.homeworkModel = self.homeworkModel;
+//            setHomeVC.isSettingHomework = self.isSettingHomework;
+//            [self.navigationController pushViewController:setHomeVC animated:YES];
+            if (self.homeworkModel.homework_moment.homework_id) {
+                //老师已经布置作业去看作业，或者修改作业
+                TeacherCheckHomeworkVC *techercheckVC = [[[TeacherCheckHomeworkVC alloc] init] autorelease];
+                techercheckVC.lessonModel = self.lessonModel;
+                techercheckVC.homeworkModel = self.homeworkModel;
+                [self.navigationController pushViewController:techercheckVC animated:YES];
+            }else{
+                //老师没有布置作业时去布置作业
+                TcherSettingHomeworkVC *settingHomeworkVC = [[[TcherSettingHomeworkVC alloc] init] autorelease];
+                settingHomeworkVC.lessonModel = self.lessonModel;
+                [self.navigationController pushViewController:settingHomeworkVC animated:YES];
+            }
+        }
+        else{
+            if (self.homeworkModel.homework_moment.homework_id) {
+                //查看老师布置的作业
+//                SettingHomeworkVC *setHomeVC = [[[SettingHomeworkVC alloc] init] autorelease];
+//                setHomeVC.lessonModel = self.lessonModel;
+//                setHomeVC.homeworkModel = self.homeworkModel;
+//                setHomeVC.isSettingHomework = self.isSettingHomework;
+//                [self.navigationController pushViewController:setHomeVC animated:YES];
+                StuCheckHomeworkVC *stuVC = [[[StuCheckHomeworkVC alloc] init] autorelease];
+                stuVC.homeworkModel = self.homeworkModel;
+                [self.navigationController pushViewController:stuVC animated:YES];
+                
+            }else{
+                UIAlertView *alertView = [[[UIAlertView alloc] initWithTitle:@"" message:@"老师还未布置作业" delegate:self cancelButtonTitle:NSLocalizedString(@"确定", nil) otherButtonTitles:nil, nil] autorelease];
+                [alertView show];
+            }
+            
+        }
+    }else{
+        if ([[WTUserDefaults getUsertype] isEqualToString:@"2"]) {
+            
+            SchoolMember *student = self.students[indexPath.row];
+            if (student.homework_state != SchoolMemberHomeworkState_NoSubmit) {
+                student.class_id = self.classModel.groupID;
+                HomeworkDetailVC *homeworkDetailVC = [[HomeworkDetailVC alloc]initWithNibName:@"HomeworkDetailVC" bundle:nil];
+                homeworkDetailVC.student = student;
+                homeworkDetailVC.classmodel = self.classModel;
+                homeworkDetailVC.lessonmodel = self.lessonModel;
+                homeworkDetailVC.delegate = self;
+                homeworkDetailVC.lesson_id = self.lessonModel.lesson_id;
+                [self.navigationController pushViewController:homeworkDetailVC animated:YES];
+                [homeworkDetailVC release];
+                return;
+            }else {
+                NSString *message_text = [NSString stringWithFormat:@"%@课%@班的%@老师提醒你，该交作业啦!",self.lessonModel.title,self.classModel.groupNameOriginal,self.schoolName];
+                [OMMessageHelper sendTextMessage:message_text withToBuddy:student];
+                UIAlertView *alertView = [[[UIAlertView alloc] initWithTitle:@"" message:@"已经向该学生发送作业提醒" delegate:self cancelButtonTitle:NSLocalizedString(@"确定", nil) otherButtonTitles:nil, nil] autorelease];
+                [alertView show];
+            }
+            
+            
+            
+//            GradeViewController *gradeVC = [[[GradeViewController alloc] init] autorelease];
+//            gradeVC.student = self.students[indexPath.row];
+//            [self.navigationController pushViewController:gradeVC animated:YES];
+        }
+        else if([[WTUserDefaults getUsertype] isEqualToString:@"1"]){
+            
+            if (self.homeworkModel.results_moments.count == 0){
+                if (self.homeworkModel.homework_moment.homework_id) {
+                    //提交作业页面
+//                    StudentUploadHomeworkVC *setHomeVC = [[[StudentUploadHomeworkVC alloc] init] autorelease];
+//                    setHomeVC.delegate = self;
+//                    //            setHomeVC.lessonModel = self.lessonModel;
+//                    setHomeVC.lessonmodel = self.lessonModel;
+//                    setHomeVC.classmodel = self.classModel;
+//                    setHomeVC.homeworkModel = self.homeworkModel;
+//                    [self.navigationController pushViewController:setHomeVC animated:YES];
+                    
+                    
+                    StuSettingHomeworkVC *setHomeVC = [[[StuSettingHomeworkVC alloc] init] autorelease];
+//                    setHomeVC.delegate = self;
+                    //            setHomeVC.lessonModel = self.lessonModel;
+                    setHomeVC.lessonModel = self.lessonModel;
+                    setHomeVC.classmodel = self.classModel;
+                    setHomeVC.homeworkModel = self.homeworkModel;
+                    [self.navigationController pushViewController:setHomeVC animated:YES];
+                    
+                }else{
+                    UIAlertView *alertView = [[[UIAlertView alloc] initWithTitle:@"" message:@"老师还未布置作业" delegate:self cancelButtonTitle:NSLocalizedString(@"确定", nil) otherButtonTitles:nil, nil] autorelease];
+                    [alertView show];
+                }
+                
+            }else{
+                HomeworkDetailVC *homeworkDetailVC = [[HomeworkDetailVC alloc]initWithNibName:@"HomeworkDetailVC" bundle:nil];
+                homeworkDetailVC.delegate = self;
+                homeworkDetailVC.lesson_id = self.lessonModel.lesson_id;
+                NSString *uid = [WTUserDefaults getUid];
+                
+                homeworkDetailVC.classmodel = self.classModel;
+                homeworkDetailVC.lessonmodel = self.lessonModel;
+                homeworkDetailVC.student = [OMDateBase_MyClass fetchClassMemberByClass_id:self.lessonModel.class_id andMember_id:uid];
+                [self.navigationController pushViewController:homeworkDetailVC animated:YES];
+                [homeworkDetailVC release];
+            }
+            
+        }
+    }
+}
+
+#pragma mark - HomeworkDetailVCDelegate
+
+- (void)homeworkDetailVC:(HomeworkDetailVC *)homeworkDetailVC didChangeHomeWorkStateWithStudent:(SchoolMember *)student{
+    
+    [self.tableView reloadData];
+}
+
+
+- (void)homeworkDetailVC:(HomeworkDetailVC *)homeworkDetailVC didChangeHomeWorkStateWithHomework_moment:(Homework_Moment *)homework_moment{
+    [self.homeworkModel.results_moments addObject:homework_moment];
+    [self.tableView reloadData];
+}
+
+#pragma mark - StudentUploadHomeworkVCDelegate
+- (void)studentUploadHomeworkVC:(StudentUploadHomeworkVC *)studentUploadHomeworkVC didUploadHomeworkWithHomework_model:(NewhomeWorkModel *)homework_model{
+    [self.tableView reloadData];
+}
+
+
+#pragma mark didGetHomeworkState
+
+- (void)didGetHomeworkState:(NSNotification *)notif{
+    NSError *error = [[notif userInfo] valueForKey:WT_ERROR];
+    if (error.code == NO_ERROR) {
+        self.omAlertViewForNet.type = OMAlertViewForNetStatus_Done;
+        self.omAlertViewForNet.title = @"加载完成";
+        self.homeworkState = [notif userInfo][@"fileName"];
+        self.students = self.homeworkState.students;
+        [self.tableView reloadData];
+    }else{
+//        self.omAlertViewForNet.type = OMAlertViewForNetStatus_Failure;
+//        self.omAlertViewForNet.title = @"加载失败";
+     }
+}
+
+
+- (void)didGetLessonHomework:(NSNotification *)notif{
+    NSError *error = [[notif userInfo] valueForKey:WT_ERROR];
+    if (error.code == NO_ERROR) {
+        self.omAlertViewForNet.type = OMAlertViewForNetStatus_Done;
+        self.omAlertViewForNet.title = @"加载完成";
+        self.homeworkModel = [notif userInfo][@"fileName"];
+    }else{
+//        self.omAlertViewForNet.type = OMAlertViewForNetStatus_Failure;
+//        self.omAlertViewForNet.title = @"加载失败";
+    }
+}
+
+
+#pragma mark - Set and Get
+
+-(void)setHomeworkModel:(NewhomeWorkModel *)homeworkModel{
+    if (_homeworkModel != homeworkModel){
+        [_homeworkModel release],_homeworkModel = nil;
+        _homeworkModel = [homeworkModel retain];
+        
+        [self.tableView reloadData];
+    }
+}
+
+
+
+#pragma mark - HomeworkStudentListCellDelegate
+- (void)remindHomeworkWithSchoolMember:(SchoolMember *)schoolMember{
+    self.studentMember = schoolMember;
+    if (schoolMember.homework_state  == SchoolMemberHomeworkState_NoSubmit) {
+        NSString *message_text = [NSString stringWithFormat:@"%@课%@班的%@老师提醒你，该交作业啦!",self.lessonModel.title,self.classModel.groupNameOriginal,self.schoolName];
+        [OMMessageHelper sendTextMessage:message_text withToBuddy:schoolMember];
+    }
+    
+}
+
+- (NSString *)schoolName{
+    if (!_schoolName) {
+        SchoolMember *schoolMem = [OMDateBase_MyClass fetchClassMemberByClass_id:self.lessonModel.class_id andMember_id:[WTUserDefaults getUid]];
+        _schoolName = [schoolMem.alias copy];
+    }
+    return _schoolName;
+}
+
+
+@end

@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="6254" systemVersion="14B25" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES">
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="6247"/>
+        <capability name="Constraints to layout margins" minToolsVersion="6.0"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner"/>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <tableViewCell contentMode="scaleToFill" selectionStyle="default" indentationWidth="10" id="KGk-i7-Jjw" customClass="MyClassCell">
+            <rect key="frame" x="0.0" y="0.0" width="320" height="60"/>
+            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+            <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="KGk-i7-Jjw" id="H2p-sc-9uM">
+                <rect key="frame" x="0.0" y="0.0" width="320" height="43"/>
+                <autoresizingMask key="autoresizingMask"/>
+                <subviews>
+                    <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="icon_myclass_leftpage_r.png" translatesAutoresizingMaskIntoConstraints="NO" id="J9I-4U-9HQ">
+                        <rect key="frame" x="18" y="7" width="45" height="45"/>
+                        <constraints>
+                            <constraint firstAttribute="width" constant="45" id="1if-Hc-Szr"/>
+                            <constraint firstAttribute="height" constant="45" id="hVX-JR-O8v"/>
+                        </constraints>
+                    </imageView>
+                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="class_name" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" preferredMaxLayoutWidth="214" translatesAutoresizingMaskIntoConstraints="NO" id="pad-rg-3i1">
+                        <rect key="frame" x="78" y="22" width="214" height="15"/>
+                        <fontDescription key="fontDescription" type="system" pointSize="12"/>
+                        <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
+                        <nil key="highlightedColor"/>
+                    </label>
+                </subviews>
+                <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
+                <constraints>
+                    <constraint firstItem="J9I-4U-9HQ" firstAttribute="leading" secondItem="H2p-sc-9uM" secondAttribute="leadingMargin" constant="10" id="dBu-ZU-Nf9"/>
+                    <constraint firstAttribute="centerY" secondItem="J9I-4U-9HQ" secondAttribute="centerY" id="dLh-J2-rZt"/>
+                    <constraint firstAttribute="centerY" secondItem="pad-rg-3i1" secondAttribute="centerY" id="jR9-Po-ryZ"/>
+                    <constraint firstItem="pad-rg-3i1" firstAttribute="leading" secondItem="J9I-4U-9HQ" secondAttribute="trailing" constant="15" id="usm-BU-deo"/>
+                    <constraint firstAttribute="trailingMargin" secondItem="pad-rg-3i1" secondAttribute="trailing" constant="20" id="zc8-8L-ZcX"/>
+                </constraints>
+            </tableViewCellContentView>
+            <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
+            <connections>
+                <outlet property="className_label" destination="pad-rg-3i1" id="xOi-el-CJ9"/>
+                <outlet property="iamgeView_title" destination="J9I-4U-9HQ" id="emE-MD-fAZ"/>
+            </connections>
+            <point key="canvasLocation" x="221" y="204.5"/>
+        </tableViewCell>
+    </objects>
+    <resources>
+        <image name="icon_myclass_leftpage_r.png" width="45" height="45"/>
+    </resources>
+</document>

@@ -1,0 +1,477 @@
+//
+//  tutorialVC2.m
+//  wowtalk
+//
+//  Created by Yi Chen on 5/5/12.
+//  Copyright (c) 2012 WowTech Inc. All rights reserved.
+//
+
+#import "tutorialVC2.h"
+#import "WowTalkVoipIF.h"
+#import "ChatMessage.h"
+#import "GlobalSetting.h"
+@implementation tutorialVC2
+
+
+
+
+-(void)fSendMessage{
+    if (![WowTalkVoipIF fIsConnectedToServer]) {
+              
+        UIAlertView *alert = [[UIAlertView alloc] init];
+        alert.title = @"warning";
+        alert.message = @"You haven't login to the server or there is some network problem";
+        [alert addButtonWithTitle:@"ok"];
+        [alert show];
+        return;
+    }
+    
+    [txtInput resignFirstResponder];
+    
+    ChatMessage* msg=[[ChatMessage alloc]init];
+    msg.chatUserName =txtInput.text;
+    msg.msgType = [ChatMessage MSGTYPE_NORMAL_TXT_MESSAGE];
+    msg.messageContent = [NSString stringWithFormat:@"helloworld%@", [[NSDate date] description]];
+    
+    [WowTalkVoipIF fSendChatMessage:msg];
+    
+    
+}
+
+
+
+#pragma mark -
+#pragma mark table Handle
+// Customize the number of rows in the table view.
+- (NSInteger)tableView:(UITableView *)tableView 
+ numberOfRowsInSection:(NSInteger)section {
+	return  10;
+}
+
+- (UITableViewCell *)tableView:(UITableView *)tableView 
+		 cellForRowAtIndexPath:(NSIndexPath *)indexPath {
+    static NSString *CellIdentifier = @"Cell";
+    
+	UITableViewCell *cell = [tableView 
+							 dequeueReusableCellWithIdentifier:CellIdentifier];
+    if (cell == nil) {
+        cell = [[[UITableViewCell alloc] 
+				 initWithStyle:UITableViewCellStyleDefault 
+				 reuseIdentifier:CellIdentifier] 
+				autorelease];
+    }
+	cell.textLabel.text = @"";
+    
+    switch (indexPath.row) {
+        case 0:
+            cell.textLabel.text = @"Make a call(to txtInput)";
+            break;
+        case 1:
+            cell.textLabel.text = @"Make a video call(to txtInput)";
+            break;
+        case 2:
+            cell.textLabel.text = @"Register as 10001";
+            break;
+        case 3:
+            cell.textLabel.text = @"Register as 20001";
+            break;
+        case 4:
+            cell.textLabel.text = @"Send a message(to txtInput)";
+            break;
+        case 5:
+            cell.textLabel.text = @"re-register using udp";
+            break;
+            
+        case 6:
+            cell.textLabel.text = @"re-register using tcp";
+            break;
+            
+        case 7:
+            cell.textLabel.text = @"re-register using tls";
+            break;
+        case 8:
+            cell.textLabel.text = @"Unregister";
+            
+            break;
+            
+     
+        case 9:
+            cell.textLabel.text = @"Print Connectivity";
+            
+            break;
+
+        default:
+            break;
+    }
+	
+    
+    return cell;
+}
+
+- (NSString *)tableView:(UITableView *)tableView 
+titleForHeaderInSection:(NSInteger)section{
+	return @"";
+}
+- (NSString *)tableView:(UITableView *)tableView
+titleForFooterInSection:(NSInteger)section {
+	return @"";
+}
+
+
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
+	[tableView deselectRowAtIndexPath:indexPath animated:NO];
+
+    NSUserDefaults* defaults = [NSUserDefaults standardUserDefaults];
+
+    
+    switch (indexPath.row) {
+        case 0:
+             [txtInput resignFirstResponder];
+            
+            if (![WowTalkVoipIF fIsConnectedToServer]) {
+                
+                UIAlertView *alert = [[UIAlertView alloc] init];
+                alert.title = @"warning";
+                alert.message = @"You haven't login to the server or there is some network problem";
+                [alert addButtonWithTitle:@"ok"];
+                [alert show];
+                return;
+            }
+
+           
+            [WowTalkVoipIF fNewOutgoingCall:txtInput.text withDisplayName:@"" withVideo:NO];
+            [txtInput setText:@""];
+            break;
+            
+        case 1:
+            [txtInput resignFirstResponder];
+            
+            if (![WowTalkVoipIF fIsConnectedToServer]) {
+                
+                UIAlertView *alert = [[UIAlertView alloc] init];
+                alert.title = @"warning";
+                alert.message = @"You haven't login to the server or there is some network problem";
+                [alert addButtonWithTitle:@"ok"];
+                [alert show];
+                return;
+            }
+            
+            
+            [WowTalkVoipIF fNewOutgoingCall:txtInput.text withDisplayName:@"" withVideo:YES];
+            [txtInput setText:@""];
+            break;
+
+        case 2:
+            
+            
+            [defaults setObject:@"dev01app-jp001.wowtalkapi.com" forKey:@"domain_preference"];
+            
+            [defaults setObject:@"10001" forKey:@"uid_preference"];
+            [defaults setObject:@"10001" forKey:@"password_preference"];
+            [defaults setObject:@"udp" forKey:@"transport_preference"];
+
+            
+            [defaults synchronize];
+            
+
+            [WowTalkVoipIF fRegister];
+            
+            break;
+        case 3:
+            [defaults setObject:@"dev01app-jp001.wowtalkapi.com" forKey:@"domain_preference"];
+
+            [defaults setObject:@"20001" forKey:@"uid_preference"];
+            [defaults setObject:@"20001" forKey:@"password_preference"];
+            [defaults setObject:@"udp" forKey:@"transport_preference"];
+
+            
+            [defaults synchronize];
+            
+            
+            [WowTalkVoipIF fRegister];
+            
+            
+            break;
+
+        case 4:
+            [self fSendMessage];
+            break;
+                  
+ 
+        
+        case 5:
+            
+            [defaults setObject:@"udp" forKey:@"transport_preference"];
+            
+            
+            [defaults synchronize];
+            
+            
+            [WowTalkVoipIF fRegister];
+            
+            
+            break;
+        case 6:
+            
+            [defaults setObject:@"tcp" forKey:@"transport_preference"];
+            
+            
+            [defaults synchronize];
+            
+            
+            [WowTalkVoipIF fRegister];
+            
+            
+            break;
+        case 7:
+            
+            [defaults setObject:@"tls" forKey:@"transport_preference"];
+            
+            
+            [defaults synchronize];
+            
+            
+            [WowTalkVoipIF fRegister];
+            
+            
+            break;
+
+        case 8:
+            [defaults setObject:@"" forKey:@"uid_preference"];
+            [defaults setObject:@"" forKey:@"password_preference"];
+            [defaults setObject:@"" forKey:@"domain_preference"];
+            [defaults setObject:@"udp" forKey:@"transport_preference"];
+            
+            
+            [defaults synchronize];
+            [WowTalkVoipIF fRegister];
+            
+            
+            break;
+            
+        case 9:
+            if ([WowTalkVoipIF fIsConnectedToNetwork]) {
+                NSLog(@"has network");
+            }
+            else{
+                NSLog(@"has no network");
+ 
+            }
+            break;
+            
+        default:
+            break;
+    }
+   
+
+    [txtInput resignFirstResponder];
+}
+
+
+- (void) initView{
+    
+    [lblStatus setText:@"Status:"];
+}
+
+- (void)viewWillAppear:(BOOL)animated {
+    [super viewWillAppear:animated];
+    
+    // Set observer
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(registrationUpdateEvent:)
+                                                 name:notif_WTRegistrationUpdate
+                                               object:nil];
+    
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(sendChatMessageUpdate:)
+                                                 name:notif_WTChatMessageSentStatusUpdate
+                                               object:nil];
+
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(getChatMessage:)
+                                                 name:notif_WTChatMessageReceived
+                                               object:nil];
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(getChatMessage_ReachedReceipt:)
+                                                 name:notif_WTSentMsgReachedReceiptReceived
+                                               object:nil];
+
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(getChatMessage_ReadedReceipt:)
+                                                 name:notif_WTSentMsgReadedReceiptReceived
+                                               object:nil];
+
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(networkConnectivityUpdateEvent:)
+                                                 name:notif_WTNetworkConnectivityUpdate
+                                               object:nil];
+
+    
+    [self initView];
+
+	}
+
+- (void)viewWillDisappear:(BOOL)animated {
+    [super viewWillDisappear:animated];
+    
+    // Remove observer
+    [[NSNotificationCenter defaultCenter] removeObserver:self
+                                                    name:notif_WTRegistrationUpdate
+                                                  object:nil];
+    
+    [[NSNotificationCenter defaultCenter] removeObserver:self
+                                                    name:notif_WTChatMessageSentStatusUpdate
+                                                  object:nil];
+
+    
+    [[NSNotificationCenter defaultCenter] removeObserver:self
+                                                    name:notif_WTChatMessageReceived
+                                                  object:nil];
+    
+    [[NSNotificationCenter defaultCenter] removeObserver:self
+                                                    name:notif_WTSentMsgReachedReceiptReceived
+                                                  object:nil];
+
+    
+    [[NSNotificationCenter defaultCenter] removeObserver:self
+                                                    name:notif_WTSentMsgReadedReceiptReceived
+                                                  object:nil];
+
+    
+    
+    [[NSNotificationCenter defaultCenter] removeObserver:self
+                                                    name:notif_WTNetworkConnectivityUpdate
+                                                  object:nil];
+
+}
+
+- (void)networkConnectivityUpdateEvent:(NSNotification*)notif{
+    NSString* state = [notif.userInfo objectForKey: @"state"];
+
+    NSLog(@"networkConnectivityUpdate:%@",state);
+    
+    if(![state isEqualToString:@"none"]){
+        NSArray* unsentList = [Database fetchAllUnsentReceipt];
+        for(ChatMessage* msg in unsentList){
+                        
+            [WowTalkVoipIF fResendUnsentReceipt:msg.messageContent forUser:msg.chatUserName];
+            
+        }
+    }
+}
+
+
+- (void)registrationUpdateEvent:(NSNotification*)notif {
+    
+    NSString* strMsg = [notif.userInfo objectForKey: @"message"];
+    int state = [[notif.userInfo objectForKey: @"state"] intValue] ;
+    [lblStatus setText: strMsg ] ;
+
+    NSLog(@"Registration state: (int:%d)(message: '%@')", state, strMsg);
+
+    if(state==WTRegistrationFailed || state==WTRegistrationSuccess){
+        NSUserDefaults* defaults = [NSUserDefaults standardUserDefaults];
+        
+        if (state==WTRegistrationFailed) {
+            NSInteger registration_failed_count = [defaults integerForKey:@"registration_failed_count"];
+            registration_failed_count++;
+            
+            if (registration_failed_count>1) {
+                [defaults setInteger:registration_failed_count forKey:@"registration_failed_count"];
+                
+                
+                NSLog(@"registration_failed_count >1  ,re-register with tcp now!");
+                
+                //register with TCP now
+                [defaults setObject:@"tcp" forKey:@"transport_preference"];
+                [WowTalkVoipIF fRegister];
+            }
+        }
+        else if (state ==WTRegistrationSuccess){
+            [defaults setInteger:0 forKey:@"registration_failed_count"];
+            
+        }
+        [defaults synchronize];
+
+        
+        
+    }
+       
+}
+
+#pragma mark -
+#pragma mark WowTalkUIChatMessageDelegate
+
+-(void) sendChatMessageUpdate:(NSNotification*)notif{
+    ChatMessage* msg = (ChatMessage *)[notif.userInfo objectForKey: @"data"];
+    NSLog(@"sendChatMessageUpdate-------------------------------");
+    NSLog(@"primaryKey:%d",msg.primaryKey);
+    NSLog(@"chatUserName:%@",msg.chatUserName);
+    NSLog(@"sentStatus:%@",msg.sentStatus);
+    NSLog(@"sendChatMessageUpdate-------------------------------");
+
+}
+
+
+-(void) getChatMessage:(NSNotification*)notif{
+    
+    ChatMessage* msg = (ChatMessage *)[notif.userInfo objectForKey: @"data"];
+    NSLog(@"getChatMessage-------------------------------");
+    NSLog(@"primaryKey:%d",msg.primaryKey);
+    NSLog(@"chatUserName:%@",msg.chatUserName);
+    NSLog(@"displayName:%@",msg.displayName);
+    NSLog(@"msgType:%@",msg.msgType);
+    NSLog(@"sentDate:%@",msg.sentDate);
+    NSLog(@"ioType:%@",msg.ioType);
+    NSLog(@"sentStatus:%@",msg.sentStatus);
+    NSLog(@"isGroupChatMessage:%d",msg.isGroupChatMessage);
+    NSLog(@"readCount:%d",msg.readCount);
+    NSLog(@"pathOfThumbNail:%@",msg.pathOfThumbNail);
+    NSLog(@"pathOfMultimedia:%@",msg.pathOfMultimedia);
+    NSLog(@"messageContent:%@",msg.messageContent);
+    NSLog(@"remotekey:%d",msg.remoteKey);
+    NSLog(@"groupChatSenderID:%@",msg.groupChatSenderID);
+    
+    NSLog(@"getChatMessage-------------------------------");
+    
+    //Let's tell him message is readed
+    if(msg.isGroupChatMessage){
+        if (msg.groupChatSenderID) {
+            [WowTalkVoipIF fNotifyMessageReaded:[NSString stringWithFormat:@"{%@}%d",msg.chatUserName, msg.remoteKey] forUser:msg.groupChatSenderID];
+        }
+    }
+    else{
+        [WowTalkVoipIF fNotifyMessageReaded:[NSString stringWithFormat:@"%d",msg.remoteKey] forUser:msg.chatUserName];
+        
+    }
+    
+    
+}
+
+
+-(void) getChatMessage_ReachedReceipt:(NSNotification*)notif{
+    NSString* username = [notif.userInfo objectForKey: @"username"];
+    NSString* displayname = [notif.userInfo objectForKey: @"displayname"];
+    NSString* messageID = [notif.userInfo objectForKey: @"data"];
+    NSLog(@"getChatMessage_ReachedReceipt-->%@ fromUser:%@ withDisplayName:%@",messageID,username,displayname);
+
+}
+
+-(void) getChatMessage_ReadedReceipt:(NSNotification*)notif{
+    NSString* username = [notif.userInfo objectForKey: @"username"];
+    NSString* displayname = [notif.userInfo objectForKey: @"displayname"];
+    NSString* messageID = [notif.userInfo objectForKey: @"data"];
+    NSLog(@"getChatMessage_ReadedReceipt-->%@ fromUser:%@ withDisplayName:%@",messageID,username,displayname);
+    
+}
+
+
+
+
+
+@end

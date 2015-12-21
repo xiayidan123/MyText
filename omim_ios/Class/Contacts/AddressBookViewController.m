@@ -1,0 +1,568 @@
+//
+//  AddressBookViewController.m
+//  omim
+//
+//  Created by coca on 2013/04/21.
+//  Copyright (c) 2014年 OneMeter Inc. All rights reserved.
+//
+
+#import "AddressBookViewController.h"
+#import "WTHeader.h"
+#import "PublicFunctions.h"
+#import "Constants.h"
+#import "AddressBookManager.h"
+#import "AddressBook.h"
+#import "CustomButton.h"
+
+#import "ContactInfoViewController.h"
+#import "NonUserContactViewController.h"
+
+@interface AddressBookViewController ()
+@property (nonatomic,retain) NSMutableArray* localcontacts;
+@property (nonatomic,retain) NSMutableArray* filteredArray;
+@property (nonatomic,retain) NSMutableArray* indexForNotEmptySection;
+@property (nonatomic,retain) NSMutableArray* registeredNumbers;
+@property (nonatomic,retain) NSMutableArray* selectedPersons;
+@end
+
+@implementation AddressBookViewController
+@synthesize localcontacts = _localcontacts;
+
+#define TAG_CELL_BUTTON             1
+#define TAG_CELL_BUTTON_LABLE       2
+#define TAG_PHONENUMBER             3
+#define TAG_SELECTED                4
+#define TAG_NAME                    5
+
+#pragma mark -- data initilization
+
+-(void)initData
+{
+    UILocalizedIndexedCollation *theCollation = [UILocalizedIndexedCollation currentCollation];
+    
+    if (self.localcontacts == nil) {
+        self.localcontacts = [[[NSMutableArray alloc] init] autorelease];
+    }
+    else{
+        [self.localcontacts removeAllObjects];
+    }
+    
+    if(self.indexForNotEmptySection == nil){
+        self.indexForNotEmptySection = [[[NSMutableArray alloc] init] autorelease];
+    }
+    else{
+        [self.indexForNotEmptySection removeAllObjects];
+    }
+    
+    NSMutableArray* tempcontacts = [NSMutableArray arrayWithArray:[AddressBookManager defaultManager].localcontacts];
+    NSMutableArray* contacts = [[NSMutableArray alloc] init];
+    
+    ABPropertyID pID1 = (ABPersonGetSortOrdering()==ABPersonFirstNameProperty)?ABPersonFirstNamePhoneticProperty:ABPersonLastNamePhoneticProperty;
+	ABPropertyID pID2 = (ABPersonGetSortOrdering()==ABPersonFirstNameProperty)?ABPersonLastNamePhoneticProperty:ABPersonFirstNamePhoneticProperty;
+	ABPropertyID pID3 = (ABPersonGetSortOrdering()==ABPersonFirstNameProperty)?ABPersonFirstNameProperty:ABPersonLastNameProperty;
+	ABPropertyID pID4 = (ABPersonGetSortOrdering()==ABPersonFirstNameProperty)?ABPersonLastNameProperty:ABPersonFirstNameProperty;
+    
+    for (ABPerson* person in tempcontacts) {
+        NSString* sortname = (NSString*)[person valueForProperty:pID1];
+        if ([sortname length] ==0 ) {
+            sortname = (NSString*)[person valueForProperty:pID2];
+            if ([sortname length] == 0) {
+                sortname = (NSString*)[person valueForProperty:pID3];
+                if ([sortname length] == 0) {
+                    sortname = (NSString*)[person valueForProperty:pID4];
+                }
+            }
+        }
+        
+        person.sortName = sortname;
+        if(person.sortName == Nil)
+            person.sortName = @"";
+    }
+    
+    // add all the numbers.
+    for (ABPerson* person in tempcontacts) {
+        NSArray* numbers = [AddressBookManager phoneNumbersOfPerson:person WithLabel:NO];
+        if (numbers == nil) {
+            continue;
+        }
+        if ([numbers count] == 1) {
+            person.phonenumber = [numbers objectAtIndex:0];
+            if ([PublicFunctions hasAnyBuddyAssociateWithNumbers:[NSArray arrayWithObject: person.phonenumber]]) {
+                continue;
+            }
+            else
+                [contacts addObject:person];
+        }
+        else{
+            for(NSString* number in numbers) {
+                if ([PublicFunctions hasAnyBuddyAssociateWithNumbers:[NSArray arrayWithObject: number]]) {
+                    continue;
+                }
+                ABPerson* newperson = [[ABPerson alloc] initWithABRef:person.recordRef];
+                newperson.phonenumber = number;
+                newperson.sortName = person.sortName;
+                [contacts addObject:newperson];
+                [newperson release];
+            }
+        }
+        
+    }
+    
+    
+    for (ABPerson* person in contacts) {
+        NSInteger sect = [theCollation sectionForObject:person collationStringSelector:@selector(sortName)];
+        person.sectionNumber = (int)sect;
+    }
+    
+    NSInteger highSection = [[theCollation sectionTitles] count];
+
+    NSMutableArray *sectionArrays = [NSMutableArray arrayWithCapacity:highSection];
+    
+    for (int i = 0; i < highSection; i++) {
+        NSMutableArray *sectionArray = [[[NSMutableArray alloc] init] autorelease];
+        [sectionArrays addObject:sectionArray];
+    }
+    
+    for (ABPerson * person in contacts) {
+        [(NSMutableArray *)[sectionArrays objectAtIndex:person.sectionNumber] addObject:person]; // add to the right section
+    }
+    
+    for (NSMutableArray *sectionArray in sectionArrays) {
+        NSArray *sortedSection = [theCollation sortedArrayFromArray:sectionArray
+                                            collationStringSelector:@selector(sortName)];   // order the data in the same section
+        
+        [self.localcontacts addObject:sortedSection];
+        
+        if ([sortedSection count] != 0) {
+            NSInteger section = [sectionArrays indexOfObject:sectionArray];
+            [self.indexForNotEmptySection addObject:[NSNumber numberWithInt:(int)section]];  // ascend order
+        }
+    }
+    
+    [contacts release];
+}
+
+
+
+
+#pragma mark -
+#pragma mark table related
+
+// return the real section stored in self.curContacts
+-(NSUInteger) realSectionIndex:(NSInteger)tableSectionIndex
+{
+    return [[self.indexForNotEmptySection objectAtIndex:tableSectionIndex] integerValue];
+}
+
+// return the section in the table
+-(NSUInteger) tableSectionIndex:(NSUInteger)realSectionIndex
+{
+    
+    NSUInteger tablesection = 0;
+    
+    for (int i = 0 ;i <[self.indexForNotEmptySection count]; i ++) {
+        
+        NSUInteger tmprealsection = [[self.indexForNotEmptySection objectAtIndex:i] integerValue];
+        
+        if (tmprealsection< realSectionIndex && i > tablesection) {
+            tablesection = i;
+            continue;
+        }
+        
+        if ( tmprealsection == realSectionIndex) {
+            tablesection = i;
+        }
+        
+        if (tmprealsection>realSectionIndex){
+            break;
+        }
+    }
+    
+    return tablesection;
+}
+
+- (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    return CONTACT_TABLEVIEWCELL_HEIGHT;
+    
+}
+
+- (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
+{
+    if([tableView isEqual: self.tb_contacts]) return [self.indexForNotEmptySection count];
+    else return 1;
+}
+
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
+{
+	if ([tableView isEqual: self.tb_contacts]){
+        NSInteger realsection = [self realSectionIndex:section];
+        return [[self.localcontacts objectAtIndex:realsection ] count];
+    }
+    else
+        return [self.filteredArray count];
+    
+}
+
+- (NSArray *)sectionIndexTitlesForTableView:(UITableView *)tableView {
+    if([tableView isEqual:self.tb_contacts]){
+        return [[UILocalizedIndexedCollation currentCollation] sectionIndexTitles];
+    }
+    else return nil;
+}
+
+- (NSInteger)tableView:(UITableView *)tableView sectionForSectionIndexTitle:(NSString *)title atIndex:(NSInteger)index
+{
+    if ([tableView isEqual:self.tb_contacts]) {
+        NSUInteger num =  [self tableSectionIndex:[[UILocalizedIndexedCollation currentCollation] sectionForSectionIndexTitleAtIndex:index]];
+        return num;
+    }
+    
+    return 0;
+}
+
+- (UIView *)tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section
+{
+    if (tableView == self.tb_contacts) {
+        
+        NSInteger realsection = [self realSectionIndex:section];
+        NSString *sectionTitle = [[[UILocalizedIndexedCollation currentCollation] sectionTitles] objectAtIndex:realsection];
+        
+        //    NSLog(@"sectiontitle:%@",sectionTitle );
+        UILabel *nameLabel = [[[UILabel alloc] init] autorelease];
+        nameLabel.frame = CGRectMake(TABLE_HEADER_LABEL_X_OFFSET, TABLE_HEADER_LABEL_Y_OFFSET, TABLE_HEADER_LABEL_WIDTH, TABLE_HEADER_LABEL_HEIGHT);
+        nameLabel.backgroundColor = [UIColor clearColor];
+        nameLabel.textColor = POPLISTVIEW_TABLEVIEW_CELL_TEXT_COLOR;
+        nameLabel.font = [UIFont fontWithName:TABLE_HEADER_LABEL_FONT_NAME size:TABLE_HEADER_LABEL_FONT_SIZE];
+        nameLabel.text = sectionTitle;
+        
+        UIImageView *imageView = [[UIImageView alloc] initWithFrame:CGRectMake(0, 0, IPHONE_WIDTH, TABLE_HEADER_IMAGEVIEW_HEIGHT)];
+        imageView.image = [UIImage imageNamed:CONTACT_TABLEVIEW_SECTION_IMAGE];
+        
+        [imageView addSubview:nameLabel];
+        return [imageView autorelease];
+    }
+    else {
+        return nil;
+    }
+}
+
+- (CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section
+{
+    
+    if (tableView == self.tb_contacts) {
+        return CONTACT_TABLEVIEWCELL_SECTION_HEIGHT;
+    }
+    
+    else return 0;
+}
+
+- (UITableViewCell *)tableView:(UITableView *)tableView
+		 cellForRowAtIndexPath:(NSIndexPath *)indexPath {
+    
+    NSString* identifier = @"localcontactcell";
+    UITableViewCell* cell = [tableView dequeueReusableCellWithIdentifier:identifier];
+    if (cell == nil) {
+        cell = [[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleValue2 reuseIdentifier:identifier] autorelease];
+        cell.selectionStyle = UITableViewCellSelectionStyleGray;
+        
+        UILabel* label_number = [[UILabel alloc] initWithFrame:CGRectMake(10, 0, 20, 44)];
+        label_number.tag = TAG_PHONENUMBER;
+        label_number.backgroundColor = [UIColor clearColor];
+        label_number.textColor = [UIColor grayColor];
+        label_number.font = [UIFont systemFontOfSize:15];
+        label_number.textAlignment = NSTextAlignmentRight;
+        [cell.contentView addSubview:label_number];
+        [label_number release];
+        
+        UIImageView* selectview = [[UIImageView alloc] initWithFrame:CGRectMake(10, 7, 30, 30)];
+        selectview.tag = TAG_SELECTED;
+        [cell.contentView addSubview:selectview];
+        [selectview release];
+        
+        UILabel* lable_name = [[UILabel alloc] initWithFrame:CGRectMake(50, 0, 80, 44)];
+        lable_name.tag = TAG_NAME;
+        lable_name.backgroundColor = [UIColor clearColor];
+        lable_name.textColor = [UIColor blackColor];
+        lable_name.font = [UIFont systemFontOfSize:16];
+        lable_name.textAlignment = NSTextAlignmentLeft;
+        [cell.contentView addSubview:lable_name];
+        [lable_name release];
+        
+    }
+    
+    UILabel* label_number = (UILabel*)[cell.contentView viewWithTag:TAG_PHONENUMBER];
+    UILabel* label_name = (UILabel*)[cell.contentView viewWithTag:TAG_NAME];
+    UIImageView* iv_select = (UIImageView*) [cell.contentView viewWithTag:TAG_SELECTED];
+    
+    ABPerson* person;
+    
+    if ([tableView isEqual:self.tb_contacts]) {
+        NSInteger realsection = [self realSectionIndex:indexPath.section];
+        person = [[self.localcontacts objectAtIndex:realsection] objectAtIndex:indexPath.row];
+        label_name.text = person.compositeName;
+    }
+    else{
+        person = [self.filteredArray objectAtIndex:indexPath.row];
+        label_name.text =  person.compositeName;
+    }
+    
+    NSString* number = person.phonenumber;
+    label_number.text = number;
+    
+    int width = [UILabel labelWidth:number FontType:16 withInMaxWidth:200];
+    [label_number setFrame:CGRectMake(280-width, 0, width, 44)];
+    
+    [label_name setFrame:CGRectMake(50, 0, 230-width, 44)];
+    
+    
+    if ([self.selectedPersons containsObject:person]) {
+        [iv_select setImage:[UIImage imageNamed:@"list_selected.png"]];
+    }
+    else{
+        [iv_select setImage:[UIImage imageNamed:@"list_unselected.png"]];
+    }
+    
+    
+    return cell;
+    
+}
+
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath{
+    
+    [tableView deselectRowAtIndexPath:indexPath animated:YES];
+    
+    ABPerson* person;
+    
+    if ([tableView isEqual:self.tb_contacts]) {
+        NSInteger realsection = [self realSectionIndex:indexPath.section];
+        person = [[self.localcontacts objectAtIndex:realsection] objectAtIndex:indexPath.row];
+    }
+    else{
+        person = [self.filteredArray objectAtIndex:indexPath.row];
+    }
+    
+    if ([self.selectedPersons containsObject:person]) {
+        [self.selectedPersons removeObject:person];
+    }
+    else
+        [self.selectedPersons addObject:person];
+    
+    
+    if ([tableView isEqual:self.tb_contacts]) {
+        
+        
+        if ([self.selectedPersons count] > 0) {
+            [self.navigationItem enableRightBarButtonItem];
+        }
+        else
+            [self.navigationItem disableRightBarButtonItem];
+        
+        [self.tb_contacts reloadData];
+    }
+    else
+        [self.searchDisplayController.searchResultsTableView reloadData];
+    
+}
+
+#pragma mark -
+#pragma mark UISearchDisplayController Delegate Methods
+
+- (BOOL)searchDisplayController:(UISearchDisplayController *)controller shouldReloadTableForSearchString:(NSString *)searchString
+{
+    [self filterContentForSearchText:searchString];
+    
+    return YES;
+}
+
+
+
+- (void) searchDisplayControllerWillBeginSearch:(UISearchDisplayController *)controller{
+    
+    // isSearchMode = YES;
+  //  [self.selectedPersons removeAllObjects];
+    [self.searchDisplayController.searchResultsTableView setBackgroundColor:[UIColor colorWithHexString:SETTING_BACKGROUND_COLOR]];
+    [self.searchDisplayController.searchResultsTableView setSeparatorStyle:UITableViewCellSeparatorStyleNone];
+    
+    //[self.searchDisplayController.searchBar setTintColor:[UIColor colorWithHexString:SETTING_BACKGROUND_COLOR]];
+    [self.searchDisplayController.searchBar setTintColor:[UIColor blackColor]];
+    
+    for(UIView *subView in self.searchDisplayController.searchBar.subviews)
+    {
+        if ([subView isKindOfClass:[UIButton class]])
+        {
+            UIButton* btn = (UIButton*) subView;
+            btn.titleLabel.textColor = [UIColor redColor]; // not working here.
+        }
+    }
+}
+
+
+- (void) searchDisplayControllerDidEndSearch:(UISearchDisplayController *)controller{
+    
+    [self.searchDisplayController.searchBar resignFirstResponder];
+//    [self.selectedPersons removeAllObjects];
+}
+
+- (void) searchBarCancelButtonClicked:(UISearchBar *)searchBar
+{
+//    [self.selectedPersons removeAllObjects];
+    [self.tb_contacts reloadData];
+}
+
+#pragma mark Content Filtering
+
+- (void)filterContentForSearchText:(NSString*)searchText
+{
+    if (self.filteredArray == nil) {
+        self.filteredArray = [[[NSMutableArray alloc] init] autorelease];
+    }
+    else
+        [self.filteredArray removeAllObjects];
+    
+    NSPredicate* predicate = [NSPredicate predicateWithFormat:@"(SELF contains[cd] %@)",searchText];
+    
+    for (NSArray* section in self.localcontacts) {
+        if (section == nil || [section count]==0) {
+            continue;
+        }
+        else{
+            for (ABPerson* person in section) {
+                if ([predicate evaluateWithObject:person.compositeName]) {
+                    [self.filteredArray addObject:person];
+                }
+            }
+            
+        }
+    }
+    
+}
+
+#pragma mark -- button action
+
+-(void)inviteFriend:(id)sender
+{
+    
+}
+
+-(void)addFriend:(id)sender
+{
+    NSMutableArray* numbers = [[NSMutableArray alloc] init];
+    for (ABPerson* person in self.selectedPersons) {
+        [numbers addObject:person.phonenumber];
+    }
+    
+    [WowTalkWebServerIF activateLocalContact:numbers withCallback:@selector(didActivatePhoneNumbers:) withObserver:self];
+}
+
+
+-(void)didActivatePhoneNumbers:(NSNotification*)notif
+{
+    NSError* error = [[notif userInfo] valueForKey:WT_ERROR];
+    if (error.code == NO_ERROR) {
+        [self goBack];
+    }
+}
+
+
+#pragma mark -- navigation bar
+-(void)goBack
+{
+    [self.navigationController popViewControllerAnimated:YES];
+}
+
+-(void)configNav
+{
+    
+    UILabel* label = [[[UILabel alloc] init] autorelease];
+    label.text =  NSLocalizedString(@"Local contact", @"") ;
+    label.font = [UIFont fontWithName:@"Helvetica-Bold" size:20];
+    label.textAlignment = NSTextAlignmentCenter;
+    label.textColor = [UIColor whiteColor];
+    label.backgroundColor = [UIColor clearColor];
+    [label sizeToFit];
+    self.navigationItem.titleView = label;
+    
+    UIBarButtonItem *barButton = [PublicFunctions getCustomNavButtonOnLeftSide:YES target:self image:[UIImage imageNamed:NAV_BACK_IMAGE] selector:@selector(goBack)];
+    [self.navigationItem addLeftBarButtonItem:barButton];
+    [barButton release];
+    
+//    UIBarButtonItem *rightBarButton = [PublicFunctions getCustomNavButtonOnLeftSide:NO target:self image:[UIImage imageNamed:NAV_CONFIRM_IMAGE] selector:@selector(addFriend:)];
+    UIBarButtonItem *rightBarButton = [PublicFunctions getCustomNavDoneButtonWithTarget:self selector:@selector(addFriend:)];
+    [self.navigationItem addRightBarButtonItem:rightBarButton];
+    [rightBarButton release];
+
+    if (self.selectedPersons == nil || [self.selectedPersons count] == 0) {
+        [self.navigationItem disableRightBarButtonItem];
+    }
+    
+    
+}
+
+
+#pragma mark -callback
+-(void)didUploadTheContactbook:(NSNotification*)notif
+{
+    NSError* error = [[notif userInfo] valueForKey:WT_ERROR];
+    if (error.code == NO_ERROR) {
+        
+        [self.tb_contacts reloadData];
+    }
+    
+}
+
+#pragma mark -
+#pragma mark -- View lifecycle
+- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
+{
+    self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
+    if (self) {
+        // Custom initialization
+    }
+    return self;
+}
+
+
+- (void)viewDidLoad
+{
+    [super viewDidLoad];
+    // Do any additional setup after loading the view from its nib.
+    
+    [self configNav];
+    //  searchBar.customDelegate = self;
+    
+    self.tb_contacts.backgroundColor = [UIColor colorWithHexString:SETTING_BACKGROUND_COLOR];
+    self.tb_contacts.backgroundView = nil;
+    
+    
+    //Search bar
+    self.searchDisplayController.delegate = self;
+
+    self.selectedPersons = [[[NSMutableArray alloc] init] autorelease];
+    
+    [self initData];
+    
+    
+    //   NSMutableArray* phonenumbers = [[AddressBookManager defaultManager] allNumbersInContactBook];
+    
+    //have to verify the numbers, actually it is better for us to put this before poping out this view.
+    
+    //   [WTNetworkFunction uploadContactBook:phonenumbers withCallback:@selector(didUploadTheContactbook:) withObserver:self];
+    
+    if (IS_IOS7) {
+        [self.view setAutoresizesSubviews:FALSE];
+        [self.view setAutoresizingMask:UIViewAutoresizingNone];
+        self.edgesForExtendedLayout = UIRectEdgeNone;
+        self.automaticallyAdjustsScrollViewInsets = NO;
+        [self.tb_contacts setFrame:CGRectMake(0, 0, 320, [UISize screenHeightNotIncludingStatusBarAndNavBar])];
+    }
+    
+}
+
+- (void)didReceiveMemoryWarning
+{
+    [super didReceiveMemoryWarning];
+    // Dispose of any resources that can be recreated.
+}
+
+@end

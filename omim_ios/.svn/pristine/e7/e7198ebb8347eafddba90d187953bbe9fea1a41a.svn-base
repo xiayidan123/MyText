@@ -1,0 +1,282 @@
+//
+//  AlbumPickerViewController.m
+//  omim
+//
+//  Created by coca on 12/09/23.
+//  Copyright (c) 2014 OneMeter Inc. All rights reserved.
+//
+
+#import "AlbumPickerViewController.h"
+#import <MobileCoreServices/MobileCoreServices.h>
+#import <MediaPlayer/MediaPlayer.h>
+
+#import "MsgComposerVC.h"
+
+#import "Constants.h"
+
+#import "WTHeader.h"
+
+@implementation AlbumPickerViewController
+
+@synthesize imagePicker;
+@synthesize parent = _parent;
+@synthesize videoPath = _videoPath;
+
+@synthesize thumbnailPath = _thumbnailPath,imagePath = _imagePath;
+@synthesize maxThumbnailSize = _maxThumbnailSize;
+@synthesize dirName = _dirName;
+@synthesize mmtType = _mmtType;
+@synthesize  delegate = _delegate;
+@synthesize needCropping = _needCropping;
+
+
+- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
+{
+    self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
+    if (self) {
+        // Custom initialization
+    }
+    return self;
+}
+
+- (void)didReceiveMemoryWarning
+{
+
+}
+
+-(BOOL)openAlbum
+{
+    if ([UIImagePickerController isSourceTypeAvailable:UIImagePickerControllerSourceTypePhotoLibrary])
+    {
+        
+        self.imagePath = [NSFileManager randomRelativeFilePathInDir:self.dirName ForFileExtension:JPG];
+        self.thumbnailPath = [NSFileManager randomRelativeFilePathInDir:self.dirName ForFileExtension:JPG];
+        
+        
+        self.imagePicker = [[[UIImagePickerController alloc] init] autorelease];
+        self.imagePicker.delegate = self;
+        
+        self.imagePicker.mediaTypes = [[[NSArray alloc] initWithObjects: (NSString *)
+                                        kUTTypeImage,(NSString *)
+                                        kUTTypeMovie, nil] autorelease];
+
+  
+        self.imagePicker.sourceType = UIImagePickerControllerSourceTypePhotoLibrary;
+        //allow editing of image
+        
+        self.imagePicker.allowsEditing = self.needCropping;
+        
+        [self presentViewController:self.imagePicker animated:YES completion:nil];
+        return YES;
+    }
+    return NO;
+    
+}
+
+
+-(void)imagePickerController:(UIImagePickerController *)picker didFinishPickingMediaWithInfo:(NSDictionary *)info
+{
+    NSString *mediaType = [info objectForKey:UIImagePickerControllerMediaType];
+    
+    if ([mediaType isEqualToString:(NSString *)kUTTypeImage])
+    {
+        // get the image and save it
+         self.mmtType = MMT_PHOTO;
+        
+        UIImage *image = nil;
+        
+        
+        CGSize targetSize;
+        CGSize targetSizeThumbnail;
+        
+        UIImage *scaledImage;
+        UIImage* thumbnailImage;
+        
+        if (self.needCropping)
+        {
+            image = [info objectForKey:UIImagePickerControllerEditedImage];
+
+            if (image.size.height>image.size.width)
+            {
+                targetSize = [image calculateTheScaledSize:CGSizeMake(image.size.width, image.size.width) withMaxSize: CGSizeMake(PhotoMaxWidth, PhotoMaxHeight)];
+            }
+            else
+            {
+                targetSize = [image calculateTheScaledSize:CGSizeMake(image.size.height, image.size.height) withMaxSize: CGSizeMake(PhotoMaxWidth, PhotoMaxHeight)];
+            }
+            
+            scaledImage = [image resizeToSqaureSize:targetSize];
+            
+            targetSizeThumbnail = [scaledImage calculateTheScaledSize:CGSizeMake(scaledImage.size.width, scaledImage.size.height) withMaxSize: self.maxThumbnailSize];
+            
+            thumbnailImage = [image resizeToSqaureSize:targetSizeThumbnail];
+            
+        }
+        
+        else
+        {
+            image = [info objectForKey:UIImagePickerControllerOriginalImage];
+            targetSize = [image calculateTheScaledSize:CGSizeMake(image.size.width, image.size.height) withMaxSize: CGSizeMake(PhotoMaxWidth, PhotoMaxHeight)];
+           
+            scaledImage = [image resizeToSize:targetSize];
+            
+            targetSizeThumbnail = [scaledImage calculateTheScaledSize:CGSizeMake(scaledImage.size.width, scaledImage.size.height) withMaxSize: self.maxThumbnailSize];
+            
+            thumbnailImage = [image resizeToSize:targetSizeThumbnail];
+        }
+    
+        
+      //  NSLog(@"scaled image size width: %f, height: %f", scaledImage.size.width, scaledImage.size.height);
+      //  NSLog(@"scaled thumbnail size width: %f, height: %f", thumbnailImage.size.width, thumbnailImage.size.height);
+        
+        
+        NSData * data = [NSData dataWithData:UIImageJPEGRepresentation(scaledImage, 1.0f)];//1.0f = 100% quality
+     
+        [data writeToFile:[NSFileManager absolutePathForFileInDocumentFolder:self.imagePath] atomically:YES];
+        
+        NSData * data2 = [NSData dataWithData:UIImageJPEGRepresentation(thumbnailImage, 1.0f)];  //1.0f = 100% quality
+       
+        [data2 writeToFile:[NSFileManager absolutePathForFileInDocumentFolder: self.thumbnailPath] atomically:YES];
+       
+        [self.delegate getDataFromAlbum:self];
+        
+        [self dismissViewControllerAnimated:YES completion:nil];
+        /*
+        if([self.parent isKindOfClass:[MsgComposerVC class]])
+        {
+            [(MsgComposerVC*)self.parent uv_barcontainer].hidden = NO;
+        }*/
+        
+        
+    }
+    
+    else if([mediaType isEqualToString:(NSString *)kUTTypeMovie])
+    {
+        
+        self.mmtType = MMT_MOVIE;
+        
+        NSURL* tmpPath = [info objectForKey:UIImagePickerControllerMediaURL] ;
+
+        self.videoPath = [NSFileManager randomRelativeFilePathInDir:self.dirName ForFileExtension:MP4];
+        
+        MediaProcessing* mp= [[[MediaProcessing alloc] init] autorelease];
+        
+        mp.delegate = self;
+       
+        
+        [mp convertVideo:tmpPath intoNewVideo:[NSFileManager absolutePathForFileInDocumentFolder:self.videoPath]];
+        
+        MPMoviePlayerController *mpplayer = [[[MPMoviePlayerController alloc] initWithContentURL:tmpPath] autorelease];
+        mpplayer.shouldAutoplay = NO;
+        
+        UIImage *firstframe = [mpplayer thumbnailImageAtTime:0 timeOption:MPMovieTimeOptionNearestKeyFrame];
+        
+        CGSize targetSizeThumbnail = [firstframe calculateTheScaledSize:CGSizeMake(firstframe.size.width, firstframe.size.height) withMaxSize:self.maxThumbnailSize];
+        
+        UIImage* thumbnailImage = [firstframe resizeToSize:targetSizeThumbnail];
+       
+        
+        NSData * data2 = [NSData dataWithData:UIImageJPEGRepresentation(thumbnailImage, 1.0f)];  //1.0f = 100% quality
+        
+        [data2 writeToFile:[NSFileManager absolutePathForFileInDocumentFolder:self.thumbnailPath] atomically:YES];
+    }
+}
+
+-(void)didFailedProcessing:(MediaProcessing *)delegate
+{
+      [[UIApplication sharedApplication] setStatusBarHidden:NO];
+     [self.parent dismissViewControllerAnimated:YES completion:nil];
+    /*
+    if([self.parent isKindOfClass:[MsgComposerVC class]])
+    {
+        [(MsgComposerVC*)self.parent uv_barcontainer].hidden = NO;
+    }
+    */
+    // TODO: pup up a alert to say it failed
+}
+-(void)didFinishProcessing:(MediaProcessing *)delegate
+{
+    [[UIApplication sharedApplication] setStatusBarHidden:NO];
+     [self.parent dismissViewControllerAnimated:YES completion:nil];
+    /*
+    if([self.parent isKindOfClass:[MsgComposerVC class]])
+    {
+        [(MsgComposerVC*)self.parent uv_barcontainer].hidden = NO;
+    }
+    */
+    [self.delegate getDataFromAlbum:self];
+}
+
+- (void)imagePickerControllerDidCancel:(UIImagePickerController *)picker
+{
+ 
+   // [[UIApplication sharedApplication] setStatusBarHidden:NO];
+    
+    [self.parent dismissViewControllerAnimated:YES completion:nil];
+    /*
+    if([self.parent isKindOfClass:[MsgComposerVC class]])
+    {
+        [(MsgComposerVC*)self.parent uv_barcontainer].hidden = NO;
+    }
+*/
+}
+
+
+
+#pragma mark - View lifecycle
+
+-(void)viewWillDisappear:(BOOL)animated
+{
+     [[UIApplication sharedApplication] setStatusBarHidden:NO];
+ 
+      
+}
+
+- (void)viewDidLoad
+{
+    [super viewDidLoad];
+    // Do any additional setup after loading the view from its nib.
+    if (IS_IOS7) {
+        [self.view setAutoresizesSubviews:FALSE];
+        [self.view setAutoresizingMask:UIViewAutoresizingNone];
+        self.edgesForExtendedLayout = UIRectEdgeNone;
+        self.automaticallyAdjustsScrollViewInsets = NO;
+    }
+}
+
+-(void)viewWillAppear:(BOOL)animated{
+    if (IS_IOS7) {
+        [UIApplication sharedApplication].statusBarStyle = UIStatusBarStyleLightContent;
+    }
+}
+
+
+- (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
+{
+    // Return YES for supported orientations
+    return YES;
+}
+
+-(BOOL)shouldAutorotate
+{
+    return YES;
+}
+
+-(UIInterfaceOrientationMask)supportedInterfaceOrientations
+{
+    return 0;
+}
+
+
+-(void)dealloc
+{
+    self.imagePicker = nil;
+    self.dirName = nil;
+    self.imagePath = nil;
+    self.videoPath = nil;
+    self.thumbnailPath = nil;
+    
+    [super dealloc];
+}
+
+@end

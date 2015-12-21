@@ -1,0 +1,341 @@
+//
+//  MomentBaseCell_MiddleView.m
+//  dev01
+//
+//  Created by 杨彬 on 15/4/10.
+//  Copyright (c) 2015年 wowtech. All rights reserved.
+//
+
+#import "MomentBaseCell_MiddleView.h"
+
+#import "MomentCellAlbumCollectionViewCell.h"
+#import "MomentRecordView.h"
+#import "MomentVoteView.h"
+#import "MomentLocationView.h"
+
+#import "MomentCellModel.h"
+#import "MomentMiddleModel.h"
+#import "MomentLocationCellModel.h"
+
+#import "MomentAlbumFile.h"
+
+#import "MomentCellDenfine.h"
+
+#import "OMViewState.h"
+
+#import "OMAlbumBrowseManager.h"
+
+
+
+@interface MomentBaseCell_MiddleView ()<UICollectionViewDataSource,UICollectionViewDelegate,MomentLocationViewDelegate,MomentVoteViewDelegate>
+
+@property (retain, nonatomic)UILabel *text_label;
+
+/**
+ *  相册控件（UICollectionView）
+ */
+@property (retain, nonatomic)UICollectionView *album_collectionview;
+
+@property (retain, nonatomic)UICollectionViewFlowLayout *collectionView_layout;
+
+
+
+/**
+ *  相册控件数据
+ */
+@property (retain, nonatomic)NSMutableArray *album_model_array;
+
+@property (retain, nonatomic)NSMutableArray *photo_state_array;
+
+
+@property (retain, nonatomic) NSMutableArray * video_array;
+
+/**
+ *  录音控件
+ */
+@property (retain, nonatomic)MomentRecordView *record_view;
+
+
+/**
+ *  投票控件
+ */
+@property (retain, nonatomic)MomentVoteView *vote_view;
+
+
+/**
+ *  位置相关
+ */
+@property (retain, nonatomic)MomentLocationView *location_view;
+
+
+
+@end
+
+
+@implementation MomentBaseCell_MiddleView
+
+
+-(void)dealloc{
+//    self.cellMoment = nil;
+    /**
+     *  相册控件
+     */
+    self.text_label = nil;
+    self.album_collectionview = nil;
+    /**
+     *  相册数据
+     */
+    self.album_model_array = nil;
+    self.photo_state_array = nil;
+    self.video_array = nil;
+    /**
+     *  录音控件
+     */
+    self.record_view = nil;
+    /**
+     *  位置控件
+     */
+    self.location_view = nil;
+    
+    self.middleModel = nil;
+    
+    [super dealloc];
+}
+
+
+-(void)setMiddleModel:(MomentMiddleModel *)middleModel{
+    [_middleModel release],_middleModel = nil;
+    _middleModel = [middleModel retain];
+    if(_middleModel == nil){
+        self.record_view.record_model = nil;
+        self.record_view.moment_id = nil;
+        self.album_model_array = nil;
+        return;
+    }
+    
+    self.text_label.text = _middleModel.moment.text;
+    self.text_label.frame = _middleModel.textLableF;
+    
+    self.album_model_array = _middleModel.photo_array;
+    self.video_array = _middleModel.video_array;
+    self.album_collectionview.frame = _middleModel.album_collectionviewF;
+    
+    
+    /**
+     *  录音
+     */
+    self.record_view.moment_id = _middleModel.moment.moment_id;
+    self.record_view.record_model = _middleModel.record_model;
+    self.record_view.frame = _middleModel.record_viewF;
+    
+    /**
+     *  投票
+     */
+    //    self.vote_view.moment_id = _cellMoment.moment.moment_id;
+    
+    
+    self.vote_view.isMultiple = _middleModel.moment.momentType == 4 ? YES : NO ;
+    self.vote_view.deadline = _middleModel.moment.deadline;
+    self.vote_view.is_voted = _middleModel.is_voted;// 先确定是否投过票 再赋值model 顺序不能对调
+    self.vote_view.voted_count = _middleModel.voted_count;
+    self.vote_view.vote_option_array = _middleModel.vote_option_array;
+    self.vote_view.moment_id = _middleModel.moment.moment_id;
+    
+    self.vote_view.frame = _middleModel.vote_viewF;
+    
+    /**
+     *  位置
+     */
+    self.location_view.locationCellModel = _middleModel.location_model;
+    
+    self.location_view.frame = _middleModel.location_viewF;
+}
+
+-(void)setVideo_array:(NSMutableArray *)video_array{
+    [_video_array release],_video_array = nil;
+    _video_array = [video_array retain];
+    
+    if(_video_array.count == 0)return;
+    
+    self.collectionView_layout.itemSize = CGSizeMake(PhotoWH, PhotoWH);
+    
+    [self.album_collectionview reloadData];
+}
+
+
+
+- (void)setAlbum_model_array:(NSMutableArray *)album_model_array{
+    [_album_model_array release],_album_model_array = nil;
+    _album_model_array = [album_model_array retain];
+    if (_album_model_array == nil || _album_model_array.count ==0){
+        self.photo_state_array = nil;
+        return;
+    }else{
+        self.collectionView_layout.itemSize = CGSizeMake(PhotoWidth, PhotoWidth);
+    }
+//#warning 测试图片浏览
+    NSMutableArray *photo_state_array = [[NSMutableArray alloc]init];
+    int count = _album_model_array.count;
+    for (int i=0; i<count; i++) {
+        OMViewState *state = [[OMViewState alloc]init];
+        state.file = _album_model_array[i];
+        state.moment_id = self.middleModel.moment.moment_id;
+        [photo_state_array addObject:state];
+        [state release];
+    }
+    self.photo_state_array = photo_state_array;
+    [photo_state_array release];
+    
+    
+//测试图片浏览结束
+    [self.album_collectionview reloadData];
+}
+
+
+-(void)layoutSubviews{
+    [super layoutSubviews];
+    self.layer.masksToBounds = YES;
+    self.backgroundColor = [UIColor clearColor];
+}
+
+
+- (UILabel *)text_label{
+    if (_text_label == nil){
+        UILabel *text_label = [[UILabel alloc]init];
+        text_label.font = TextLableFont;
+        text_label.textAlignment = NSTextAlignmentLeft;
+        text_label.numberOfLines = 0;
+        [self addSubview:text_label];
+        self.text_label = text_label;
+        [text_label release];
+    }
+    return _text_label;
+}
+
+
+-(UICollectionView *)album_collectionview{
+    if (_album_collectionview == nil){
+        UICollectionViewFlowLayout *layout = [[UICollectionViewFlowLayout alloc]init];
+        layout.itemSize = CGSizeMake(PhotoWH, PhotoWH);
+        layout.minimumInteritemSpacing = PhotoGap;
+        layout.minimumLineSpacing = PhotoGap;
+        self.collectionView_layout = layout;
+        
+        UICollectionView *album_collectionview = [[UICollectionView alloc]initWithFrame:CGRectMake(0, 0, 0, 0) collectionViewLayout:layout];
+        album_collectionview.dataSource = self;
+        album_collectionview.delegate = self;
+        album_collectionview.backgroundColor = [UIColor clearColor];
+        album_collectionview.scrollEnabled = NO;
+        [album_collectionview registerNib:[UINib nibWithNibName:@"MomentCellAlbumCollectionViewCell" bundle:nil] forCellWithReuseIdentifier:@"MomentCellAlbumCollectionViewCell"];
+        album_collectionview.collectionViewLayout = layout;
+        [layout release];
+        [self addSubview:album_collectionview];
+        self.album_collectionview = album_collectionview;
+        [album_collectionview release];
+    }
+    return _album_collectionview;
+}
+
+-(MomentRecordView *)record_view{
+    if (_record_view == nil){
+        MomentRecordView *record_view = [[MomentRecordView alloc]init];
+        [self addSubview:record_view];
+        self.record_view = record_view;
+        [record_view release];
+    }
+    return _record_view;
+}
+
+-(MomentVoteView *)vote_view{
+    if (_vote_view == nil){
+        MomentVoteView *vote_view = [[MomentVoteView alloc]init];
+        vote_view.delegate = self;
+        [self addSubview:vote_view];
+        self.vote_view = vote_view;
+        [vote_view release];
+    }
+    return _vote_view;
+}
+
+-(MomentLocationView *)location_view{
+    if (_location_view == nil){
+        MomentLocationView *location_view = [[MomentLocationView alloc]init];
+        location_view.delegate = self;
+        [self addSubview:location_view];
+        self.location_view = location_view;
+        [location_view release];
+    }
+    return _location_view;
+}
+
+
+#pragma mark - UICollectionViewDataSource
+
+- (UICollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath{
+    
+    MomentCellAlbumCollectionViewCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:@"MomentCellAlbumCollectionViewCell" forIndexPath:indexPath];
+    cell.moment_id = self.middleModel.moment.moment_id;
+    
+    if (self.middleModel.moment.momentType != 6){
+        cell.isVideo = NO;
+        cell.file = self.album_model_array[indexPath.row];
+        OMViewState *state = self.photo_state_array[indexPath.row];
+        if (state.file == cell.file){
+            [state setStateWithView:cell.photo_imageView];
+        }
+    }else{
+        cell.isVideo = YES;
+        cell.file = self.video_array[indexPath.row];
+    }
+    return cell;
+}
+
+- (NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section{
+    if (self.middleModel.moment.momentType == 6){
+        return 1;
+    }
+    return self.album_model_array.count;
+}
+
+#pragma mark - UICollectionViewDelegate
+- (void)collectionView:(UICollectionView *)collectionView didSelectItemAtIndexPath:(NSIndexPath *)indexPath{
+    
+    if (self.middleModel.moment.momentType == 6){
+        WTFile* file = [self.video_array objectAtIndex:indexPath.row];
+        
+        if ([self.delegate respondsToSelector:@selector(MomentBaseCell_MiddleView:playVideoWithMoment_id:videoFile:)]){
+            [self.delegate MomentBaseCell_MiddleView:self playVideoWithMoment_id:self.middleModel.moment.moment_id videoFile:file
+             ];
+        }
+        
+        
+    }else{
+        [[OMAlbumBrowseManager sharedManager] showWithState:self.photo_state_array withIndex:indexPath];
+    }
+}
+
+- (void)collectionView:(UICollectionView *)collectionView didEndDisplayingCell:(UICollectionViewCell *)cell forItemAtIndexPath:(NSIndexPath *)indexPath{
+    MomentCellAlbumCollectionViewCell *albumCell = (MomentCellAlbumCollectionViewCell *)cell;
+    albumCell.photo_imageView.image = nil;
+}
+
+
+#pragma mark - MomentLocationViewDelegate
+
+- (void)MomentLocationView:(MomentLocationView *)locationView momentLocationCellModel:(MomentLocationCellModel *)locationModel{
+    if ([self.delegate respondsToSelector:@selector(MomentBaseCell_MiddleView:locationModel:)]){
+        [self.delegate MomentBaseCell_MiddleView:self locationModel:locationModel];
+    }
+}
+
+#pragma mark - MomentVoteViewDelegate
+
+- (void)MomentVoteView:(MomentVoteView *)voteView didVotedWithMoment_id:(NSString *)moment_id option_array:(NSArray *)option_array{
+    if ([self.delegate respondsToSelector:@selector(MomentBaseCell_MiddleView:didVotedWithMoment_id:option_array:)]){
+        [self.delegate MomentBaseCell_MiddleView:self didVotedWithMoment_id:moment_id option_array:option_array];
+    }
+}
+
+
+
+@end

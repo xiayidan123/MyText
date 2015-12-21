@@ -1,0 +1,13 @@
+//
+//  Communicator_GetHistoryCount.h
+//  suzhou
+//
+//  Created by jianxd on 14-2-17.
+//  Copyright (c) 2014年 wowtech. All rights reserved.
+//
+
+#import "Communicator.h"
+
+@interface Communicator_GetHistoryCount : Communicator
+
+@end

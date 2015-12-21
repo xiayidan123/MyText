@@ -1,0 +1,313 @@
+//
+//  OMEmailFindPasswordVC.m
+//  dev01
+//
+//  Created by Starmoon on 15/7/20.
+//  Copyright (c) 2015年 wowtech. All rights reserved.
+//
+
+#import "OMEmailFindPasswordVC.h"
+#import "OMCodeCountdownButton.h"
+
+#import "OMNetwork_Login.h"
+
+#import "OMNewPasswordViewController.h"
+
+#import "YBAttrbutedLabel.h"
+
+
+@interface OMEmailFindPasswordVC ()<OMAlertViewForNetDelegate,YBAttrbutedLabelDelegate,UIAlertViewDelegate>
+
+/** 提示按钮 （显示：请输入要绑定的手机号码，以获取验证码） */
+@property (retain, nonatomic) IBOutlet UILabel *tips_label;
+
+/** 手机号码输入框 */
+@property (retain, nonatomic) IBOutlet UITextField *email_textfield;
+
+/** 验证码输入框 */
+@property (retain, nonatomic) IBOutlet UITextField *code_textfield;
+
+/** 获取验证码按钮 */
+@property (retain, nonatomic) IBOutlet OMCodeCountdownButton *code_button;
+
+/** 确定按钮 */
+@property (retain, nonatomic) IBOutlet UIButton *enter_button;
+
+/** 错误提示label */
+@property (retain, nonatomic) IBOutlet YBAttrbutedLabel *error_label;
+
+/** 邮箱格式正确 */
+@property (assign, getter=isEmailCorrect,nonatomic) BOOL email_correct;
+
+/** 随机生成的新密码 */
+@property (copy, nonatomic) NSString * reset_password;
+
+@property (retain,nonatomic) NSError *error;
+
+@property (copy, nonatomic) NSString * uid;
+
+@property(nonatomic,assign)BOOL isClickCodeBtn;
+
+@end
+
+@implementation OMEmailFindPasswordVC
+
+- (void)dealloc {
+    [_tips_label release];
+    [_email_textfield release];
+    [_code_textfield release];
+    [_code_button release];
+    [_enter_button release];
+    [_error_label release];
+    
+    self.reset_password = nil;
+    self.uid = nil;
+    
+    [super dealloc];
+}
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    
+    [self uiConfig];
+    self.isClickCodeBtn=NO;
+}
+
+- (void)uiConfig{
+    self.title = NSLocalizedString(@"找回密码",nil);
+    
+    self.error_label.delegate = self;
+    
+    self.email_textfield.leftView = [[[UIView alloc]initWithFrame:CGRectMake(0, 0, 14, 5)] autorelease];
+    self.email_textfield.placeholder = NSLocalizedString(@"邮箱",nil);
+    self.email_textfield.leftViewMode = UITextFieldViewModeAlways;
+    [self.email_textfield addTarget:self action:@selector(email_editing:) forControlEvents:UIControlEventEditingChanged];
+    
+    self.code_textfield.leftView = [[[UIView alloc]initWithFrame:CGRectMake(0, 0, 14, 5)] autorelease];
+    self.code_textfield.leftViewMode = UITextFieldViewModeAlways;
+    self.code_textfield.placeholder = NSLocalizedString(@"验证码",nil);
+    [self.code_textfield addTarget:self action:@selector(code_editing:) forControlEvents:UIControlEventEditingChanged];
+    
+    [self.code_button setTitle:@"获取验证码" forState:UIControlStateNormal];
+    self.enter_button.enabled = NO;
+    [self.enter_button setBackgroundImage:[[UIImage imageNamed:@"btn_blue"] stretchableImageWithLeftCapWidth:10 topCapHeight:10] forState:UIControlStateNormal];
+    [self.enter_button setTitle:@"确定" forState:UIControlStateNormal];
+    self.navigation_back_button_title=@"返回";
+
+}
+
+#pragma mark - Action
+
+- (void)email_editing:(UITextField *)email_textfield{
+    self.email_correct = email_textfield.text.isEmail;
+}
+
+
+- (void)code_editing:(UITextField *)code_Textfield{
+    if (self.error.code == 301) {
+        
+        self.enter_button.enabled = NO;
+    }
+    
+    else if (self.isEmailCorrect && code_Textfield.text.length >0){
+        self.enter_button.enabled = YES;
+    }else{
+        self.enter_button.enabled = NO;
+    }
+}
+
+
+- (IBAction)codeCountdownAction:(OMCodeCountdownButton *)sender {
+    self.isClickCodeBtn=YES;
+    if (!self.isEmailCorrect){// 邮箱格式不正确
+        self.error_label.text = @"邮箱格式不正确，请输入正确的邮箱";
+        self.error_label.hidden = NO;
+        [sender stop];
+        return;
+    }
+    sender.duration = 60;
+    [sender fire];
+    
+    // 调用接口发送邮件
+    [OMNetwork_Login retrieve_passwork_via_emailWithEmail:self.email_textfield.text withCallback:@selector(didSendEmail:) withObserver:self];
+}
+
+
+- (IBAction)enter_action:(id)sender {
+    // 再次验证邮箱 防止用户在等待验证码的时间中修改了邮箱
+    self.email_correct = self.email_textfield.text.isEmail;
+    if (!self.email_correct){
+        self.error_label.text = @"请输入正确的邮箱";
+        self.error_label.hidden = NO;
+        return;
+    }
+    // 验证码不能为空
+    if (self.code_textfield.text.length == 0){
+        self.error_label.text = @"验证码不能为空";
+        self.error_label.hidden = NO;
+        return;
+    }
+    
+     //[self.code_button stop];
+    
+    self.omAlertViewForNet.type = OMAlertViewForNetStatus_Loading;
+    self.omAlertViewForNet.title = @"验证中...";
+    [self.omAlertViewForNet showInView:self.view];
+    
+//    CFStringRef newUniqueIdString = CFUUIDCreateString(kCFAllocatorDefault, CFUUIDCreate(kCFAllocatorDefault));
+    
+    [OMNetwork_Login reset_password_via_email:self.email_textfield.text access_code:self.code_textfield.text new_password:self.reset_password withCallback:@selector(didVerifyCode:) withObserver:self];
+}
+
+#pragma mark---
+#pragma mark---点击获取验证码，返回时警告框提示
+-(void)baseVCBackAction:(UIButton *)back_button{
+    
+    if (!self.email_correct || self.error.code == 301){
+        
+        [[self navigationController] popViewControllerAnimated:YES];
+    }
+
+    else if (self.isClickCodeBtn==YES)
+    {
+        UIAlertView *alertView = [[UIAlertView alloc]initWithTitle:NSLocalizedString(@"Tips",nil) message:@"发送验证码可能需要一些时间请稍等片刻是否确定返回" delegate:self cancelButtonTitle:@"停留当前页面" otherButtonTitles:NSLocalizedString(@"OK",nil), nil];
+        [alertView show];
+        [alertView release];
+    }
+    else
+    {
+        [self.navigationController popViewControllerAnimated:YES];
+    }
+}
+-(void)removeLoading
+{
+    [self.omAlertViewForNet dismiss];
+}
+
+-(void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex{
+    if (buttonIndex == 1){
+        [self.navigationController popViewControllerAnimated:YES];
+    }
+}
+
+
+-(void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event{
+    [self.view endEditing:YES];
+}
+
+
+#pragma mark - Network
+
+- (void)didSendEmail:(NSNotification *)notif{
+    self.error = [[notif userInfo] valueForKey:WT_ERROR];
+    if (self.error.code == 301) {
+        self.error_label.hidden = YES;
+        self.code_button.enabled = NO;
+        [self.code_button stop];
+        self.enter_button.enabled = NO;
+        
+    }
+
+    else if (self.error.code == NO_ERROR) {
+        self.error_label.text = @"";
+        self.error_label.hidden = YES;
+    }else if (self.error.code == -99 || self.error.code == 21){
+        
+//        NSMutableArray *range_array = [[NSMutableArray alloc]init];
+//        
+//        NSString *text_label_text = @"该邮箱未被绑定,去";
+//        
+//        NSString *string = @"注册";
+//        
+//        NSRange text_range1 = NSMakeRange(text_label_text.length, string.length);
+//        YBAttrbutedModel *model1 = [[YBAttrbutedModel alloc]init];
+//        model1.text = string;
+//        model1.range = text_range1;
+//        [range_array addObject:model1];
+//        [model1 release];
+//        
+//        text_label_text = [NSString stringWithFormat:@"%@%@",text_label_text,string];
+//        
+//        NSAttributedString *attributedString = [[NSAttributedString alloc]initWithString:text_label_text];
+//        
+//        self.error_label.text = text_label_text;
+//        self.error_label.attributedText = attributedString;
+//        self.error_label.link_array = range_array;
+////        self.error_label.text = @"该邮箱尚未绑定账号";
+//        self.error_label.hidden = NO;
+//        [attributedString release];
+//        [range_array release];
+//        
+//        NSLog(@"%@",NSStringFromCGRect(self.error_label.frame));
+        self.error_label.text = @"该邮箱未被绑定,请先注册账号";
+        self.error_label.hidden = YES;
+        
+        
+    }
+#warning 错误码30 还未证实
+    else if (self.error.code == 30){
+        self.error_label.text = @"该邮箱尚未绑定账号";
+        self.error_label.hidden = NO;
+    }
+}
+
+- (void)didVerifyCode:(NSNotification *)notif{
+    NSError *error = [[notif userInfo] valueForKey:WT_ERROR];
+    
+    if (error.code == NO_ERROR) {
+        self.uid = error.userInfo[@"uid"];
+        self.error_label.text = @"";
+        self.error_label.hidden = YES;
+        self.omAlertViewForNet.title = @"验证成功";
+        self.omAlertViewForNet.type =OMAlertViewForNetStatus_Done;
+    }
+    else{
+        self.error_label.text=@"验证码输入不正确";
+        self.error_label.hidden=NO;
+        [self.omAlertViewForNet dismiss];
+    }
+    
+    
+}
+
+
+#pragma mark - YBAttrbutedLabelDelegate
+
+- (void)YBAttrbutedLabel:(YBAttrbutedLabel *)label click:(YBAttrbutedModel *)model{
+    NSLog(@"%@ %@",model.text, NSStringFromRange(model.range));
+}
+
+#pragma mark - OMAlertViewForNetDelegate
+
+-(void)hiddenOMAlertViewForNet:(OMAlertViewForNet *)alertViewForNet{
+    if (alertViewForNet.type == OMAlertViewForNetStatus_Done){
+        OMNewPasswordViewController *passwordVC = [[OMNewPasswordViewController alloc]initWithNibName:@"OMNewPasswordViewController" bundle:nil];
+        passwordVC.uid = self.uid;
+        passwordVC.code = self.code_textfield.text;
+        passwordVC.email =  self.email_textfield.text;
+        passwordVC.source_type = OMNewPasswordViewControllerSourceType_ByEmail;
+        [self.navigationController pushViewController:passwordVC animated:YES];
+        [passwordVC release];
+    }
+}
+
+
+#pragma mark - Set and Get
+
+-(void)setEmail_correct:(BOOL)email_correct{
+    _email_correct = email_correct;
+   //self.error_label.hidden = _email_correct;// 邮箱格式正确 隐藏错误提示label
+//    self.enter_button.enabled = _email_correct;// 邮箱格式正确 确定按钮可以使用
+    
+}
+
+
+-(NSString *)reset_password{
+    if (_reset_password == nil){
+        _reset_password = [[NSString stringWithFormat:@"%d",arc4random()%1000000] copy];
+    }
+    return _reset_password;
+}
+    
+
+@end

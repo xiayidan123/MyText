@@ -1,0 +1,564 @@
+//
+//  OMFMonentListVC.m
+//  dev01
+//
+//  Created by 杨彬 on 15/4/8.
+//  Copyright (c) 2015年 wowtech. All rights reserved.
+//
+
+#import "OMFMomentListVC.h"
+
+#import "MomentCellModel.h"
+
+#import "MomentBaseCell.h"
+#import "MomentNotificationCell.h"
+
+#import "Database.h"
+#import "WTUserDefaults.h"
+#import "WTHeader.h"
+#import "WowTalkWebServerIF.h"
+#import "VoiceMessagePlayer.h"
+#import "PublicFunctions.h"
+
+#import "OMBuddySpaceViewController.h"
+#import "ReviewListViewController.h"
+#import "ViewDetailedLocationVC.h"
+
+
+#import "UIView+MJExtension.h"
+#import "MJRefresh.h"
+#import "PulldownMenuView.h"
+
+#import "OMInputManager.h"
+
+typedef NS_ENUM(NSInteger, OMMomentOwnerType) {
+    OMMomentOwnerTypePublicAccount  = 0,
+    OMMomentOwnerTypeTeacher = 2,
+    OMMomentOwnerTypeStudent = 1,
+    OMMomentOwnerTypeALL = 99
+};
+
+
+
+typedef NS_ENUM(NSInteger, OMNewMomentType) {
+    OMNewMomentTypeAll,
+    OMNewMomentTypeNotification,
+    OMNewMomentTypeQA,
+    OMNewMomentTypeStudy,
+    OMNewMomentTypeLife,
+    OMNewMomentTypeSurvey,
+    OMNewMomentTypeVideo
+};
+
+
+
+@interface OMFMomentListVC ()<UITableViewDataSource, UITableViewDelegate,MomentBaseCellDelegate,PulldownMenuViewDelegate>
+
+@property (retain, nonatomic) IBOutlet UITableView *moment_tableView;
+
+@property (retain, nonatomic) NSMutableArray *moment_array;
+
+@property (retain, nonatomic) NSMutableArray *cellModel_array;
+
+@property (retain, nonatomic) PulldownMenuView * pulldownView;
+
+@property (assign, nonatomic) OMMomentOwnerType momentOwnerType;
+
+@property (assign, nonatomic) OMNewMomentType momentType;
+
+@property (assign, nonatomic) int selected_type;
+
+@property (retain, nonatomic) NSArray *reviewArray;
+
+
+@end
+
+@implementation OMFMomentListVC
+
+- (void)dealloc {
+    self.pulldownView = nil;
+    self.moment_array = nil;
+    self.cellModel_array = nil;
+    self.reviewArray = nil;
+    [_moment_tableView release];
+    [super dealloc];
+}
+
+- (void)didAddNewMoment{
+    [self.moment_tableView scrollsToTop];
+    [self refreshMomentsFromDBWithLimit:(int)self.moment_array.count +1 andOffset:0];
+}
+
+-(void)viewWillAppear:(BOOL)animated{
+    [super viewWillAppear:animated];
+    
+    [self refreshMomentsFromDBWithLimit:(int)self.moment_array.count andOffset:0];
+    
+}
+
+-(void)viewDidAppear:(BOOL)animated
+{
+    [self loadMJRefresh];
+}
+
+
+-(void)viewWillDisappear:(BOOL)animated{
+    [super viewWillDisappear:animated];
+    [[VoiceMessagePlayer sharedInstance] stopPlayingVoiceMessage];
+    [OMInputManager hideKeyBoard];
+}
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    
+    [self prepareData];
+    
+    [self uiConfig];
+    
+    self.moment_array = [Database fetchMomentsForBuddy:nil withLimit:20 andOffset:0 withtags:nil withOwnerType:99 ];
+    
+    
+}
+
+- (void)prepareData{
+    self.momentOwnerType = OMMomentOwnerTypeALL;
+    self.momentType = OMNewMomentTypeAll;
+    [self checkNewReview];
+}
+
+- (void)uiConfig{
+    
+    self.view.backgroundColor = [UIColor colorWithRed:0.94 green:0.94 blue:0.96 alpha:1];
+    
+    self.moment_tableView.backgroundColor = [UIColor colorWithRed:0.94 green:0.94 blue:0.96 alpha:1];
+    
+    self.moment_tableView.separatorStyle = UITableViewCellSeparatorStyleNone;
+    
+//    self.moment_tableView.allowsSelection = NO;
+    
+   // [self loadMJRefresh];
+    
+    [self loadPulldownMenuView];
+}
+
+- (void)loadPulldownMenuView{
+    NSMutableArray *array = [[NSMutableArray alloc]init];
+    for (int i=0; i<2; i++){
+        Tag *tag = [[Tag alloc]init];
+        tag.tagTitle =@[NSLocalizedString(@"分享者",nil),NSLocalizedString(@"分类",nil)][i];
+        tag.contentArray = @[@[NSLocalizedString(@"全部",nil),NSLocalizedString(@"公众账号",nil),NSLocalizedString(@"老师",nil),NSLocalizedString(@"学生",nil)],@[NSLocalizedString(@"全部",nil),NSLocalizedString(@"学习",nil),NSLocalizedString(@"生活",nil),NSLocalizedString(@"投票",nil),NSLocalizedString(@"视频教程",nil)]][i];
+        [array addObject:tag];
+        [tag release];
+    }
+    PulldownMenuView *pulldownView = [[[NSBundle mainBundle] loadNibNamed:@"PulldownMenuView" owner:self options:nil] firstObject];
+    [pulldownView loadPulldownViewWithFram:CGRectMake(0, 0, self.view.bounds.size.width, 44) andCTagArry:array];
+    pulldownView.delegate = self;
+    [array release];
+    [self.view addSubview:pulldownView];
+    self.pulldownView = pulldownView;
+}
+
+
+- (void)loadMJRefresh{
+    // 添加传统的下拉刷新
+    // 设置回调（一旦进入刷新状态，就调用target的action，也就是调用self的loadNewData方法）
+    [self.moment_tableView addLegendHeaderWithRefreshingTarget:self refreshingAction:@selector(loadNewData)];
+    
+    // 设置文字
+    [self.moment_tableView.header setTitle:@"下拉刷新" forState:MJRefreshHeaderStateIdle];
+    [self.moment_tableView.header setTitle:@"释放刷新" forState:MJRefreshHeaderStatePulling];
+    [self.moment_tableView.header setTitle:@"正在加载..." forState:MJRefreshHeaderStateRefreshing];
+    
+    // 设置字体
+    self.moment_tableView.header.font = [UIFont systemFontOfSize:14];
+    
+    // 设置颜色
+    self.moment_tableView.header.textColor = [UIColor blackColor];
+    self.moment_tableView.header.backgroundColor = [UIColor colorWithRed:0.94 green:0.94 blue:0.96 alpha:1];
+    
+    // 马上进入刷新状态
+    [self.moment_tableView.header beginRefreshing];
+    
+    
+    // 添加传统的上拉刷新
+    // 设置回调（一旦进入刷新状态，就调用target的action，也就是调用self的loadMoreData方法）
+    [self.moment_tableView addLegendFooterWithRefreshingTarget:self refreshingAction:@selector(loadMoreData)];
+    
+    // 设置文字
+    [self.moment_tableView.footer setTitle:@"上拉或点击刷新" forState:MJRefreshFooterStateIdle];
+    [self.moment_tableView.footer setTitle:@"正在加载更多中...." forState:MJRefreshFooterStateRefreshing];
+    [self.moment_tableView.footer setTitle:@"没有更多" forState:MJRefreshFooterStateNoMoreData];
+    
+    // 设置字体
+    self.moment_tableView.footer.font = [UIFont systemFontOfSize:14];
+    
+    // 设置颜色
+    self.moment_tableView.footer.textColor = [UIColor lightGrayColor];
+}
+
+
+#pragma mark - check new review
+
+- (void)checkNewReview{
+    NSArray* arr = [Database getUnreadReviews];
+    if (arr.count != self.reviewArray.count){
+        self.reviewArray = arr;
+        NSIndexSet *set = [[NSIndexSet alloc]initWithIndex:0];
+        [self.moment_tableView reloadSections:set withRowAnimation:UITableViewRowAnimationTop];
+        [set release];
+    }
+}
+
+#pragma mark - MJRefresh
+
+- (void)loadNewData{
+    NSArray* arrTag = [self getTag_array];
+    
+    [WowTalkWebServerIF getMomentsOfAll:-1 withTags:arrTag withReview:true withCallback:@selector(didGetNewMomemts:) withObserver:self];
+}
+
+- (NSArray *)getTag_array{
+    NSArray* arrTag = nil;
+    
+    switch (self.selected_type) {
+        case 0:
+            arrTag =  nil;
+            break;
+        case 1:
+            arrTag= @[@(2)];
+            break;
+        case 2:
+            arrTag= @[@(5)];
+            break;
+            
+        case 3:
+            arrTag= @[@(3),@(4)];
+            break;
+        case 4:
+            arrTag= @[@(6)];
+            break;
+            
+        default:
+            return arrTag;
+    }
+    return arrTag;
+}
+
+
+- (void)loadMoreData{
+    NSArray* arrTag;
+    
+    switch (self.selected_type) {
+        case 0:
+            arrTag = @[@(0),@(1),@(2),@(3),@(4),@(5),@(6)];
+            break;
+        case 1:
+            arrTag= @[@(0)];
+            break;
+        case 2:
+            arrTag= @[@(1)];
+            break;
+        case 3:
+            arrTag= @[@(2)];
+            break;
+            
+        case 4:
+            arrTag= @[@(5)];
+            break;
+            
+        case 5:
+            arrTag= @[@(3),@(4)];
+            break;
+        case 6:
+            arrTag= @[@(6)];
+            break;
+        default:
+            return;
+    }
+    int count = self.moment_array.count;
+    if (count> 0) {
+        Moment* moment = [self.moment_array objectAtIndex:count-1];
+        [WowTalkWebServerIF getMomentsOfAll:moment.timestamp withTags:arrTag withReview:TRUE withCallback:@selector(didLoadMoreMoments:) withObserver:self];
+    }
+    else{
+        [WowTalkWebServerIF getMomentsOfAll:-1 withTags:arrTag withReview:TRUE withCallback:@selector(didLoadMoreMoments:) withObserver:self];
+    }
+}
+
+
+#pragma mark - PulldownMenuViewDelegate
+
+- (void)didSelecteWithState:(NSArray *)stateArray{
+    int type = [[stateArray objectAtIndex:0] intValue];
+    switch (type) {
+        case 0:{
+            self.momentOwnerType = OMMomentOwnerTypeALL;
+        }break;
+        case 1:{
+            self.momentOwnerType = OMMomentOwnerTypePublicAccount;
+        }break;
+        case 2:{
+            self.momentOwnerType = OMMomentOwnerTypeTeacher;
+        }break;
+        case 3:{
+            self.momentOwnerType = OMMomentOwnerTypeStudent;
+        }break;
+        default:
+            break;
+    }
+    
+    int menuitem = [[stateArray objectAtIndex:1] intValue];
+    self.selected_type = menuitem;
+    switch (menuitem) {
+        case 0:{
+            self.momentType = OMNewMomentTypeAll;
+        }break;
+        case 1:{
+            self.momentType = OMNewMomentTypeStudy;
+        }break;
+        case 2:{
+            self.momentType = OMNewMomentTypeLife;
+        }break;
+        case 3:{
+            self.momentType = OMNewMomentTypeSurvey;
+        }break;
+        case 4:{
+            self.momentType
+            = OMNewMomentTypeVideo;
+        }break;
+        default:
+            break;
+    }
+    
+    [self refreshMomentsFromDBWithLimit:20 andOffset:0];
+}
+
+
+- (void)refreshMomentsFromDBWithLimit:(int)limit andOffset:(int)offset{
+    NSArray* arrTag = [self getTag_array];
+    
+    self.moment_array = [Database fetchMomentsForAllBuddiesWithLimit:limit andOffset:offset withtags:arrTag withOwnerType:self.momentOwnerType];
+}
+
+#pragma mark - NetWork CallBack
+-(void)didGetNewMomemts:(NSNotification*)notif
+{
+    NSError* error = [[notif userInfo] valueForKey:WT_ERROR];
+    if (error.code == NO_ERROR) {
+        
+    }
+    [self checkNewReview];
+    [self refreshMomentsFromDBWithLimit:20 andOffset:0];
+    [self.moment_tableView.header endRefreshing];
+    
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.5 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+        self.moment_tableView.header.hidden = YES;
+    });
+}
+
+
+-(void)didLoadMoreMoments:(NSNotification*)notif
+{
+    NSError* error = [[notif userInfo] valueForKey:WT_ERROR];
+    if (error.code == NO_ERROR) {
+        int download_moment_count = [[[notif userInfo] valueForKey:@"fileName"] integerValue];
+        int existing_moment_count = self.moment_array.count;
+        if (download_moment_count == 0){
+            [self.moment_tableView.footer noticeNoMoreData];
+            return;
+        }
+        [self refreshMomentsFromDBWithLimit:download_moment_count + existing_moment_count andOffset:0];
+    }
+    [self.moment_tableView.footer endRefreshing];
+}
+
+
+#pragma mark - UITableViewDataSource 
+
+
+-(UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath{
+    if (indexPath.section == 0){
+        MomentNotificationCell *cell = [MomentNotificationCell cellWithTableView:tableView];
+        cell.review_array = self.reviewArray;
+        return cell;
+    }else{
+        MomentBaseCell *cell = [MomentBaseCell cellWithTableView:tableView];
+        cell.indexPath = indexPath;
+        
+        cell.delegate = self;
+        
+        MomentCellModel *model = self.cellModel_array[indexPath.row];
+        
+        cell.cellMoment = model;
+        
+        return cell;
+    }
+}
+
+-(NSInteger)numberOfSectionsInTableView:(UITableView *)tableView{
+    return 2;
+}
+
+-(NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section{
+    if (section == 0){
+        int count = self.reviewArray.count;
+        return count ==0 ? 0: 1;
+    }else{
+        return self.cellModel_array.count;
+    }
+}
+
+
+-(CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath{
+    if (indexPath.section == 0){
+        return 40;
+    }else{
+        MomentCellModel *model = self.cellModel_array[indexPath.row];
+        return model.cellHeight;
+    }
+}
+
+
+
+
+#pragma mark - UITableViewDelegate
+-(void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath{
+//    [tableView deselectRowAtIndexPath:indexPath animated:YES];
+    if (indexPath.section == 0){
+        if (self.reviewArray.count != 0 && [self.delegate respondsToSelector:@selector(OMFMomentListVC:readNewReview:)]){
+            [self.delegate OMFMomentListVC:self readNewReview:self.reviewArray];
+        }
+        
+        self.reviewArray = nil;
+        
+        NSIndexSet *set = [[NSIndexSet alloc]initWithIndex:0];
+        [self.moment_tableView reloadSections:set withRowAnimation:UITableViewRowAnimationTop];
+        [set release];
+        
+        return;
+    }else{
+#warning  暂时不需要点击
+        return;
+        
+    }
+    Moment *moment = self.moment_array[indexPath.row];
+    
+    if ([self.delegate respondsToSelector:@selector(OMFMomentListVC:clickMoment:)]){
+        [self.delegate OMFMomentListVC:self clickMoment:moment];
+    }
+}
+
+
+-(void)scrollViewWillBeginDragging:(UIScrollView *)scrollView{
+    if (scrollView.contentOffset.y > -1){
+        self.moment_tableView.header.hidden = NO;
+    }
+    
+}
+
+
+//-(void)scrollViewDidEndDecelerating:(UIScrollView *)scrollView{
+//    self.moment_tableView.header.hidden = YES;
+//}
+
+
+
+#pragma mark - MomentBaseCellDelegate
+
+- (void)MomentBaseCell:(MomentBaseCell *)momentBaseCell didClickHeadImageViewWithBuddy:(Buddy *)owner_buddy{
+    if ([self.delegate respondsToSelector:@selector(OMFMomentListVC:didClickHeadImageViewWithBuddy:)]){
+        [self.delegate OMFMomentListVC:self didClickHeadImageViewWithBuddy:owner_buddy];
+    }
+}
+
+
+- (void)MomentBaseCell:(MomentBaseCell *)momentBaseCell didClickLocationModel:(MomentLocationCellModel *)locationModel{
+    if ([self.delegate respondsToSelector:@selector(OMFMomentListVC:didClickLocationModel:)]){
+        [self.delegate OMFMomentListVC:self didClickLocationModel:locationModel];
+    }
+}
+
+- (void)MomentBaseCell:(MomentBaseCell *)momentBaseCell didVotedOption_array:(NSArray *)option_array withIndexPath:(NSIndexPath *)indexPath{
+    
+    MomentCellModel *model = self.cellModel_array[indexPath.row];
+    
+    Moment *moment = [Database getMomentWithID:model.moment.moment_id];
+    
+    model.moment = moment;
+    
+    [self.moment_tableView reloadRowsAtIndexPaths:[NSArray arrayWithObjects:indexPath, nil] withRowAnimation:UITableViewRowAnimationLeft];
+}
+
+
+- (void)MomentBaseCell:(MomentBaseCell *)momentBaseCell clickLikeButton:(MomentBottomModel *)bottomMdel withIndexPath:(NSIndexPath *)indexPath{
+    MomentCellModel *model = self.cellModel_array[indexPath.row];
+    
+    Moment *moment = [Database getMomentWithID:model.moment.moment_id];
+    
+    model.moment = moment;
+    
+    [self.moment_tableView reloadRowsAtIndexPaths:[NSArray arrayWithObjects:indexPath, nil] withRowAnimation:UITableViewRowAnimationFade];
+}
+
+
+- (void)MomentBaseCell:(MomentBaseCell *)momentBaseCell clickCommentButton:(MomentBottomModel *)bottomMdel withIndexPath:(NSIndexPath *)indexPath withDistance:(CGFloat )distance{
+    self.moment_tableView.header.hidden = YES;
+    CGPoint point = self.moment_tableView.contentOffset;
+    [UIView animateWithDuration:0.2 animations:^{
+        self.moment_tableView.contentOffset = CGPointMake(point.x, point.y + distance);
+    }];
+}
+
+
+- (void)MomentBaseCell:(MomentBaseCell *)momentBaseCell clickReviewBuddy:(MomentBottomModel *)bottomMdel withIndexPath:(NSIndexPath *)indexPath withBuddy_id:(NSString *)buddy_id{
+    if ([self.delegate respondsToSelector:@selector(OMFMomentListVC:clickReviewBuddy:withIndexPath:withBuddy_id:)]){
+        [self.delegate OMFMomentListVC:self clickReviewBuddy:bottomMdel withIndexPath:indexPath withBuddy_id:buddy_id];
+    }
+}
+
+
+- (void)MomentBaseCell:(MomentBaseCell *)momentBaseCell didEndEdit:(MomentBottomModel *)bottomMdel withIndexPath:(NSIndexPath *)indexPath{
+    CGFloat offY = self.moment_tableView.contentOffset.y;
+    if (offY < 0){
+        [self.moment_tableView setContentOffset:CGPointZero animated:YES];
+    }
+}
+
+
+- (void)MomentBaseCell:(MomentBaseCell *)momentBaseCell playVideo:(WTFile *)videl_file withIndexPath:(NSIndexPath *)indexPath{
+    if ([self.delegate respondsToSelector:@selector(OMFMomentListVC:playVideo:withIndexPath:)]){
+        [self.delegate OMFMomentListVC:self playVideo:videl_file withIndexPath:indexPath];
+    }
+}
+
+
+#pragma mark - Set and Get
+
+
+-(void)setMoment_array:(NSMutableArray *)moment_array{
+    [_moment_array release],_moment_array = nil;
+    _moment_array = [moment_array retain];
+    
+    NSMutableArray *cellModel_array = [[NSMutableArray alloc]init];
+    int count = _moment_array.count;
+    for (int i=0; i<count; i++){
+        MomentCellModel *model = [[MomentCellModel alloc]init];
+        model.moment = _moment_array[i];
+        [cellModel_array addObject:model];
+        [model release];
+    }
+    
+    self.cellModel_array = cellModel_array;
+    [cellModel_array release];
+}
+
+
+-(void)setCellModel_array:(NSMutableArray *)cellModel_array{
+    [_cellModel_array release],_cellModel_array = nil;
+    _cellModel_array = [cellModel_array retain];
+    
+    
+    [self.moment_tableView reloadData];
+}
+
+@end

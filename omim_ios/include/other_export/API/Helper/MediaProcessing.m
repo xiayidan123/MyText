@@ -1,0 +1,422 @@
+//
+//  MediaProcessing.m
+//  omim
+//
+//  Created by coca on 2012/10/10.
+//  Copyright (c) 2012年 WowTech Inc. All rights reserved.
+//
+
+#import "MediaProcessing.h"
+#import <AVFoundation/AVFoundation.h>
+#import "NSFileManager+extension.h"
+#import "SDKConstant.h"
+#import <AssetsLibrary/AssetsLibrary.h>
+#import "WTUserDefaults.h"
+#import "UIImage+Resize.h"
+#import <MediaPlayer/MediaPlayer.h>
+#import "PublicFunctions.h"
+//static const NSUInteger BufferSize = 1024*1024;
+
+
+
+
+@implementation MediaProcessing
+@synthesize delegate = _delegate;
+
+#define radians( degrees ) ( degrees * M_PI / 180 )
+
++ (MediaProcessing *)sharedInstance
+{
+    // the instance of this class is stored here
+    static MediaProcessing *myInstance = nil;
+	
+    // check to see if an instance already exists
+    if (nil == myInstance) {
+        myInstance  = [[[self class] alloc] init];
+        // initialize variables here
+    }
+    // return the instance of this class
+    return myInstance;
+}
+
+
+//Convert Video into proper format and save
+-(BOOL) convertVideo:(NSURL*) originalfile intoNewVideo:(NSString*)newPath
+{
+    isConverted = FALSE;
+    AVURLAsset * anAsset = [[[AVURLAsset alloc] initWithURL:originalfile options:nil] autorelease];
+    
+    NSArray *compatiblePresets = [AVAssetExportSession exportPresetsCompatibleWithAsset:anAsset];
+    if ([compatiblePresets containsObject:AVAssetExportPresetLowQuality]){
+        AVAssetExportSession *exportSession = [[AVAssetExportSession alloc]
+                                               initWithAsset:anAsset presetName:AVAssetExportPresetPassthrough];
+        // Implementation continues.
+        
+        
+        exportSession.outputURL = [[[NSURL alloc] initFileURLWithPath:newPath] autorelease]; // init a url from the path
+        
+        exportSession.outputFileType = AVFileTypeMPEG4;
+        
+        CMTime start = CMTimeMakeWithSeconds(1.0, 600);
+        CMTime duration = CMTimeMakeWithSeconds(60.0, 600);
+        CMTimeRange range = CMTimeRangeMake(start, duration);
+        exportSession.timeRange = range;
+        
+        [exportSession exportAsynchronouslyWithCompletionHandler:^{
+            
+            switch ([exportSession status])
+            {
+                case AVAssetExportSessionStatusFailed:
+                    //         NSLog(@"Export failed: %@", [[exportSession error] localizedDescription]);
+                    
+                    dispatch_async(dispatch_get_main_queue(), ^{
+                        [self.delegate didFailedProcessing:self];
+                    });
+                    
+                    
+                    break;
+                case AVAssetExportSessionStatusCancelled:
+                    dispatch_async(dispatch_get_main_queue(), ^{
+                        [self.delegate didFailedProcessing:self];
+                    });
+                    //         NSLog(@"Export canceled");
+                    break;
+                    
+                case AVAssetExportSessionStatusCompleted:
+                    dispatch_async(dispatch_get_main_queue(), ^{
+                        [self.delegate didFinishProcessing:self];
+                    });
+                    isConverted = TRUE;
+                    //      NSLog(@"export succesfully");
+                    break;
+                default:
+                    break;
+            }
+        }];
+    }
+    return isConverted;
+}
+
++ (BOOL)writeEventMedia:(NSString *)fileId data:(NSData  *)data
+{
+    NSString *fileName = [NSFileManager relativePathToDocumentFolderForFile:fileId WithSubFolder:SDK_EVENT_MEDIA_DIR];
+    NSString *absolutePath = [NSFileManager absolutePathForFileInDocumentFolder:fileName];
+    BOOL success = NO;
+    if (absolutePath != nil) {
+        success = [data writeToFile:absolutePath atomically:YES];
+    }
+    return success;
+}
+
++ (BOOL)writeMomentCoverImage:(NSString *)fileId data:(NSData  *)data{
+    NSString *absolutePath = [NSFileManager absolutePathForFileInDocumentFolder:fileId];
+    BOOL success = NO;
+    if (absolutePath != nil) {
+        success = [data writeToFile:absolutePath atomically:YES];
+    }
+    return success;
+}
+
++(NSData *)getMomentCoverImageForFile:(NSString *)mediapath withExtension:(NSString *)ext
+{
+    if (mediapath == nil|| ext == nil) {
+        return nil;
+    }
+    NSString *filepath = [NSFileManager relativePathToDocumentFolderForFile:mediapath WithSubFolder:SDK_MOMENT_COVER_DIR withExtention:ext];
+
+    NSString *absolutepath = [NSFileManager absolutePathForFileInDocumentFolder:filepath];
+    
+    NSData *data = nil;
+    if (absolutepath != nil)
+        data = [NSData dataWithContentsOfFile:absolutepath];
+    return data;
+}
+
+
++ (NSData *)getMediaForEvent:(NSString *)fileId withExtension:(NSString *)ext
+{
+    if (fileId == nil || ext == nil) {
+        return nil;
+    }
+    NSString *name = [[fileId stringByAppendingString:@"."] stringByAppendingString:ext];
+    NSString *fileName = [NSFileManager relativePathToDocumentFolderForFile:name WithSubFolder:SDK_EVENT_MEDIA_DIR];
+    NSString *filePath = [NSFileManager absolutePathForFileInDocumentFolder:fileName];
+    NSData *data = nil;
+    if (filePath != nil) {
+        data = [NSData dataWithContentsOfFile:filePath];
+    }
+    return data;
+}
+
++(BOOL)writeMedia:(NSString *)filepath data:(NSData *)data
+{
+    NSString *relativefilepath = [NSFileManager relativePathToDocumentFolderForFile:filepath WithSubFolder:SDK_MOMENT_MEDIA_DIR];
+    NSString *absolutepath = [NSFileManager absolutePathForFileInDocumentFolder:relativefilepath];
+    
+    BOOL isSucc = NO;
+    if (absolutepath != nil)
+        isSucc = [data writeToFile:absolutepath atomically:YES];
+    return  isSucc;
+}
+
++(NSData *)getMediaForFile:(NSString *)mediapath withExtension:(NSString*)ext
+{
+    if (mediapath == nil || ext == nil) {
+        return nil;
+    }
+    NSString *filepath = [NSFileManager relativePathToDocumentFolderForFile:mediapath WithSubFolder:SDK_MOMENT_MEDIA_DIR withExtention:ext];
+    
+    NSString *absolutepath = [NSFileManager absolutePathForFileInDocumentFolder:filepath];
+    
+    NSData *data = nil;
+    if (absolutepath != nil)
+        data = [NSData dataWithContentsOfFile:absolutepath];
+    return data;
+}
+
+
+
++(NSArray *)savePhotoFromLibraryToLocalEvent:(ALAsset *)asset{
+    NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory,NSUserDomainMask, YES);
+    NSString *documentsPath = [paths objectAtIndex:0];
+    
+    CFUUIDRef newUniqueId;
+    CFStringRef newUniqueIdString;
+    NSString* relativefilepath;
+    NSString* filepath;
+    NSString* relativetthumbpath;
+    NSString* thumbnailpath;
+    
+    int timeStamp = (int)[[NSDate date] timeIntervalSince1970] ;
+    
+    // original path;
+    do {
+        newUniqueId = CFUUIDCreate(kCFAllocatorDefault);
+        newUniqueIdString = CFUUIDCreateString(kCFAllocatorDefault, newUniqueId);
+        relativefilepath = [NSString stringWithFormat:@"%@_%d_%@",[WTUserDefaults getUid],timeStamp,(NSString*)newUniqueIdString];
+        filepath = [[documentsPath stringByAppendingPathComponent:[SDK_EVENT_MEDIA_DIR stringByAppendingPathComponent:relativefilepath]] stringByAppendingPathExtension:@"jpg"];
+        CFRelease(newUniqueId);
+        CFRelease(newUniqueIdString);
+    } while ([NSFileManager mediafileExistedAtPath:filepath]);
+    
+    // thumbnail path;
+    do {
+        newUniqueId = CFUUIDCreate(kCFAllocatorDefault);
+        newUniqueIdString = CFUUIDCreateString(kCFAllocatorDefault, newUniqueId);
+        relativetthumbpath = [NSString stringWithFormat:@"%@_%d_%@",[WTUserDefaults getUid],timeStamp,(NSString*)newUniqueIdString];
+        thumbnailpath = [[documentsPath stringByAppendingPathComponent:[SDK_EVENT_MEDIA_DIR stringByAppendingPathComponent:relativetthumbpath]] stringByAppendingPathExtension:@"jpg"];
+        CFRelease(newUniqueId);
+        CFRelease(newUniqueIdString);
+        
+    } while ([NSFileManager mediafileExistedAtPath:thumbnailpath]);
+    
+    UIImageOrientation orientation = UIImageOrientationUp;
+    NSNumber* orientationValue = [asset valueForProperty:@"ALAssetPropertyOrientation"];
+    if (orientationValue != nil) {
+        orientation = [orientationValue intValue];
+    }
+    
+    
+    CGImageRef iref = [[asset defaultRepresentation] fullResolutionImage];
+    
+    UIImage* fullimage = [UIImage imageWithCGImage:iref scale:1.0 orientation:orientation];  // have to get the right orientation
+    
+    if (iref) {
+        
+        CGSize targetSize = [fullimage calculateTheScaledSize:CGSizeMake(fullimage.size.width, fullimage.size.height) withMaxSize: CGSizeMake(1200, 1200)];
+        
+        UIImage*  scaledImage = [fullimage resizeToSize:targetSize];
+        
+        CGSize targetSizeThumbnail = CGSizeMake(400, 400);
+        
+        UIImage *thumbnailImage = [MediaProcessing cutoutImage:fullimage scaleToSize:targetSizeThumbnail];
+        
+        NSData * data = [NSData dataWithData:UIImageJPEGRepresentation(scaledImage, 1.0)];
+        [data writeToFile:[NSFileManager absolutePathForFileInDocumentFolder:filepath] atomically:YES];
+        
+        NSData * data2 = [NSData dataWithData:UIImageJPEGRepresentation(thumbnailImage, 1.0)];
+        
+        [data2 writeToFile:[NSFileManager absolutePathForFileInDocumentFolder: thumbnailpath] atomically:YES];
+        
+        return [NSArray arrayWithObjects:relativefilepath,relativetthumbpath, nil];
+    }
+    return nil;
+}
+
++ (UIImage *)cutoutImage:(UIImage *)originalImage scaleToSize:(CGSize)size{
+    if (!originalImage || originalImage.size.height== 0 ||originalImage.size.width == 0 || size.width==0 || size.height == 0){
+        return nil;
+    }
+    CGFloat widthscale = originalImage.size.width / size.width;
+    CGFloat heightscale = originalImage.size.height / size.height;
+    CGFloat scale = 1;
+    
+    if (widthscale < heightscale){
+        scale = widthscale;
+    }else{
+        scale = heightscale;
+    }
+    
+    CGSize newSize = CGSizeMake(originalImage.size.width / scale, originalImage.size.height / scale);
+    
+    UIGraphicsBeginImageContext(size);
+    [originalImage drawInRect:CGRectMake(-(newSize.width / 2 - size.width/2), -(newSize.height / 2 - size.height/2), newSize.width, newSize.height)];
+    UIImage* scaledImage = UIGraphicsGetImageFromCurrentImageContext();
+    UIGraphicsEndImageContext();
+    
+    return scaledImage;
+}
+
+
+
++(NSArray*)savePhotoFromLibraryToLocal:(ALAsset*)asset
+{
+    NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory,NSUserDomainMask, YES);
+    NSString *documentsPath = [paths objectAtIndex:0];
+    
+    CFUUIDRef newUniqueId;
+    CFStringRef newUniqueIdString;
+    NSString* relativefilepath;
+    NSString* filepath;
+    NSString* relativetthumbpath;
+    NSString* thumbnailpath;
+    
+    int timeStamp = (int)[[NSDate date] timeIntervalSince1970] ;
+    
+     // original path;
+    do {
+        newUniqueId = CFUUIDCreate(kCFAllocatorDefault);
+        newUniqueIdString = CFUUIDCreateString(kCFAllocatorDefault, newUniqueId);
+        relativefilepath = [NSString stringWithFormat:@"%@_%d_%@",[WTUserDefaults getUid],timeStamp,(NSString*)newUniqueIdString];
+        filepath = [[documentsPath stringByAppendingPathComponent:[SDK_MOMENT_MEDIA_DIR stringByAppendingPathComponent:relativefilepath]] stringByAppendingPathExtension:@"jpg"];
+        	CFRelease(newUniqueId);
+	CFRelease(newUniqueIdString);
+    } while ([NSFileManager mediafileExistedAtPath:filepath]);
+    
+    // thumbnail path;
+    do {
+        newUniqueId = CFUUIDCreate(kCFAllocatorDefault);
+        newUniqueIdString = CFUUIDCreateString(kCFAllocatorDefault, newUniqueId);
+        relativetthumbpath = [NSString stringWithFormat:@"%@_%d_%@",[WTUserDefaults getUid],timeStamp,(NSString*)newUniqueIdString];
+        thumbnailpath = [[documentsPath stringByAppendingPathComponent:[SDK_MOMENT_MEDIA_DIR stringByAppendingPathComponent:relativetthumbpath]] stringByAppendingPathExtension:@"jpg"];
+        CFRelease(newUniqueId);
+        CFRelease(newUniqueIdString);
+        
+    } while ([NSFileManager mediafileExistedAtPath:thumbnailpath]);
+    
+    UIImageOrientation orientation = UIImageOrientationUp;
+    NSNumber* orientationValue = [asset valueForProperty:@"ALAssetPropertyOrientation"];
+    if (orientationValue != nil) {
+        orientation = [orientationValue intValue];
+    }
+    
+    
+    CGImageRef iref = [[asset defaultRepresentation] fullResolutionImage];
+    
+    UIImage* fullimage = [UIImage imageWithCGImage:iref scale:1.0 orientation:orientation];  // have to get the right orientation
+    
+    if (iref) {
+        
+        CGSize targetSize = [fullimage calculateTheScaledSize:CGSizeMake(fullimage.size.width, fullimage.size.height) withMaxSize: CGSizeMake(1200, 1200)];
+        
+        UIImage*  scaledImage = [fullimage resizeToSize:targetSize];
+        
+        CGSize targetSizeThumbnail = CGSizeMake(400, 400);
+        
+        UIImage* thumbnailImage = [fullimage resizeToSqaureSize:targetSizeThumbnail];
+        
+        NSData * data = [NSData dataWithData:UIImageJPEGRepresentation(scaledImage, 1.0)];
+
+        [data writeToFile:[NSFileManager absolutePathForFileInDocumentFolder:filepath] atomically:YES];
+        
+        NSData * data2 = [NSData dataWithData:UIImageJPEGRepresentation(thumbnailImage, 1.0)];
+        
+        [data2 writeToFile:[NSFileManager absolutePathForFileInDocumentFolder: thumbnailpath] atomically:YES];
+        
+        return [NSArray arrayWithObjects:relativefilepath,relativetthumbpath, nil];
+    }
+    return nil;
+}
+
+
++(NSString*)saveCoverImageToLocal:(UIImage*)image
+{
+    NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory,NSUserDomainMask, YES);
+    NSString *documentsPath = [paths objectAtIndex:0];
+    
+    CFUUIDRef newUniqueId;
+    CFStringRef newUniqueIdString;
+    NSString* relativefilepath;
+    NSString* filepath;
+    
+    int timeStamp = (int)[[NSDate date] timeIntervalSince1970] ;
+    
+    // original path;
+    do {
+        newUniqueId = CFUUIDCreate(kCFAllocatorDefault);
+        newUniqueIdString = CFUUIDCreateString(kCFAllocatorDefault, newUniqueId);
+        relativefilepath = [NSString stringWithFormat:@"%@_%d_%@",[WTUserDefaults getUid],timeStamp,(NSString*)newUniqueIdString];
+        filepath = [documentsPath stringByAppendingPathComponent:[SDK_MOMENT_COVER_DIR stringByAppendingPathComponent:relativefilepath]];
+       
+        CFRelease(newUniqueId);
+        CFRelease(newUniqueIdString);
+        
+    } while ([NSFileManager mediafileExistedAtPath:filepath]);
+    
+    if (image) {
+        
+        CGSize targetSize = CGSizeMake(640, 640);
+        
+        UIImage* scaledImage = [image resizeToSqaureSize:targetSize];
+
+        NSData * data = [NSData dataWithData:UIImageJPEGRepresentation(scaledImage, 1.0)];
+        
+        [data writeToFile:[NSFileManager absolutePathForFileInDocumentFolder:filepath] atomically:YES];
+        
+        return relativefilepath;
+    }
+    return nil;
+}
+
+
++(NSString*)saveVoiceClipToLocal
+{
+    NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory,NSUserDomainMask, YES);
+    NSString *documentsPath = [paths objectAtIndex:0];
+      // voiceclip path;
+   
+    CFUUIDRef newUniqueId;
+    CFStringRef newUniqueIdString;
+    NSString* relativefilepath;
+    NSString* filepath;
+    
+     int timeStamp = (int)[[NSDate date] timeIntervalSince1970] ;
+    
+    // original path;
+    do {
+        newUniqueId = CFUUIDCreate(kCFAllocatorDefault);
+        newUniqueIdString = CFUUIDCreateString(kCFAllocatorDefault, newUniqueId);
+        relativefilepath = [NSString stringWithFormat:@"%@_%d_%@",[WTUserDefaults getUid],timeStamp,(NSString*)newUniqueIdString];
+        filepath = [[documentsPath stringByAppendingPathComponent:[SDK_MOMENT_MEDIA_DIR stringByAppendingPathComponent:relativefilepath]] stringByAppendingPathExtension:@"aac"];
+        
+        CFRelease(newUniqueId);
+        CFRelease(newUniqueIdString);
+        
+    } while ([NSFileManager mediafileExistedAtPath:filepath]);
+ 
+    NSURL *url = [NSURL fileURLWithPath:[NSFileManager absolutePathForFileInDocumentFolder:[NSFileManager relativePathToDocumentFolderForFile:@"temprecorder" WithSubFolder:SDK_MOMENT_MEDIA_DIR withExtention:@"aac"]]];
+    NSData* data = [[[NSData alloc] initWithContentsOfURL:url] autorelease];
+    
+    if (data) {
+       BOOL success =  [data writeToFile:filepath atomically:YES];
+        if (success) {
+            // we don't delete the temp file.
+            return relativefilepath;
+        }
+        
+    }
+    return nil;
+
+}
+
+@end

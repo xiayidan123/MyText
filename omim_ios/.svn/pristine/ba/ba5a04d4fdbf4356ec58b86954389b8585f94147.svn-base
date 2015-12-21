@@ -1,0 +1,347 @@
+//
+//  TcherSettingHomeworkVC.m
+//  dev01
+//
+//  Created by Huan on 15/8/6.
+//  Copyright (c) 2015年 wowtech. All rights reserved.
+//  教师新建作业
+
+#import "TcherSettingHomeworkVC.h"
+#import "YBImgePickerView.h"
+#import "YBImagePickerViewController.h"
+#import "WowTalkWebServerIF.h"
+#import "WTError.h"
+#import "WTFile.h"
+#import "NewhomeWorkModel.h"
+#import "OMNetWork_MyClass.h"
+#import "Lesson.h"
+#import <AssetsLibrary/AssetsLibrary.h>
+#import "MediaProcessing.h"
+#import "MediaUploader.h"
+@interface TcherSettingHomeworkVC ()<UIImagePickerControllerDelegate,UINavigationControllerDelegate,YBImagePickerViewControllerDelegate,YBImgePickerViewDelegate,OMAlertViewForNetDelegate,OMAlertViewForNetDelegate>
+
+
+/** 照片选择*/
+@property (retain, nonatomic) YBImgePickerView * imagePickerView;
+
+
+/** 作业内容的textView*/
+@property (retain, nonatomic) UITextView * contentTextView;
+
+
+/** 选中照片数组*/
+@property (retain, nonatomic) NSMutableArray * selectedPhotos;
+
+@property (retain, nonatomic) ALAssetsLibrary* assetLib;
+
+@property (retain, nonatomic) Moment * moment;
+
+@end
+
+@implementation TcherSettingHomeworkVC
+
+- (void)dealloc{
+    
+    self.selectedPhotos = nil;
+    
+    self.lessonModel = nil;
+    
+    self.imagePickerView = nil;
+    
+    self.contentTextView = nil;
+    
+    [super dealloc];
+}
+
+
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    
+    self.title = @"布置作业";
+    
+    self.imagePickerView.delegate = self;
+    
+    
+    [self configNavigation];
+    
+    
+    
+}
+
+- (void)viewDidLayoutSubviews{
+    
+    [super viewDidLayoutSubviews];
+    
+    self.imagePickerView.y = 74;
+    
+}
+
+- (void)configNavigation{
+    self.navigationItem.rightBarButtonItem = [[[UIBarButtonItem alloc] initWithTitle:@"上传" style:UIBarButtonItemStylePlain target:self action:@selector(setHomework)] autorelease];
+}
+
+
+#pragma mark setHomework - 上传作业
+
+- (void)setHomework{
+    self.omAlertViewForNet = [OMAlertViewForNet OMAlertViewForNet];
+    self.omAlertViewForNet.delegate = self;
+    self.omAlertViewForNet.title = @"正在提交作业";
+    self.omAlertViewForNet.delegate = self;
+    self.omAlertViewForNet.duration = 1.0;
+    self.omAlertViewForNet.type = OMAlertViewForNetStatus_Loading;
+    [self.omAlertViewForNet show];
+    
+    //获取moment_id
+    [WowTalkWebServerIF addMomentToUploadParentsOpinion:self.contentTextView.text isPublic:NO allowReview:TRUE Latitude:@"0" Longitutde:@"0" withPlace:NULL withMomentType:@"5" withSharerange:nil withCallback:@selector(didSaveMomentInServer:) withObserver:self];
+    
+}
+
+#pragma mark set - get 方法
+
+- (YBImgePickerView *)imagePickerView{
+    if (!_imagePickerView) {
+        YBImgePickerView *imagePickerView = [[YBImgePickerView imagePickerView] retain];
+        imagePickerView.width = self.view.width;
+        imagePickerView.height = 150;
+        imagePickerView.x = 0;
+        imagePickerView.backgroundColor = [UIColor whiteColor];
+        [self.view addSubview:imagePickerView];
+        _imagePickerView = imagePickerView;
+    }
+    return _imagePickerView;
+}
+
+- (UITextView *)contentTextView{
+    if (!_contentTextView) {
+        _contentTextView = [[UITextView alloc] init];
+        _contentTextView.x = 0;
+        _contentTextView.width = self.view.width;
+        _contentTextView.height = 150;
+        [self.view addSubview:_contentTextView];
+    }
+    return _contentTextView;
+}
+
+- (NSMutableArray *)selectedPhotos{
+    if (!_selectedPhotos) {
+        _selectedPhotos = [[NSMutableArray alloc] init];
+    }
+    return _selectedPhotos;
+}
+
+- (ALAssetsLibrary *)assetLib{
+    if (!_assetLib) {
+        _assetLib = [[ALAssetsLibrary alloc] init];
+    }
+    return _assetLib;
+}
+
+#pragma mark - UploadHomeworkViewDelegate 获取imagePickerView对象  位置信息 与  选中照片的数组
+
+- (void)imagePickerView:(YBImgePickerView *)imagePickerView changeFrame:(CGRect) frame{
+    self.imagePickerView.frame = frame;
+    self.contentTextView.y = CGRectGetMaxY(frame) + 10;
+    self.selectedPhotos = imagePickerView.selected_image_array;
+}
+
+#pragma mark - YBImagePickerViewControllerDelegate
+
+- (void)YBImagePickerViewController:(YBImagePickerViewController *)imagePickerVC selectedPhotoArray:(NSArray *)selected_photo_array{
+    
+    NSMutableArray *selected_image_array = [[NSMutableArray alloc]initWithArray:selected_photo_array];
+    
+    self.imagePickerView.selected_image_array = selected_image_array;
+    
+    
+}
+
+#pragma mark didSaveMomentInServer  是否上传成功moment
+
+- (void)didSaveMomentInServer:(NSNotification *)notif{
+    NSError *error = [[notif userInfo] valueForKey:WT_ERROR];
+    NSMutableArray *arr_medias = [[NSMutableArray alloc] init];
+    if (error.code == NO_ERROR) {
+        self.moment = (Moment*)[[notif userInfo] valueForKey:@"moment"];
+        [OMNetWork_MyClass AddLessonHomeWorkWithLessonID:self.lessonModel.lesson_id WithMomentID:self.moment.moment_id withCallBack:@selector(didSettingHomework:) withObserver:self];
+        
+        }
+        
+        // take care of images
+        if (self.selectedPhotos.count > 0) {
+            __block NSMutableArray* files = [[NSMutableArray alloc] init];
+            //            __block int i = 0;
+            __block NSMutableArray* fetchedAssetArray = [[NSMutableArray alloc] init];
+            for (YBPhotoModel *model in self.selectedPhotos) {
+                NSURL *url = nil;
+                if (model.image_obj){
+                    WTFile *file = model.image_obj;
+                    file.momentid = self.moment.moment_id;
+                    [fetchedAssetArray addObject:file];
+                }else if (model.url){
+                    url = model.url;
+                }
+                
+                if (fetchedAssetArray.count == [self.selectedPhotos count]) {
+                    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+                        for (id obj in fetchedAssetArray) {
+                            @autoreleasepool {
+                                
+                                if ([obj isKindOfClass:[WTFile class]]){
+                                    [files addObject:obj];
+                                }else{
+                                    ALAsset *aAsset = obj;
+                                    NSLog(@"process asset %@",aAsset);
+                                    NSArray* array = [MediaProcessing savePhotoFromLibraryToLocal:aAsset];
+                                    if (array) {
+                                        NSLog(@"process asset ok");
+                                        WTFile* file = [[WTFile alloc] init];
+                                        file.thumbnailid = [array objectAtIndex:1];
+                                        file.fileid = [array objectAtIndex:0];
+                                        file.ext = @"jpg";
+                                        [files addObject:file];
+                                        [file release];
+                                    }
+                                }
+                            }
+                        }
+                        
+                        dispatch_async(dispatch_get_main_queue(), ^{
+                            NSLog(@"final process on main thread");
+                            [arr_medias addObjectsFromArray:files];
+                            self.moment.multimedias = arr_medias;
+                            [Database storeMoment:self.moment];
+                            [files release];
+                            // save the upload work in background
+                            for (WTFile* file in arr_medias) {
+                                if ([file.ext isEqualToString:@"aac"]) {
+                                    [Database storeQueuedMediaFile:file.fileid withExt:file.ext forMoment:self.moment.moment_id isThumbnail:FALSE];
+                                }
+                                else{
+                                    [Database storeQueuedMediaFile:file.fileid withExt:file.ext forMoment:self.moment.moment_id isThumbnail:FALSE];
+                                    [Database storeQueuedMediaFile:file.thumbnailid withExt:file.ext forMoment:self.moment.moment_id isThumbnail:TRUE];
+                                };
+                            }
+                            
+                            [[NSNotificationCenter defaultCenter] postNotificationName:MOMENT_ACTION_NEW_MOMENT object:self.moment.moment_id];
+                            [[MediaUploader sharedUploader] upload];
+                            
+                            return;
+                            
+                        });
+                    });
+                    
+                }
+                
+                
+                if (url != nil){
+                    [self.assetLib assetForURL:url resultBlock:^(ALAsset *asset) {
+                        [fetchedAssetArray addObject:asset];
+                        NSLog(@"fetched asset array %d/%d",fetchedAssetArray.count,[self.selectedPhotos count]);
+                        
+                        if (fetchedAssetArray.count == [self.selectedPhotos count]) {
+                            dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+                                for (id obj in fetchedAssetArray) {
+                                    @autoreleasepool {
+                                        
+                                        if ([obj isKindOfClass:[WTFile class]]){
+                                            [files addObject:obj];
+                                        }else{
+                                            ALAsset *aAsset = obj;
+                                            NSLog(@"process asset %@",aAsset);
+                                            NSArray* array = [MediaProcessing savePhotoFromLibraryToLocal:aAsset];
+                                            if (array) {
+                                                NSLog(@"process asset ok");
+                                                WTFile* file = [[WTFile alloc] init];
+                                                file.thumbnailid = [array objectAtIndex:1];
+                                                file.fileid = [array objectAtIndex:0];
+                                                file.ext = @"jpg";
+                                                [files addObject:file];
+                                                [file release];
+                                            }
+                                        }
+                                    }
+                                }
+                                
+                                dispatch_async(dispatch_get_main_queue(), ^{
+                                    NSLog(@"final process on main thread");
+                                    [arr_medias addObjectsFromArray:files];
+                                    self.moment.multimedias = arr_medias;
+                                    [Database storeMoment:self.moment];
+                                    [files release];
+                                    // save the upload work in background
+                                    for (WTFile* file in arr_medias) {
+                                        if ([file.ext isEqualToString:@"aac"]) {
+                                            [Database storeQueuedMediaFile:file.fileid withExt:file.ext forMoment:self.moment.moment_id isThumbnail:FALSE];
+                                        }
+                                        else{
+                                            [Database storeQueuedMediaFile:file.fileid withExt:file.ext forMoment:self.moment.moment_id isThumbnail:FALSE];
+                                            [Database storeQueuedMediaFile:file.thumbnailid withExt:file.ext forMoment:self.moment.moment_id isThumbnail:TRUE];
+                                        };
+                                    }
+                                    
+                                    [[NSNotificationCenter defaultCenter] postNotificationName:MOMENT_ACTION_NEW_MOMENT object:self.moment.moment_id];
+                                    [[MediaUploader sharedUploader] upload];
+                                    
+                                    self.omAlertViewForNet.title = @"提交作业成功";
+                                    self.omAlertViewForNet.type = OMAlertViewForNetStatus_Done;
+                                    return;
+                                    
+                                });
+                            });
+                        }
+                        
+                    } failureBlock:^(NSError *error) {
+                        dispatch_async(dispatch_get_main_queue(), ^{
+                            //TODO: localization string here
+                            UIAlertView* alert = [[UIAlertView alloc] initWithTitle:nil message:NSLocalizedString(@ "The image file is broken, please select it again", nil) delegate:self cancelButtonTitle:NSLocalizedString(@"OK", nil) otherButtonTitles: nil];
+                            [alert show];
+                            [alert release];
+                            return;
+                        });
+                    }];
+                }
+            }
+        }
+        else{
+            self.moment.multimedias = arr_medias;
+            [Database storeMoment:self.moment];
+            
+            // save the upload work in background
+            for (WTFile* file in arr_medias) {
+                if ([file.ext isEqualToString:@"aac"]) {
+                    [Database storeQueuedMediaFile:file.fileid withExt:file.ext forMoment:self.moment.moment_id isThumbnail:FALSE];
+                }
+                else{
+                    [Database storeQueuedMediaFile:file.fileid withExt:file.ext forMoment:self.moment.moment_id isThumbnail:FALSE];
+                    [Database storeQueuedMediaFile:file.thumbnailid withExt:file.ext forMoment:self.moment.moment_id isThumbnail:TRUE];
+                };
+            }
+            [[NSNotificationCenter defaultCenter] postNotificationName:MOMENT_ACTION_NEW_MOMENT object:self.moment.moment_id];
+            
+            [[MediaUploader sharedUploader] upload];
+            self.omAlertViewForNet.title = @"提交作业成功";
+            self.omAlertViewForNet.type = OMAlertViewForNetStatus_Done;
+            return;
+        }
+        
+}
+
+#pragma mark didSettingHomework 是否成功布置作业
+- (void)didSettingHomework:(NSNotification *)notif{
+    NSError *error = [[notif userInfo] valueForKey:WT_ERROR];
+    if (error.code == NO_ERROR) {
+        self.omAlertViewForNet.title = @"提交作业成功";
+        self.omAlertViewForNet.type = OMAlertViewForNetStatus_Done;
+    }else{
+        self.omAlertViewForNet.title = @"提交作业失败";
+        self.omAlertViewForNet.type = OMAlertViewForNetStatus_Failure;
+    }
+}
+
+#pragma mark - OMAlertViewForNetDelegate
+- (void)hiddenOMAlertViewForNet:(OMAlertViewForNet *)alertViewForNet{
+    [self.navigationController popViewControllerAnimated:YES];
+}
+@end

@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="6254" systemVersion="14B25" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES">
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="6247"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner"/>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <view contentMode="scaleToFill" restorationIdentifier="MyClass_AddClassCell" id="TpH-xN-caW" customClass="MyClass_AddClassCell">
+            <rect key="frame" x="0.0" y="0.0" width="320" height="60"/>
+            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+            <subviews>
+                <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="icon_myclass_leftpage_addclass.png" translatesAutoresizingMaskIntoConstraints="NO" id="m4Q-oC-dxV">
+                    <rect key="frame" x="18" y="8" width="45" height="45"/>
+                    <constraints>
+                        <constraint firstAttribute="width" constant="45" id="5pC-fl-dFw"/>
+                        <constraint firstAttribute="height" constant="45" id="lo2-WV-c4z"/>
+                    </constraints>
+                </imageView>
+                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="添加班级" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="iBr-he-K7k">
+                    <rect key="frame" x="78" y="23" width="48" height="15"/>
+                    <fontDescription key="fontDescription" type="system" pointSize="12"/>
+                    <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
+                    <nil key="highlightedColor"/>
+                </label>
+            </subviews>
+            <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+            <constraints>
+                <constraint firstItem="m4Q-oC-dxV" firstAttribute="leading" secondItem="TpH-xN-caW" secondAttribute="leading" constant="18" id="PJ3-ax-hcx"/>
+                <constraint firstAttribute="centerY" secondItem="iBr-he-K7k" secondAttribute="centerY" id="Yk3-sk-baG"/>
+                <constraint firstAttribute="centerY" secondItem="m4Q-oC-dxV" secondAttribute="centerY" id="asQ-xi-bQQ"/>
+                <constraint firstItem="iBr-he-K7k" firstAttribute="leading" secondItem="m4Q-oC-dxV" secondAttribute="trailing" constant="15" id="gAb-bo-qh5"/>
+            </constraints>
+            <freeformSimulatedSizeMetrics key="simulatedDestinationMetrics"/>
+            <connections>
+                <outlet property="imageView_title" destination="m4Q-oC-dxV" id="9FA-YD-VnK"/>
+                <outlet property="title_label" destination="iBr-he-K7k" id="Rue-kx-Frt"/>
+            </connections>
+            <point key="canvasLocation" x="472" y="189"/>
+        </view>
+    </objects>
+    <resources>
+        <image name="icon_myclass_leftpage_addclass.png" width="45" height="45"/>
+    </resources>
+</document>
